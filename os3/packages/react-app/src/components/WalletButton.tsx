@@ -43,14 +43,16 @@ const WalletButton = ({
 
   return (
     <>
-      <p>Network: {networkName}</p>
+      <div style={{ display: "flex" }}>
+        <p>Network: {networkName}</p>
 
-      <Button onClick={getSigner}>
-        {rendered === "" && "Connect Wallet"}
-        {rendered !== "" && rendered}
-      </Button>
-      <br></br>
-      <P>My Balance: {balance} wei</P>
+        <Button onClick={getSigner}>
+          {rendered === "" && "Connect Wallet"}
+          {rendered !== "" && rendered}
+        </Button>
+        <br></br>
+        <P>My Balance: {balance} wei</P>
+      </div>
     </>
   );
 };

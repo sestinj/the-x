@@ -6,4 +6,7 @@ struct Bid {
     uint256 price;
     uint256 quantity;
     address sender;
+    uint256 deliNum;
+    uint256 quantityRemaining;
+    uint256 avgPrice;
 }

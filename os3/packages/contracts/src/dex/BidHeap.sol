@@ -2,29 +2,40 @@
 
 pragma solidity ^0.8.0;
 
-import './BidQueue.sol';
+import './Bid.sol';
 
 /**
-This is a max-heap used for ordering the bids in an exchange. The nodes of the tree are each queues, to order by timing when using FIFO.
+This is a max-heap used for ordering the bids in an exchange. Order by pricing then timing when using FIFO.
 You might generalize this later to allow for pro-rata or other prioritization algorithms.
+Uses FIFO algorithm. ORDER BY price DESC, time ASC
  */
 contract BidHeap {
-    BidQueue[] private bids;
+    Bid[] private bids;
+
+    // This is the replacement for a timestamp.
+    uint256 nextDeliNum = 0;
 
     constructor() {}
+
+    /**
+    @return above Bool, whether bid1 should be above bid2 in the heap
+     */
+    function compare(Bid memory bid1, Bid memory bid2) internal pure returns (bool above) {
+        return bid1.price == bid2.price ? bid1.deliNum < bid2.deliNum : bid1.price > bid2.price;
+    }
 
     function maxHeapify(uint i) internal {
         uint256 child1 = 2 * i + 1;
         uint256 child2 = 2 * i + 2;
         uint index = i;
 
-        while (bids[index].peek().price < bids[child1].peek().price || bids[index].peek().price < bids[child2].peek().price || 2 * index > bids.length) { // Last statement checks whether there are any children. TODO it does this wrong
+        while (!compare(bids[index], bids[child1]) || !compare(bids[index], bids[child2]) || 2 * index > bids.length) { // Last statement checks whether there are any children. TODO it does this wrong
             uint maxChild = child2;
-            if (bids[child1].peek().price > bids[child2].peek().price) {
+            if (compare(bids[child1], bids[child2])) {
                 maxChild = child1;
             }
-            BidQueue temp = bids[i];
-            bids[i] = bids[maxChild];
+            Bid memory temp = bids[index];
+            bids[index] = bids[maxChild];
             bids[maxChild] = temp;
             index = maxChild;
 
@@ -33,27 +44,16 @@ contract BidHeap {
         }
     }
 
-    function insertBid(Bid memory bid_) internal {
-        // Should you keep a mapping of prices to queues? Probably not because then you'd
-        // have to update many times when maxHeapify-ing.
-        // Alternative is to search through the heap upon every insertion, which will take O(n/2)
-        // because you have to search through the entire layer of the heap since it is unordered.
-        // This is not ideal.
-
-        // If you changed to a single heap, which ordered FIFO style, you could get O(logn) insertion
-        // But the problem would be if it was common for many orders of the same price you would be doing
-        // the O(logn) deletion method way more often instead of just dequeueing in O(1). Tough to know a priori.
-        // With a single heap would you have a log pop speed.
-        // To analyze this you'll need to know average length of queues n_q and average size of heap n_h.
-        // Might make this dynamic, would be cool.
-        // Or use an AVL tree.
+    function insert(uint256 price, uint256 quantity, address sender) public {
+        Bid memory bid = Bid(price, quantity, sender, nextDeliNum, quantity);
+        nextDeliNum += 1;
 
         // Add new bid to end of heap, and max-heapify from bottom up
         uint index = bids.length;
         uint parent = index / 2 - 1; // Division rounds toward zero. TODO -1 or no?
-        bids.push(bid_);
+        bids.push(bid);
 
-        while (bids[parent].price < bids[index].price || index <= 0) {
+        while (compare(bids[index], bids[parent]) || index <= 0) {
             Bid memory temp = bids[index];
             bids[index] = bids[parent];
             bids[parent] = temp;
@@ -64,18 +64,25 @@ contract BidHeap {
     }
 
     /**
-    @dev Get the next-up bid by FIFO algorithm. ORDER BY price DESC, time ASC
+    @dev Get the next-up bid
      */
     function pop() public returns (Bid memory bid) {
-        Bid memory bid_ = bids[0].dequeue();
+        Bid memory bid_ = bids[0];
 
-        if (bids[0].getLength() == 0) {
-            // Replace first item with last and max-heapify from root
-            bids[0] = bids[bids.length - 1];
-            delete bids[bids.length - 1];
-            maxHeapify(0);
-        }
+        // Replace first item with last and max-heapify from root
+        bids[0] = bids[bids.length - 1];
+        delete bids[bids.length - 1];
+        maxHeapify(0);
 
         return bid_;
+    }
+
+    function peek() public view returns (Bid memory bid) {
+        require(bids.length > 0, "Empty heap.");
+        return bids[0];
+    }
+
+    function isEmpty() public view returns (bool empty) {
+        return bids.length == 0;
     }
 }
