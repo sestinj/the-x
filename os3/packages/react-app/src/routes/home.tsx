@@ -7,7 +7,7 @@ const Home = () => {
     <>
       <Layout>
         <Button onClick={createToken}>Create Token</Button>
-        <Link href={"./pages/exchange"}>Exchange</Link>
+        <Link to="/exchange">Exchange</Link>
       </Layout>
     </>
   );

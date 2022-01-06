@@ -5,24 +5,32 @@ import { MutableRefObject } from "react";
 
 const WalletButton = ({
   provider,
-  signerRef,
+  signer,
+  setSigner,
 }: {
   provider: Web3Provider;
-  signerRef: MutableRefObject<JsonRpcSigner | undefined>;
+  signer: JsonRpcSigner | undefined;
+  setSigner:
+    | React.Dispatch<React.SetStateAction<JsonRpcSigner | undefined>>
+    | undefined;
 }) => {
   const [rendered, setRendered] = useState("");
   const [networkName, setNetworkName] = useState("");
   const [balance, setBalance] = useState("");
 
   const getSigner = async () => {
+    if (signer) return; // To avoid infinite looping re-renders with the context
     await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    signerRef.current = signer;
-    signer.getAddress().then((address) => {
+    const newSigner = provider.getSigner();
+    if (setSigner) {
+      setSigner(newSigner);
+    }
+    console.log("New Signer added to context: ", newSigner);
+    newSigner.getAddress().then((address) => {
       setRendered(`🟢 ${address.slice(0, 5)}...${address.slice(-4)}`);
     });
 
-    signer.getBalance().then((balance) => {
+    newSigner.getBalance().then((balance) => {
       setBalance(balance.toString());
     });
 

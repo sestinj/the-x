@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <9.0.0;
+pragma solidity ^0.8.0;
 
 import './ERC20.sol';
 import './ICO.sol';
@@ -8,12 +8,11 @@ import './ICO.sol';
 
 /**
 @dev The Token contract may have implement one of several ICO strategies.
+You previously had this contract inheriting ICO, but I don't think that's what you want. Consider renaming this one then?
  */
-contract Token is ICO {
-    address public owner;
+contract Token {
 
-    constructor(string memory name_, string memory symbol_, address owner_) ICO(name_, symbol_) {
-        owner = owner_;
+    constructor(string memory name_, string memory symbol_, address owner_) {
     }
 
     

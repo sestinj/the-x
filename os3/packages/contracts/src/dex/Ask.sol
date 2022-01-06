@@ -8,5 +8,5 @@ struct Ask {
     address sender;
     uint256 deliNum;
     uint256 quantityRemaining;
-    uint256 avgPrice;
+    // uint256 avgPrice;
 }

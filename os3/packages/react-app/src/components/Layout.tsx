@@ -8,13 +8,17 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const signerRef = useContext(SignerContext);
+  const { signer, setSigner } = useContext(SignerContext);
   const provider = useContext(ProviderContext);
 
   return (
     <>
       <Header>
-        <WalletButton provider={provider} signerRef={signerRef}></WalletButton>
+        <WalletButton
+          provider={provider}
+          setSigner={setSigner}
+          signer={signer}
+        ></WalletButton>
       </Header>
       <Body>{children}</Body>
     </>

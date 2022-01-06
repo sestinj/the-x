@@ -1,13 +1,6 @@
-type Token @entity {
+type Pair @entity {
   id: ID!
-  decimals: Int
-  name: String
-  symbol: String
-}
-
-type Transfer @entity {
-  id: ID!
-  from: String!
-  to: String!
-  value: BigInt!
+  token1: String!
+  token2: String!
+  address: String!
 }

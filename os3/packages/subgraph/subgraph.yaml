@@ -1,26 +1,25 @@
 specVersion: 0.0.2
-description: Subgraph that indexes the blockchain data
-repository: https://github.com/sablierhq/sablier-subgraph
+description: Subgraph that indexes the Central DEX
+repository: https://github.com
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: CeaErc20
+    name: CentralDex
     network: mainnet
     source:
-      abi: erc20
-      address: "0xc1C0472c0C80bCcDC7F5D01A376Bd97a734B8815"
+      abi: CentralDex
+      # address: "0xc1C0472c0C80bCcDC7F5D01A376Bd97a734B8815"
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       abis:
-        - name: erc20
-          file: ../contracts/src/abis/erc20.json
+        - name: CentralDex
+          file: ../contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json
       entities:
-        - Token
-        - Transfer
+        - Pair
       eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-      file: ./src/mappings/transfers.ts
+        - event: NewPair(address,address,address)
+          handler: handleNewPair
+      file: ./src/mappings/newPairs.ts
       language: wasm/assemblyscript

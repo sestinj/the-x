@@ -17,40 +17,24 @@ import './AskHeap.sol';
 // you have to deal with is Eth until you move off-chain and that might end up being radically different so as to not want to make
 // this abstraction. Probably better to leave it at the DEX level for visibility.
 
-abstract contract ADEX {
+abstract contract ADex {
     // Implements all the usual DEX functions, but leaves token transfer implementations for child contracts
     function transferToken1(address payable reciever, uint256 quantity) virtual internal;
     function transferToken2(address payable reciever, uint256 quantity) virtual internal;
     function transferToken1From(address sender, address reciever, uint256 quantity) virtual internal;
     function transferToken2From(address sender, address reciever, uint256 quantity) virtual internal;
-    function getToken1Balance(address tokenAddress) virtual internal returns (uint256 balance);
-    function getToken2Balance(address tokenAddress) virtual internal returns (uint256 balance);
+    function getToken1Balance() virtual internal view returns (uint256 balance);
+    function getToken2Balance() virtual internal view returns (uint256 balance);
 
     uint256 FUNDS_BUFFER1 = 0;
     uint256 FUNDS_BUFFER2  = 0;
 
-    IERC20 token1;
-    IERC20 token2;
-    address token1Address;
-    address token2Address;
-
     uint256 token1Balance;
     uint256 token2Balance;
 
-    uint256 currentPrice;
+    uint256 public currentPrice;
 
     bool mainRunning = false;
-
-    constructor(address token1Address_, address token2Address_) {
-        token1Address = token1Address_;
-        token2Address = token2Address;
-        token1 = IERC20(token1Address_);
-        token2 = IERC20(token2Address_);
-
-        // The above must come before the below in case it is relied upon in the child's implementation of getting balance.
-        token1Balance = getToken1Balance(token1Address_);
-        token2Balance = getToken2Balance(token2Address_);
-    }
 
     BidHeap private bids;
     AskHeap private asks;
