@@ -1,9 +1,4 @@
-import React, {
-  MutableRefObject,
-  useRef,
-  createContext,
-  useState,
-} from "react";
+import React, { createContext, useState } from "react";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { ethers } from "ethers";
 

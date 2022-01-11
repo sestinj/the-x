@@ -2,16 +2,18 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 
-require("@nomiclabs/hardhat-ethers");
+import "@nomiclabs/hardhat-ethers";
 
-module.exports = {
+export default {
   defaultNetwork: "local",
   networks: {
     hardhat: {},
     local: {
-      url: "http://127.0.0.1:7545",
+      url: "http://127.0.0.1:8545",
       accounts: [
-        "d75153b3ce0f4eb956b299150c86c6df7bc16d35feddf28fa74aa8808388ed65",
+        "0x83f15e996eb4da6d8df4ffb075cd15bccd86e7004993cdbd884a98d053b61b49",
+        "0x55c5d2cd9f334ee80d1ceee64b6a677f03d52d1d65a89bd020695aa601468ea7",
+        "0xb1b203857ab5282f23342d37a848bda0404a88dd4b6e3f5535f99f6b9ca82443",
       ],
     },
     // rinkeby: {

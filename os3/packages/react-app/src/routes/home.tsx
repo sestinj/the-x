@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <>
       <Layout>
-        <Button onClick={createToken}>Create Token</Button>
+        <Link to="/createToken">Create Token</Link>
         <Link to="/exchange">Exchange</Link>
       </Layout>
     </>

@@ -28,7 +28,7 @@ contract CentralDex is Dictatorship {
 
     event NewPair(address token1, address token2, address dexAddress);
 
-    function createErc20Dex(address token1, address token2) public returns (address) {
+    function createErc20Dex(address token1, address token2) public returns (address newDexAddress) {
         require(msg.sender == dictator, "You don't have permission to take this action.");
         if (dexAddresses[token1][token2] != address(0x0)) {
             revert("DEX already exists for this token pair.");

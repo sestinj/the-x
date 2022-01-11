@@ -9,6 +9,7 @@ import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex
 import { SignerContext } from "../App";
 import Table from "../components/Table";
 import { useForm } from "react-hook-form";
+import { gql, useQuery } from "@apollo/client";
 
 const Exchange = () => {
   const [token1, setToken1] = useState("Ethereum");
@@ -70,18 +71,20 @@ const Exchange = () => {
     getCurrentPrice();
   }, [token1, token2]);
 
-  const getExistingExchanges = async () => {
-    if (!signer) return;
-    mainExchange.listExchanges().then((tx: any) => {
-      console.log("Exchange List:");
-      console.log(tx);
-      setExchangeList(tx);
-    });
-  };
-
-  useEffect(() => {
-    getExistingExchanges();
-  }, [signer]);
+  const { loading, error, data: pairsData } = useQuery(
+    gql`
+      {
+        pairs {
+          token1
+          token2
+          address
+        }
+      }
+    `,
+    {
+      variables: { language: "english" },
+    }
+  );
 
   const submitOrder = async () => {};
 
@@ -194,15 +197,39 @@ const Exchange = () => {
           <p>Current Price: {currentPrice}</p>
         </div>
         <h5>Available Exchanges</h5>
+        <p>
+          Pairs: {JSON.stringify(pairsData)} {loading.valueOf()}{" "}
+          {error?.message}
+        </p>
         <Table
-          rowData={exchangeList}
-          rowCell={(data) => {
+          rowData={
+            pairsData?.pairs.length
+              ? pairsData.pairs
+              : [
+                  {
+                    address: "idk",
+                    token1: "0x6A9973322502281205dA4775adbb2249B0f85577",
+                    token2: "0x7dD057E3580DB225D263d97fcF3ee56077973F8b",
+                  },
+                  {
+                    address: "idk",
+                    token1: "0x7dD057E3580DB225D263d97fcF3ee56077973F8b",
+                    token2: "0x6A9973322502281205dA4775adbb2249B0f85577",
+                  },
+                ]
+          }
+          rowCell={(data: {
+            token1: string;
+            token2: string;
+            address: string;
+          }) => {
             return [
               <>
-                test
-                {/* {(ExchangeTokenList as any)[data[0]].symbol}
-                {"  ->  "}
-                {(ExchangeTokenList as any)[data[1]].symbol} */}
+                Token1: {data.token1}
+                <br></br>
+                Token2: {data.token2}
+                <br></br>
+                Address: {data.address}
               </>,
             ];
           }}

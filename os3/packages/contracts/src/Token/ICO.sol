@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 
 import './ERC20.sol';
 
-abstract contract ICO is ERC20 {
+contract ICO is ERC20 {
+
+    // should we keep some of the token as liquidity for the exchange automatically? There has to be a market from the start and that won't necessarily happen if you just sell some initial tokens.
 
     address owner;
 
@@ -14,9 +16,9 @@ abstract contract ICO is ERC20 {
 
     uint256 public icoSupply;
 
-    // Amount specified by the token owner to reinvest their proceeds back into the token.
-    // This volume has to be agreed upon by purchasers, so cannot change following icoOpen()
-    uint256 private reinvestmentAmount;
+    // This is the percentage of the total token amount to be owned by the token owner at the beginning.
+    // Though token supply is dynamic (with fixed price) during ICO, this is a constant.
+    uint256 public personalStake;
 
     struct ICOPurchase {
         address purchaser;
@@ -37,29 +39,37 @@ abstract contract ICO is ERC20 {
     /**
     * @dev Transfers purchased tokens to purchasers, and purchasing funds to token owner.
     **/
-    function closeICO() internal {
+    function closeICO() public {
+        require(msg.sender == owner, "You do not have permission to close the ICO.");
         icoOpen = false;
         for (uint i; i < icoPurchases.length; i++) {
             // Mint tokens to each purchaser
             _mint(icoPurchases[i].purchaser, icoPurchases[i].amount);
         }
-        // Transfer the funds collected to the owner of the token, or put them directly back into tokens for the owner if specified.
-        _mint(owner, reinvestmentAmount);
-        (bool sent,) = owner.call{value: icoPrice*icoSupply - reinvestmentAmount}("");
+        // Calculate personal stake to give to owner
+        // TODO: How do I work with fractions? personalStake is a fraction?
+        // Also this is the wrong calculation
+        _mint(owner, personalStake*icoSupply);
+        // Isn't transfer the preferred way to send Ether?
+        (bool sent,) = owner.call{value: icoSupply*icoPrice}("");
         require(sent, "Failed to transfer proceeds to owner.");
     }
 
-    constructor(string memory name_, string memory symbol_, address owner_, uint256 icoPrice_, uint256 icoSupply_, uint256 reinvestmentAmount_) ERC20(name_, symbol_) {
+    constructor(string memory name_, string memory symbol_, address owner_, uint256 icoPrice_, uint256 personalStake_) ERC20(name_, symbol_) {
         owner = owner_;
         icoPrice = icoPrice_;
-        icoSupply = icoSupply_;
-        reinvestmentAmount = reinvestmentAmount_;
+        personalStake = personalStake_;
         openICO();
     }
 
+    event IcoPurchase(address purchaser, uint256 amount);
+
     function purchase(uint256 amount) payable public {
-        require(amount == msg.value, "Transaction value must match amount parameter.");
+        // Or just make this parameterless.
+        require(amount*icoPrice == msg.value, "Transaction value must match amount parameter times price.");
         icoPurchases.push(ICOPurchase(msg.sender, amount));
+        icoSupply += amount;
+        emit IcoPurchase(msg.sender, amount);
     }
 
     /**

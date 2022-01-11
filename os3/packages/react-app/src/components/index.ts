@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import * as ReactRouterDOM from "react-router-dom";
 
-const backgroundColor = "#161616";
-const secondaryDark = "#323232";
+export const backgroundColor = "#161616";
+export const secondaryDark = "#323232";
+export const primaryHighlight = "#8000ff";
 
 export const Header = styled.header`
   background-color: ${backgroundColor};
@@ -51,6 +52,10 @@ export const Button = styled.button`
   text-decoration: none;
   margin: 0px 20px;
   padding: 12px 24px;
+
+  :hover {
+    box-shadow: 0px 0px 4px 4px ${primaryHighlight};
+  }
 
   ${(props) => props.hidden && "hidden"} :focus {
     border: none;
@@ -106,8 +111,16 @@ export const Submit = styled.input.attrs((props) => ({
   margin: 0px 20px;
   padding: 12px 24px;
 
+  :hover {
+    box-shadow: 0px 0px 4px 4px ${primaryHighlight};
+  }
+
   ${(props) => props.hidden && "hidden"} :focus {
     border: none;
     outline: none;
   }
+`;
+
+export const Hr = styled.hr`
+  margin: 40px;
 `;
