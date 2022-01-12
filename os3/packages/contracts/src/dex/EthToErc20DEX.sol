@@ -6,7 +6,6 @@ import '../Token/IERC20.sol';
 import './ADex.sol';
 
 contract EthToErc20Dex is ADex {
-    IERC20 token2;
 
     function transferToken1(address payable reciever, uint256 quantity) override virtual internal {
         reciever.transfer(quantity);
@@ -16,11 +15,12 @@ contract EthToErc20Dex is ADex {
         token2.transfer(reciever, quantity);
     }
 
-    function transferToken1From(address sender, address reciever, uint256 quantity) override internal {
-        revert("Not yet implemented.");
+    function transferToken1From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+        return false;
+        // Not yet implemented
     }
-    function transferToken2From(address sender, address reciever, uint256 quantity) override internal {
-        token2.transferFrom(sender, reciever, quantity);
+    function transferToken2From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+        return token2.transferFrom(sender, reciever, quantity);
     }
 
     function getToken1Balance() override internal view returns (uint256 balance) {

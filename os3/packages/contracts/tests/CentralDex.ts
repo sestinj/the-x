@@ -1,23 +1,15 @@
 import { ethers } from "hardhat";
-import { BytesLike, Contract, Wallet, BigNumber } from "ethers";
+import { Contract, BigNumber } from "ethers";
 
 const assert = require("chai").assert;
-import Ico from "../artifacts/src/Token/ICO.sol/ICO.json";
+import TestIco from "../artifacts/src/Token/test/TestIco.sol/TestIco.json";
 import Erc20Dex from "../artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json";
-import { ParamType } from "@ethersproject/abi";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { createContracts, waitForTx, decode, isAddress } from "./libs";
 
-const decode = (types: readonly (string | ParamType)[], data: BytesLike) => {
-  return ethers.utils.defaultAbiCoder.decode(types, data);
-};
+// TODO Instead of having an array of Contracts, one for each signer, you should make a function to do this, and memoize the Contracts
 
-const isAddress = (addressCandidate: string) => {
-  return (
-    typeof addressCandidate == "string" &&
-    addressCandidate.startsWith("0x") &&
-    addressCandidate.length == 42
-  );
-};
+const initialBalance = 100000000000000;
 
 describe("*", () => {
   var signers: SignerWithAddress[];
@@ -31,18 +23,27 @@ describe("*", () => {
   var token2: Contract;
   var dex: Contract;
   var centralDex: Contract;
-  var testPairDex: Contract;
+  var dexs: Contract[];
   var icoFactory: Contract;
   var icoAddress: string;
   var icos: Contract[]; // An ethers.Contract for each signer
 
   describe("ERC20 token contract", () => {
     it("should be constructed without reversion", async () => {
-      const ERC20Token = await ethers.getContractFactory("ERC20");
+      const ERC20Token = await ethers.getContractFactory("TestErc20");
 
       token1 = await ERC20Token.deploy("Token1", "ONE");
       token2 = await ERC20Token.deploy("Token2", "TWO");
       console.log("Token addresses: ", token1.address, token2.address);
+      for (let i = 0; i < signers.length; i++) {
+        // Give each of the account a bunch of the token for testing
+        const tx1 = await waitForTx(
+          token1.mint(signers[i].address, initialBalance)
+        );
+        const tx2 = await waitForTx(
+          token2.mint(signers[i].address, initialBalance)
+        );
+      }
     });
   });
 
@@ -56,15 +57,14 @@ describe("*", () => {
     });
 
     it("should add an exchange between DOGE and SHIB", async () => {
-      const tx = await centralDex.createErc20Dex(
-        token1.address,
-        token2.address
+      const tx = await waitForTx(
+        centralDex.createErc20Dex(token1.address, token2.address)
       );
-      const resp = await tx.wait();
-      const event = resp.events[0];
+      const event = tx.events[0];
       const decoded = decode(["address", "address", "address"], event.data);
+      console.log("New Pair Event: ", decoded);
       console.log("Erc20Dex Address: ", decoded[2]);
-      testPairDex = new ethers.Contract(decoded[2], Erc20Dex.abi, signers[0]);
+      dexs = createContracts(decoded[2], Erc20Dex.abi, signers);
       assert(decoded[2].startsWith("0x"));
     });
 
@@ -87,25 +87,21 @@ describe("*", () => {
     });
     it("should create a new token.", async () => {
       const event = (
-        await (
-          await icoFactory.createNewIco(
+        await waitForTx(
+          icoFactory.createNewIco(
             "Nate's Token",
             "NJS",
             1,
             signers[0].address,
             50
           )
-        ).wait()
+        )
       ).events[0];
       const decoded = decode(["address", "address", "uint256"], event.data);
       icoAddress = decoded[0];
       console.log("New ICO Address: ", icoAddress);
       assert(isAddress(icoAddress));
-      icos = await Promise.all(
-        signers.map((signer) => {
-          return new ethers.Contract(icoAddress, Ico.abi, signer);
-        })
-      );
+      icos = createContracts(icoAddress, TestIco.abi, signers);
     });
 
     it("should accept the following list of ICO purchases.", async () => {
@@ -115,11 +111,11 @@ describe("*", () => {
       const promises = [];
       for (let i = 0; i < purchaseValues.length; i++) {
         promises.push(
-          (
-            await icos[purchaseSigners[i]].purchase(purchaseValues[i], {
+          await waitForTx(
+            icos[purchaseSigners[i]].purchase(purchaseValues[i], {
               value: purchaseValues[i],
             })
-          ).wait()
+          )
         );
       }
       const txResponses = await Promise.all(promises);
@@ -133,28 +129,52 @@ describe("*", () => {
 
     it("should close the ICO and successfully mint the tokens to the right people.", async () => {
       const txResp = await icos[0].closeICO();
-      console.log("Closing ICO:", txResp);
     });
   });
 
   describe("Test Pair DEX (DOGE <-> SHIB)", () => {
     it("should accept the first bid and do nothing.", async () => {
-      const txResp = await dex.submitBid(5, 100);
+      // Check the balance of the signer
+      const balance = await token1.balanceOf(signers[0].address);
 
-      // Check balances
+      // First approve funds for the DEX
+      const quantity = 100;
+      const price = 5;
+      const approveTx = await waitForTx(
+        token1.approve(dexs[0].address, quantity * price)
+      );
+
+      const txResp = await waitForTx(dexs[0].submitBid(price, quantity));
+
+      // Check balance - shouldn't have changed
+      const tx = await token2.balanceOf(signers[0].address);
+      assert((tx as BigNumber).toNumber() == initialBalance);
+
+      // TODO: Check the balance of the DEX by exposing
     });
 
     it("should accept an ask creating positive spread, and make profit off of this while fulfilling both orders.", async () => {
-      const txResp = await dex.submitAsk(6, 100);
+      const approveTx = await waitForTx(token2.approve(dexs[0].address, 100));
+      const txResp = await waitForTx(dexs[0].submitAsk(6, 100));
+
       // Check balances and profit
+      const tx1 = await token1.balanceOf(signers[0].address);
+      const tx2 = await token2.balanceOf(signers[0].address);
+      console.log("TX12: ", tx1, tx2);
+      // Need to expose and check DEX balance
     });
 
     it("should not meet a bid below the current price when there is no ask to match.", async () => {
       // Make sure current price is according the the previous trade
-      const currentPrice = await dex.currentPrice();
+      const currentPrice = await dexs[0].currentPrice();
       assert(currentPrice == 5);
 
-      const txResp = await dex.submitBid(3, 50);
+      const approveTx = await waitForTx(
+        token1.approve(dexs[0].address, 3 * 100)
+      );
+      const txResp = await waitForTx(dexs[0].submitBid(3, 100));
+
+      // Check that the balance is the same, the transaction didn't go through.
     });
 
     it("should direct buy an ask below the current price.", async () => {});

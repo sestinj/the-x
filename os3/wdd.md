@@ -39,3 +39,9 @@ Solution: `tx.data` refers to the inputs. You have to `await tx.wait()` and then
 Error: I can't get the return value of a transaction with ethers.js.
 
 Solution: You can only get the return value of a non-pure/view function on-chain, so from ethers.js you must get the info from an emitted event.
+
+---
+
+Error: I was able to isolate the line in Solidity code causing a reversion without a message, but when I try to cause reversions from inside this function (in an inherited contract) it reverts with an empty message.
+
+Solution: Reversion messages don't carry outward in the scope. Only the fact that it was a reversion. WHAT YOU SHOULD DO is write unit tests for that core contract. It will have to happen eventually, so just test it now. And you will be able to see the reversion messages. Keep drilling down.

@@ -7,6 +7,7 @@ import './Bid.sol';
 import './Ask.sol';
 import './BidHeap.sol';
 import './AskHeap.sol';
+import 'hardhat/console.sol';
 
 // You can eventually generalize like this so you don't have to rewrite the DEX class to work with non-ERC-20 tokens.
 // Specifying these functions should include checks for allowance.
@@ -21,10 +22,13 @@ abstract contract ADex {
     // Implements all the usual DEX functions, but leaves token transfer implementations for child contracts
     function transferToken1(address payable reciever, uint256 quantity) virtual internal;
     function transferToken2(address payable reciever, uint256 quantity) virtual internal;
-    function transferToken1From(address sender, address reciever, uint256 quantity) virtual internal;
-    function transferToken2From(address sender, address reciever, uint256 quantity) virtual internal;
+    function transferToken1From(address sender, address reciever, uint256 quantity) virtual internal returns (bool);
+    function transferToken2From(address sender, address reciever, uint256 quantity) virtual internal returns (bool);
     function getToken1Balance() virtual internal view returns (uint256 balance);
     function getToken2Balance() virtual internal view returns (uint256 balance);
+
+    IERC20 token1;
+    IERC20 token2;
 
     uint256 FUNDS_BUFFER1 = 0;
     uint256 FUNDS_BUFFER2  = 0;
@@ -39,8 +43,20 @@ abstract contract ADex {
     BidHeap private bids;
     AskHeap private asks;
 
+    constructor() {
+        bids = new BidHeap();
+        asks = new AskHeap();
+    }
+
+    event NewBid(uint256 price, uint256 quantity, address sender);
+    event NewAsk(uint256 price, uint256 quantity, address sender);
+
     function submitBid(uint256 price, uint256 quantity) public {
+        // Right now the transfer has to happen before the payback, but UniSwap does Flash Swaps, which you could implement
+        require(transferToken1From(msg.sender, address(this), quantity*price), "Transfer of funds not approved.");
+        token1Balance += quantity;
         bids.insert(price, quantity, msg.sender);
+        emit NewBid(price, quantity, msg.sender);
         if (!mainRunning) {
             mainRunning = true;
             main();
@@ -48,7 +64,10 @@ abstract contract ADex {
     }
 
     function submitAsk(uint256 price, uint256 quantity) public {
+        require(transferToken2From(msg.sender, address(this), quantity), "Transfer of funds not approved.");
+        token2Balance += quantity;
         asks.insert(price, quantity, msg.sender);
+        emit NewAsk(price, quantity, msg.sender);
         if (!mainRunning) {
             mainRunning = true;
             main();
@@ -61,7 +80,7 @@ abstract contract ADex {
                 Ask memory topAsk = asks.peek();
                 Bid memory topBid = bids.peek();
 
-                uint256 spread = topAsk.price - topBid.price;
+                int256 spread = int256(topAsk.price) - int256(topBid.price);
 
                 if (spread < 0) {
                     // Inverted market.
@@ -71,16 +90,21 @@ abstract contract ADex {
                     // After direct buy, should you raise the price to that specified by the buyer? You then have tokens which are worth more.
                     // After direct sell, should you lower the price? Wouldn't doing this repeatedly change the price in large swings?
                     // It would make the tokens you are recieving "worth more" but this seems transient?
-                    directBuy(topBid);
-                    directSell(topAsk);
+                    if (!directBuy(topBid) && !directSell(topAsk)) {
+                        break;
+                    }
                 } else {
                     // Right-side-up market. Buy, mark up, sell.
                     swap(topBid, topAsk);
                 }
             } else if (!asks.isEmpty()) {
-                directSell(asks.peek());
+                if (!directSell(asks.peek())) {
+                    break;
+                }
             } else {
-                directBuy(bids.peek());
+                if (!directBuy(bids.peek())) {
+                    break;
+                }
             }
             
         }
@@ -95,15 +119,21 @@ abstract contract ADex {
         if (bid.quantityRemaining < ask.quantityRemaining) {
             // Use the entire bid - how do you know another bid hasn't come into the heap in between? Is pop safe?
             bids.pop();
-            // TODO: How do we make sure these go through, that the allowance is given?
-            transferToken1From(bid.sender, ask.sender, bid.quantityRemaining*bid.price);
-            transferToken2From(ask.sender, bid.sender, bid.quantityRemaining);
+            // We made sure the allowance goes through, but consider making a mapping(address => uint256) of balances given by each account.
+            // Or is it significantly more efficient to transfer directly from user to user?
+            transferToken1(payable(ask.sender), bid.quantityRemaining*bid.price);
+            transferToken2(payable(bid.sender), bid.quantityRemaining);
             ask.quantityRemaining -= bid.quantityRemaining;
+        } else if (bid.quantityRemaining > ask.quantityRemaining) {
+            asks.pop();
+            transferToken1(payable(ask.sender), ask.quantityRemaining*bid.price);
+            transferToken2(payable(bid.sender), ask.quantityRemaining);
+            bid.quantityRemaining -= ask.quantityRemaining;
         } else {
             asks.pop();
-            transferToken1From(bid.sender, ask.sender, ask.quantityRemaining*bid.price);
-            transferToken2From(ask.sender, bid.sender, ask.quantityRemaining);
-            bid.quantityRemaining -= ask.quantityRemaining;
+            bids.pop();
+            transferToken1(payable(ask.sender), ask.quantityRemaining*bid.price);
+            transferToken2(payable(bid.sender), ask.quantityRemaining);
         }
         
         currentPrice = bid.price;
@@ -119,17 +149,27 @@ abstract contract ADex {
     Alternative is to give the currentPrice to buyers and sellers. But since
     they specify what they are willing to buy/sell for, profit seems fair. This is the benefit of providing
     liquidity. This might be how you pay back a liquidity pool.
+    @return bool whether the direct bid went through - if not we should not try anymore
      */
-    function directBuy(Bid memory bid) internal {
-        require(bid.price >= currentPrice, "No bid price meets current.");
-        require(bid.quantity + FUNDS_BUFFER2 <= token2Balance, "Insufficient funds to transfer token 2.");
-        transferToken2(payable(bid.sender), bid.quantity);
+    function directBuy(Bid memory bid) internal returns (bool) {
+        if (bid.price >= currentPrice && bid.quantityRemaining + FUNDS_BUFFER2 <= token2Balance) {
+            bids.pop();
+            transferToken2(payable(bid.sender), bid.quantityRemaining);
+            return true;
+        }
+        return false;
     }
 
-    function directSell(Ask memory ask) internal {
-        require(ask.price <= currentPrice, "No ask price meets current.");
-        require(ask.quantity + FUNDS_BUFFER1 <= token1Balance, "Insufficient funds to transfer token 1.");
-        transferToken2(payable(ask.sender), ask.quantity);
+    /**
+    @return bool whether the direct sell went through - if not we should not try anymore
+     */
+    function directSell(Ask memory ask) internal returns (bool) {
+        if (ask.price <= currentPrice && ask.quantityRemaining*ask.price + FUNDS_BUFFER1 <= token1Balance) {
+            asks.pop();
+            transferToken1(payable(ask.sender), ask.quantityRemaining*ask.price);
+            return true;
+        }
+        return false;
     }
 }
 

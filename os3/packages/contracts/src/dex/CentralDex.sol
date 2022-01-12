@@ -29,11 +29,10 @@ contract CentralDex is Dictatorship {
     event NewPair(address token1, address token2, address dexAddress);
 
     function createErc20Dex(address token1, address token2) public returns (address newDexAddress) {
-        require(msg.sender == dictator, "You don't have permission to take this action.");
+        require(msg.sender == dictator, "NP"); // No permission
         if (dexAddresses[token1][token2] != address(0x0)) {
-            revert("DEX already exists for this token pair.");
+            revert("AE"); // Already exists
         }
-
         // How can we check here whether the addresses are existing tokens?
 
         Erc20Dex newDex = new Erc20Dex(token1, token2);

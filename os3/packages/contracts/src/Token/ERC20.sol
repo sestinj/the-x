@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 import "./IERC20.sol";
 import "./IERC20Metadata.sol";
 import "./Context.sol";
-
+import 'hardhat/console.sol';
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -229,6 +229,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(sender, recipient, amount);
 
         uint256 senderBalance = _balances[sender];
+        console.log('B', senderBalance, amount);
         require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
         unchecked {
             _balances[sender] = senderBalance - amount;

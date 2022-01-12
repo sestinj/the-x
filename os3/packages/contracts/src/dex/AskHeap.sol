@@ -31,10 +31,18 @@ contract AskHeap {
         uint256 child2 = 2 * i + 2;
         uint index = i;
 
-        while (!compare(asks[index], asks[child1]) || !compare(asks[index], asks[child2]) || 2 * index > asks.length) { // Last statement checks whether there are any children. TODO it does this wrong
+        while (child1 < asks.length) { // checks if it's a leaf
+            // Get index of the smaller child
             uint minChild = child2;
-            if (compare(asks[child1], asks[child2])) {
+            if (child2 >= asks.length) {
                 minChild = child1;
+            } else if (compare(asks[child1], asks[child2])) {
+                minChild = child1;
+            }
+
+            // If the smaller child is in the right place, stop
+            if (compare(asks[index], asks[minChild])) {
+                break;
             }
             Ask memory temp = asks[index];
             asks[index] = asks[minChild];
@@ -52,16 +60,16 @@ contract AskHeap {
 
         // Add new ask to end of heap, and min-heapify from bottom up
         uint index = asks.length;
-        uint parent = index / 2 - 1; // Division rounds toward zero. TODO -1 or no?
+        uint parent = index > 0 ? (index - 1) / 2 : 0;
         asks.push(ask);
 
-        while (compare(asks[index], asks[parent]) || index <= 0) {
+        while (compare(asks[index], asks[parent]) && index > 0) {
             Ask memory temp = asks[index];
             asks[index] = asks[parent];
             asks[parent] = temp;
 
             index = parent;
-            parent = index / 2 - 1;
+            parent = index > 0 ? (index - 1) / 2 : 0;
         }
     }
 
@@ -69,11 +77,12 @@ contract AskHeap {
     @dev Get the next-up ask
      */
     function pop() public returns (Ask memory ask) {
+        require(asks.length > 0, "Empty heap.");
         Ask memory ask_ = asks[0];
 
         // Replace first item with last and min-heapify from root
         asks[0] = asks[asks.length - 1];
-        delete asks[asks.length - 1];
+        asks.pop();
         minHeapify(0);
 
         return ask_;
