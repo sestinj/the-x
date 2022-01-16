@@ -9,17 +9,60 @@ dataSources:
     network: mainnet
     source:
       abi: CentralDex
-      address: "0x280B224C5c2EB30677a82548838a53b0DD26f001"
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       abis:
         - name: CentralDex
           file: ../contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json
       entities:
         - Pair
+        - Token
       eventHandlers:
         - event: NewPair(address,address,address)
           handler: handleNewPair
+      file: ./src/mappings/newPairs.ts
+      language: wasm/assemblyscript
+
+templates:
+  - name: Erc20Dex
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: Erc20Dex
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      file: ./src/mappings/erc20dex.ts
+      entities:
+        - Bid
+        - Ask
+        - Swap
+        - User
+      abis:
+        - name: Erc20Dex
+          file: ../contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json
+      eventHandlers:
+        - event: Buy(address,uint256,uint256)
+          handler: handleBuy
+        - event: Sell(address,uint256,uint256)
+          handler: handleSell
+        - event: Swap(address,address,uint256,uint256,uint256)
+          handler: handleSwap
+  - kind: ethereum/contract
+    name: ERC20
+    network: mainnet
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      abis:
+        - name: ERC20
+          file: ../contracts/artifacts/src/Token/ERC20.sol/ERC20.json
+      entities:
+        - Token
       file: ./src/mappings/newPairs.ts
       language: wasm/assemblyscript

@@ -3,6 +3,10 @@ const { ethers } = hre;
 import { exec } from "child_process";
 
 async function main() {
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
+  console.log("Account balance:", (await deployer.getBalance()).toString());
+
   const CentralDex = await ethers.getContractFactory("CentralDex");
   const centralDex = await CentralDex.deploy();
   await centralDex.deployed();

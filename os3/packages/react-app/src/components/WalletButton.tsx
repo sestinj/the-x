@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, P } from ".";
 import { Web3Provider, JsonRpcSigner } from "@ethersproject/providers";
 import { MutableRefObject } from "react";
+import { BigNumber, ethers } from "ethers";
 
 const WalletButton = ({
   provider,
@@ -16,7 +17,7 @@ const WalletButton = ({
 }) => {
   const [rendered, setRendered] = useState("");
   const [networkName, setNetworkName] = useState("");
-  const [balance, setBalance] = useState("");
+  const [balance, setBalance] = useState("0");
 
   const getSigner = async () => {
     if (signer) return; // To avoid infinite looping re-renders with the context
@@ -59,7 +60,9 @@ const WalletButton = ({
           {rendered !== "" && rendered}
         </Button>
         <br></br>
-        <P>My Balance: {balance} wei</P>
+        <P>
+          My Balance: {ethers.utils.formatEther(BigNumber.from(balance))} Ether
+        </P>
       </div>
     </>
   );

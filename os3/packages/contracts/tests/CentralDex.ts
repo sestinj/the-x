@@ -28,8 +28,8 @@ describe("*", () => {
   var icoAddress: string;
   var icos: Contract[]; // An ethers.Contract for each signer
 
-  describe("ERC20 token contract", () => {
-    it("should be constructed without reversion", async () => {
+  describe.only("ERC20 token contract", () => {
+    it.only("should be constructed without reversion", async () => {
       const ERC20Token = await ethers.getContractFactory("TestErc20");
 
       token1 = await ERC20Token.deploy("Token1", "ONE");

@@ -113,6 +113,9 @@ abstract contract ADex {
 
     // Emits the current price of token2
     event PriceUpdate(uint256 price);
+    event Buy(address sender, uint256 price, uint256 quantity);
+    event Sell(address sender, uint256 price, uint256 quantity);
+    event Swap(address buyer, address seller, uint256 buyPrice, uint256 sellPrice, uint256 quantity); // Quantity of token2
 
     function swap(Bid memory bid, Ask memory ask) internal {
 
@@ -124,16 +127,23 @@ abstract contract ADex {
             transferToken1(payable(ask.sender), bid.quantityRemaining*bid.price);
             transferToken2(payable(bid.sender), bid.quantityRemaining);
             ask.quantityRemaining -= bid.quantityRemaining;
+            emit Buy(bid.sender, bid.price, bid.quantity);
+            emit Swap(bid.sender, ask.sender, bid.price, ask.price, bid.quantityRemaining);
         } else if (bid.quantityRemaining > ask.quantityRemaining) {
             asks.pop();
             transferToken1(payable(ask.sender), ask.quantityRemaining*bid.price);
             transferToken2(payable(bid.sender), ask.quantityRemaining);
             bid.quantityRemaining -= ask.quantityRemaining;
+            emit Sell(ask.sender, ask.price, ask.quantity);
+            emit Swap(bid.sender, ask.sender, bid.price, ask.price, ask.quantityRemaining);
         } else {
             asks.pop();
             bids.pop();
             transferToken1(payable(ask.sender), ask.quantityRemaining*bid.price);
             transferToken2(payable(bid.sender), ask.quantityRemaining);
+            emit Buy(bid.sender, bid.price, bid.quantity);
+            emit Sell(ask.sender, ask.price, ask.quantity);
+            emit Swap(bid.sender, ask.sender, bid.price, ask.price, ask.quantityRemaining);
         }
         
         currentPrice = bid.price;
@@ -141,6 +151,7 @@ abstract contract ADex {
     }
 
 
+    event DirectPurchase(address sender, uint256 price, uint256 quantity, bool isToken1);
     /**
     When contract funds are available, we can meet a buy order without having any sell orders to match it with.
     They will buy at the price of the last match, which is the currentPrice.
@@ -155,6 +166,7 @@ abstract contract ADex {
         if (bid.price >= currentPrice && bid.quantityRemaining + FUNDS_BUFFER2 <= token2Balance) {
             bids.pop();
             transferToken2(payable(bid.sender), bid.quantityRemaining);
+            emit DirectPurchase(msg.sender, bid.price, bid.quantityRemaining, false);
             return true;
         }
         return false;
@@ -167,6 +179,7 @@ abstract contract ADex {
         if (ask.price <= currentPrice && ask.quantityRemaining*ask.price + FUNDS_BUFFER1 <= token1Balance) {
             asks.pop();
             transferToken1(payable(ask.sender), ask.quantityRemaining*ask.price);
+            emit DirectPurchase(msg.sender, ask.price, ask.quantityRemaining, true);
             return true;
         }
         return false;

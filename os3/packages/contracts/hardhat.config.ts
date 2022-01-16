@@ -4,10 +4,15 @@
 
 import "@nomiclabs/hardhat-ethers";
 
+const ALCHEMY_API_KEY =
+  "https://eth-ropsten.alchemyapi.io/v2/iQg42SGtsJ11gAA9awS8gph4yQql9ogQ";
+
+const ROPSTEN_PRIVATE_KEY =
+  "65b80e3396c2d2319c0cb60d270ab0f741a4318246f643b79555c643d853141f";
+
 export default {
   defaultNetwork: "local",
   networks: {
-    hardhat: {},
     local: {
       url: "http://127.0.0.1:8545",
       accounts: [
@@ -16,10 +21,10 @@ export default {
         "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
       ],
     },
-    // rinkeby: {
-    //   url: "https://eth-rinkeby.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",
-    //   accounts: [privateKey1, privateKey2, ...]
-    // }
+    ropsten: {
+      url: ALCHEMY_API_KEY,
+      accounts: [`${ROPSTEN_PRIVATE_KEY}`],
+    },
   },
   solidity: "0.8.0",
   paths: {

@@ -1,5 +1,4 @@
 import Layout from "../components/Layout";
-import ExchangeTokenList from "../json/ExchangeTokenList";
 import React, { useEffect, useState, useContext } from "react";
 import { TextInput, Select, Button, Submit } from "../components";
 import addresses from "@project/contracts/src/addresses";
@@ -9,22 +8,88 @@ import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex
 import { SignerContext } from "../App";
 import Table from "../components/Table";
 import { useForm } from "react-hook-form";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery, useApolloClient } from "@apollo/client";
+import { Pair, Token } from "@project/subgraph/generated/schema";
+
+const GET_TOKENS = gql`
+  query getTokens {
+    token {
+      name
+      symbol
+      address
+      pairs {
+        token1
+        token2
+        address
+      }
+    }
+  }
+`;
+
+const GET_TOKEN = gql`
+  query getToken($id: ID!) {
+    token(id: $id) {
+      name
+      symbol
+      address
+      pairs {
+        token1
+        token2
+        address
+      }
+    }
+  }
+`;
+
+const GET_PAIRS = gql`
+  query getPairs {
+    pairs {
+      token1 {
+        id
+        address
+        name
+        symbol
+      }
+      token2 {
+        id
+        address
+        name
+        symbol
+      }
+      address
+    }
+  }
+`;
+
+const GET_CURRENT_EXCHANGE = gql`
+  query getCurrentExchange($token1: ID!, $token2: ID!) {
+    pair(token1: $token1, token2: $token2) {
+      token1
+      token2
+      address
+      price
+    }
+  }
+`;
+
+const GET_TOKEN2_OPTIONS = gql`
+  query getToken2Options($token1: ID!) {
+    pairs(token1: $token1) {
+      token2 {
+        name
+        address
+      }
+    }
+  }
+`;
 
 const Exchange = () => {
-  const [token1, setToken1] = useState("Ethereum");
-  const [token2, setToken2] = useState("Dogecoin");
-  const [token2SelectOptions, setToken2SelectOptions] = useState<
-    React.ReactNode[]
-  >([]);
-  const [exchangeList, setExchangeList] = useState<[string, string][]>([]);
-  const [currentPrice, setCurrentPrice] = useState();
-
-  const { register: registerNE, handleSubmit: handleSubmitNE } = useForm();
-
+  const apolloClient = useApolloClient();
+  // Web3
   const { signer } = useContext(SignerContext);
   // const provider = useContext(ProviderContext);
 
+  // Main Exchange Contract
   var mainExchange = new ethers.Contract(
     (addresses as any).centralDex,
     CentralDex.abi,
@@ -40,13 +105,51 @@ const Exchange = () => {
     );
   }, [signer]);
 
-  const [exchangeContract, setExchangeContract] = useState<ethers.Contract>();
+  // Load pairs
+  const { data: pairsData } = useQuery(GET_PAIRS, {
+    variables: { language: "english" },
+  });
+
+  // Exchange State
+
+  const [token1Address, setToken1Address] = useState("");
+  const [token2Address, setToken2Address] = useState("");
+  const { data: tokens } = useQuery<Token[]>(GET_TOKENS);
+  const [token1, setToken1] = useState<Token | null>();
+  const [token2, setToken2] = useState<Token | null>();
 
   useEffect(() => {
-    // Set the current exchange for this token pair.
+    setToken1(
+      apolloClient.readQuery({
+        query: GET_TOKEN,
+        variables: { id: token1Address },
+      })
+    );
+  }, [token1Address]);
+
+  useEffect(() => {
+    setToken2(
+      apolloClient.readQuery({
+        query: GET_TOKEN,
+        variables: { id: token2Address },
+      })
+    );
+  }, [token2Address]);
+
+  const [currentPrice, setCurrentPrice] = useState();
+
+  const getCurrentExchange = () => {
+    const pair = apolloClient.readQuery({
+      query: GET_CURRENT_EXCHANGE,
+      variables: { token1: token1Address, token2: token2Address },
+    })?.pair;
+    return pair || { address: "0x0" };
+  };
+  useEffect(() => {
+    const currentExchange = getCurrentExchange();
     try {
       const dex = new ethers.Contract(
-        (ExchangeTokenList as any)[token1].exchanges[token1],
+        currentExchange.address,
         Erc20Dex.abi,
         signer
       );
@@ -55,63 +158,33 @@ const Exchange = () => {
       setExchangeContract(undefined);
       console.log(error);
     }
-  }, [token1, token2]);
-
-  const getCurrentPrice = async () => {
-    // Get the current price of the selected coin
-    if (!signer) return;
-    if (exchangeContract) {
-      exchangeContract.currentPrice().then((tx: any) => {
-        console.log(tx);
-      });
-    }
-  };
-
-  useEffect(() => {
-    getCurrentPrice();
-  }, [token1, token2]);
-
-  const { loading, error, data: pairsData } = useQuery(
-    gql`
-      {
-        pairs {
-          token1
-          token2
-          address
-        }
-      }
-    `,
-    {
-      variables: { language: "english" },
-    }
-  );
-
-  const submitOrder = async () => {};
-
-  useEffect(() => {
-    const token = (ExchangeTokenList as any)[token1];
-    const names = Object.keys(token.exchanges);
-    setToken2SelectOptions(
-      names.map((name: string) => {
-        return (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        );
-      })
-    );
-  }, [token1]);
+  }, [token1Address, token2Address]);
+  const [exchangeContract, setExchangeContract] = useState<ethers.Contract>();
 
   // Table data preparation
   const tableData: [string, string][] = [];
 
-  Object.keys(ExchangeTokenList).forEach((token1: string) => {
-    Object.keys((ExchangeTokenList as any)[token1].exchanges).forEach(
-      (token2: string) => {
-        tableData.push([token1, token2]);
-      }
+  useEffect(() => {
+    (pairsData?.length ? pairsData : undefined)?.forEach((pair: Pair) => {
+      tableData.push([pair.token1, pair.token2]);
+    });
+  }, [pairsData]);
+
+  const submitOrder = async () => {};
+
+  const [token2Options, setToken2Options] = useState([]);
+
+  useEffect(() => {
+    setToken2Options(
+      apolloClient.readQuery({
+        query: GET_TOKEN2_OPTIONS,
+        variables: { token1: token1Address },
+      }) || []
     );
-  });
+  }, [token1Address]);
+
+  // New Exchange
+  const { register: registerNE, handleSubmit: handleSubmitNE } = useForm();
 
   const onNESubmit = (data: any) => {
     if (!signer) return;
@@ -139,16 +212,19 @@ const Exchange = () => {
           >
             <Select
               onChange={(ev) => {
-                setToken1(ev.target.value);
+                setToken1Address(ev.target.value);
               }}
             >
-              {Object.keys(ExchangeTokenList).map((key: string) => {
-                return (
-                  <option key={key} value={key}>
-                    {key}
-                  </option>
-                );
-              })}
+              {(pairsData?.length ? pairsData : undefined)?.map(
+                (pair: Pair & { token1: Token }) => {
+                  const key = pair.token1.name;
+                  return (
+                    <option key={key} value={pair.token1.address}>
+                      {key}
+                    </option>
+                  );
+                }
+              )}
             </Select>
             <TextInput
               style={{
@@ -156,7 +232,7 @@ const Exchange = () => {
                 borderLeft: "1px solid black",
                 height: "100%",
               }}
-              placeholder={"0.00 " + (ExchangeTokenList as any)[token1].symbol}
+              placeholder={"0.00 " + (token1?.symbol || "ETH")}
             ></TextInput>
             <span
               style={{
@@ -177,15 +253,22 @@ const Exchange = () => {
                 textAlign: "right",
                 height: "100%",
               }}
-              placeholder={"0.00 " + (ExchangeTokenList as any)[token2].symbol}
+              placeholder={"0.00 " + (token2?.symbol || "DOGE")}
               disabled={true}
             ></TextInput>
             <Select
               onChange={(ev) => {
-                setToken2(ev.target.value);
+                setToken2Address(ev.target.value);
               }}
             >
-              {token2SelectOptions}
+              {token2Options.map((token2Option: Token) => {
+                const name = token2Option.name;
+                return (
+                  <option key={name} value={token2Option.address}>
+                    {name}
+                  </option>
+                );
+              })}
             </Select>
             <Button
               style={{ borderRadius: "0", margin: "0", height: "100%" }}
@@ -194,16 +277,18 @@ const Exchange = () => {
               Submit Order
             </Button>
           </div>
-          <p>Current Price: {currentPrice}</p>
+          <p>
+            Current Price:{" "}
+            <span style={{ float: "right" }}>
+              {currentPrice || "?"} {token1?.symbol || "ETH"}/
+              {token2?.symbol || "DOGE"}
+            </span>
+          </p>
         </div>
         <h5>Available Exchanges</h5>
-        <p>
-          Pairs: {JSON.stringify(pairsData)} {loading.valueOf()}{" "}
-          {error?.message}
-        </p>
         <Table
           rowData={
-            pairsData?.pairs.length
+            (pairsData?.length ? pairsData : undefined)?.pairs.length
               ? pairsData.pairs
               : [
                   {
@@ -219,23 +304,91 @@ const Exchange = () => {
                 ]
           }
           rowCell={(data: {
-            token1: string;
-            token2: string;
+            token1: Token;
+            token2: Token;
             address: string;
           }) => {
             return [
               <>
-                Token1: {data.token1}
-                <br></br>
-                Token2: {data.token2}
-                <br></br>
-                Address: {data.address}
+                <button
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    color: "white",
+                    margin: "none",
+                    padding: "none",
+                    fontSize: "18px",
+                  }}
+                  onClick={() => {
+                    if (token1 && token2) {
+                      setToken1Address(token1.address);
+                      setToken2Address(token2.address);
+                    }
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "auto auto auto",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        gridColumn: "1",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        height: "70px",
+                        width: "70px",
+                        margin: "20px",
+                      }}
+                    >
+                      <img
+                        style={{
+                          objectFit: "fill",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${token1?.address ||
+                          "0x0200412995f1bafef0d3f97c4e28ac2515ec1ece"}.png
+`}
+                      ></img>
+                    </div>
+                    <p>1.5 ETH / DOGE</p>
+                    <div
+                      style={{
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        height: "70px",
+                        width: "70px",
+                        margin: "20px",
+                        float: "right",
+                      }}
+                    >
+                      <img
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "fill",
+                        }}
+                        src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${token2?.address ||
+                          "0x075c60ee2cd308ff47873b38bd9a0fa5853382c4"}.png
+`}
+                      ></img>
+                    </div>
+                  </div>
+                </button>
               </>,
             ];
           }}
         ></Table>
         <br></br>
-        <form onSubmit={handleSubmitNE(onNESubmit)}>
+        <form
+          style={{ textAlign: "center" }}
+          onSubmit={handleSubmitNE(onNESubmit)}
+        >
+          <h5>Add a token pair:</h5>
           <TextInput
             placeholder="Token Address 1"
             {...registerNE("token1")}
@@ -245,8 +398,10 @@ const Exchange = () => {
             {...registerNE("token2")}
           ></TextInput>
           <br></br>
+          <br></br>
           <Submit value="Add New Exchange" />
         </form>
+        <br></br>
 
         <div hidden>
           <h4>Want to trade a token you don't see listed?</h4>

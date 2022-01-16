@@ -1,13 +1,31 @@
 import { NewPair as NewPairEvent } from "../../generated/CentralDex/CentralDex";
-import { Pair } from "../../generated/schema";
+import { Pair, Token } from "../../generated/schema";
+import { ERC20 as ERC20Contract } from "../../generated/templates/ERC20/ERC20";
 
 export function handleNewPair(event: NewPairEvent): void {
-  let transactionHash = event.transaction.hash.toHex();
-  let pair = new Pair(transactionHash);
-  pair.token1 = event.params.token1.toHex();
-  pair.token2 = event.params.token2.toHex();
+  let pair = new Pair(event.params.dexAddress.toHex());
+  let address1 = event.params.token1;
+  let address2 = event.params.token2;
+  pair.token1 = address1.toHex();
+  pair.token2 = address2.toHex();
   pair.address = event.params.dexAddress.toHex();
   pair.save();
+
+  let token1 = new Token(address1.toHex());
+  let token1Contract = ERC20Contract.bind(address1);
+  token1.address = address1.toHex();
+  token1.name = token1Contract.name();
+  token1.symbol = token1Contract.symbol();
+  token1.pairs.push(pair.id);
+  token1.save();
+
+  let token2 = new Token(address2.toHex());
+  let token2Contract = ERC20Contract.bind(address2);
+  token2.address = address2.toHex();
+  token2.name = token2Contract.name();
+  token2.symbol = token2Contract.symbol();
+  token2.pairs.push(pair.id);
+  token2.save();
 }
 
 // Events need a handler. And this handler should add an entity with its addX function. They are distinct things, but confusingly the same in this case because there is only one event per entity, when the exchange is first created.

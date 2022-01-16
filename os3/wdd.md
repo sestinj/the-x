@@ -45,3 +45,9 @@ Solution: You can only get the return value of a non-pure/view function on-chain
 Error: I was able to isolate the line in Solidity code causing a reversion without a message, but when I try to cause reversions from inside this function (in an inherited contract) it reverts with an empty message.
 
 Solution: Reversion messages don't carry outward in the scope. Only the fact that it was a reversion. WHAT YOU SHOULD DO is write unit tests for that core contract. It will have to happen eventually, so just test it now. And you will be able to see the reversion messages. Keep drilling down.
+
+---
+
+Error: Nonce too high. Expected nonce to be 9 but got 68. Note that transactions can't be queued when automining
+
+Solution: Go to advanced settings in Metamask and reset account

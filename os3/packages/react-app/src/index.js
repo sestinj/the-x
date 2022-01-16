@@ -11,6 +11,7 @@ import Home from "./routes/home";
 import Exchange from "./routes/exchange";
 import CreateToken from "./routes/createToken";
 import ManageToken from "./routes/manageToken";
+import Offerings from "./routes/offerings";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -30,10 +31,10 @@ ReactDOM.render(
           <Route path="exchange" element={<Exchange />} />
           <Route path="createToken" element={<CreateToken />} />
           <Route path="manageToken" element={<ManageToken />} />
+          <Route path="offerings" element={<Offerings />} />
         </Routes>
       </BrowserRouter>
     </App>
-    ,
   </ApolloProvider>,
   document.getElementById("root")
 );
