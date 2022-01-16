@@ -51,3 +51,9 @@ Solution: Reversion messages don't carry outward in the scope. Only the fact tha
 Error: Nonce too high. Expected nonce to be 9 but got 68. Note that transactions can't be queued when automining
 
 Solution: Go to advanced settings in Metamask and reset account
+
+---
+
+Error: "Mapping terminated before handling trigger: oneshot canceled" Other than this error subgraph might otherwise seem to be working but queries show that it is empty.
+
+Solution: Check that your graph-cli version matches the one used in the .yaml file. ex) 0.0.4 or 0.0.6. Moving to 0.0.4 fixed this for me on 1/16/22

@@ -12,7 +12,7 @@ dataSources:
       address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.4
       abis:
         - name: CentralDex
           file: ../contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json
@@ -24,7 +24,6 @@ dataSources:
           handler: handleNewPair
       file: ./src/mappings/newPairs.ts
       language: wasm/assemblyscript
-
 templates:
   - name: Erc20Dex
     kind: ethereum/contract
@@ -33,7 +32,7 @@ templates:
       abi: Erc20Dex
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/mappings/erc20dex.ts
       entities:
@@ -58,7 +57,7 @@ templates:
       abi: ERC20
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.4
       abis:
         - name: ERC20
           file: ../contracts/artifacts/src/Token/ERC20.sol/ERC20.json
