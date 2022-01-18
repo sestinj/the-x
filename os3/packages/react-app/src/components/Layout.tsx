@@ -3,7 +3,6 @@ import WalletButton from "./WalletButton";
 import React, { useContext, useRef } from "react";
 import { SignerContext, ProviderContext } from "../App";
 import LoginButton from "./Login/LoginButton";
-import LoginModal from "./Login/LoginModal";
 
 interface LayoutProps {
   children: React.ReactNode;

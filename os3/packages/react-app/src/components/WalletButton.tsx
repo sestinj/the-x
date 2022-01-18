@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, P } from ".";
 import { Web3Provider, JsonRpcSigner } from "@ethersproject/providers";
-import { MutableRefObject } from "react";
 import { BigNumber, ethers } from "ethers";
 
 const WalletButton = ({
@@ -44,7 +43,7 @@ const WalletButton = ({
 
   useEffect(() => {
     getSigner();
-    window.ethereum.on("accountsChanged", (accounts: any) => {
+    (window as any).ethereum.on("accountsChanged", (accounts: any) => {
       console.log("Account changed: ", accounts);
       getSigner();
     });

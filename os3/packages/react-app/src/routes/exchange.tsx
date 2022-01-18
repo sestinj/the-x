@@ -1,5 +1,5 @@
 import Layout from "../components/Layout";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { TextInput, Select, Button, Submit } from "../components";
 import addresses from "@project/contracts/src/addresses";
 import { ethers } from "ethers";
@@ -8,35 +8,56 @@ import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex
 import { SignerContext } from "../App";
 import Table from "../components/Table";
 import { useForm } from "react-hook-form";
-import { gql, useLazyQuery, useQuery, useApolloClient } from "@apollo/client";
+import { gql, useQuery, useApolloClient } from "@apollo/client";
 import { Pair, Token } from "@project/subgraph/generated/schema";
+
+// TODO - You should move all graphql queries somewhere else if there are too many.
+// And should make a type for each query, with a good naming convention.
+// ex) GET_TOKENS -> type GetTokensResp = Token & {pairs1: {token1: string, token2: string, address: string}}
+type PairWithTokens = Pair & { token1: Token; token2: Token };
+
+// You should be able to autogen all of this.
+type MiniPair = {
+  token2: { id: string; name: string; symbol: string };
+  address: string;
+  token1: string;
+};
+type GetTokensResp = Token & {
+  pairs1: MiniPair[];
+};
 
 const GET_TOKENS = gql`
   query getTokens {
-    token {
+    tokens {
+      id
       name
       symbol
       address
-      pairs {
-        token1
-        token2
+      pairs1 {
+        token1 {
+          id
+        }
+        token2 {
+          id
+          name
+          symbol
+        }
         address
       }
     }
   }
 `;
 
-const GET_TOKEN = gql`
-  query getToken($id: ID!) {
-    token(id: $id) {
-      name
-      symbol
+const GET_TOKEN_FRAGMENT = gql`
+  fragment token on Token {
+    id
+    name
+    symbol
+    address
+    pairs1 {
+      token1
+      token2
       address
-      pairs {
-        token1
-        token2
-        address
-      }
     }
   }
 `;
@@ -44,6 +65,7 @@ const GET_TOKEN = gql`
 const GET_PAIRS = gql`
   query getPairs {
     pairs {
+      id
       token1 {
         id
         address
@@ -57,28 +79,25 @@ const GET_PAIRS = gql`
         symbol
       }
       address
-    }
-  }
-`;
-
-const GET_CURRENT_EXCHANGE = gql`
-  query getCurrentExchange($token1: ID!, $token2: ID!) {
-    pair(token1: $token1, token2: $token2) {
-      token1
-      token2
-      address
       price
     }
   }
 `;
 
-const GET_TOKEN2_OPTIONS = gql`
-  query getToken2Options($token1: ID!) {
-    pairs(token1: $token1) {
-      token2 {
-        name
-        address
-      }
+type GetCurrentExchangeResp = {
+  token1: string;
+  token2: string;
+  address: string;
+  price: number;
+};
+const GET_CURRENT_EXCHANGE = gql`
+  query getCurrentExchange($id: ID!) {
+    pair(id: $id) {
+      id
+      token1
+      token2
+      address
+      price
     }
   }
 `;
@@ -97,7 +116,6 @@ const Exchange = () => {
   );
 
   useEffect(() => {
-    console.log("Resetting main exchange with signer: ", signer);
     mainExchange = new ethers.Contract(
       (addresses as any).centralDex,
       CentralDex.abi,
@@ -106,47 +124,87 @@ const Exchange = () => {
   }, [signer]);
 
   // Load pairs
-  const { data: pairsData } = useQuery(GET_PAIRS, {
+  const { data: pairsData } = useQuery<{ pairs: PairWithTokens[] }>(GET_PAIRS, {
     variables: { language: "english" },
   });
 
-  // Exchange State
-
+  // Exchange State - token1Address => currentExchange => token1, token2
   const [token1Address, setToken1Address] = useState("");
-  const [token2Address, setToken2Address] = useState("");
-  const { data: tokens } = useQuery<Token[]>(GET_TOKENS);
-  const [token1, setToken1] = useState<Token | null>();
-  const [token2, setToken2] = useState<Token | null>();
+  const [exchangeAddress, setExchangeAddress] = useState("");
+  const [currentExchange, setCurrentExchange] = useState<Pair>();
+  const { data: tokenData, loading: tokenDataLoading } = useQuery(GET_TOKENS);
+  const [token1, setToken1] = useState<any>();
+  const [token2, setToken2] = useState<any>();
+
+  const [token2Frags, setToken2Frags] = useState([]);
+  const token2SelectRef = useRef<HTMLSelectElement | null>(null);
+  const [token2Options, setToken2Options] = useState<HTMLOptionElement[]>([]);
+
+  const reactToChangedExchangeAddress = () => {
+    console.log("REACTING: ", exchangeAddress);
+    let currEx = apolloClient.readQuery({
+      query: GET_CURRENT_EXCHANGE,
+      variables: { id: exchangeAddress },
+    });
+    if (!currEx) {
+      return;
+    }
+    console.log("CURREX: ", currEx);
+    let t2 = apolloClient.readFragment({
+      id: currEx.token2.__ref,
+      fragment: GET_TOKEN_FRAGMENT,
+    });
+    console.log("New token two!: ", t2);
+    setCurrentExchange(currEx);
+    setToken2(t2);
+  };
 
   useEffect(() => {
-    setToken1(
-      apolloClient.readQuery({
-        query: GET_TOKEN,
-        variables: { id: token1Address },
+    let newT1 = apolloClient.readFragment({
+      id: "Token:" + token1Address,
+      fragment: GET_TOKEN_FRAGMENT,
+    });
+    setToken1(newT1);
+    console.log("NEWtoken1: ", newT1, token1Address);
+
+    setToken2Frags(
+      token1?.pairs1?.map((pair: any) => {
+        return apolloClient.readFragment({
+          id: pair.token2.__ref,
+          fragment: GET_TOKEN_FRAGMENT,
+        });
+      }) || []
+    );
+    setToken2Options(
+      token1?.pairs1?.map((pair: any) => {
+        let token2Frag = apolloClient.readFragment({
+          id: pair.token2.__ref,
+          fragment: GET_TOKEN_FRAGMENT,
+        });
+        return (
+          <option key={token2Frag.name} value={pair.address}>
+            {token2Frag.name}
+          </option>
+        );
       })
     );
+
+    // Set the new exchange address, because the select onChange method doesn't trigger when you change the options
+    // ISSUE: This is happening before the options are loaded by the map below in the select! How to deal with this?
+
+    if (token2Options?.length) {
+      setExchangeAddress(token2Options[0].value);
+    }
   }, [token1Address]);
-
-  useEffect(() => {
-    setToken2(
-      apolloClient.readQuery({
-        query: GET_TOKEN,
-        variables: { id: token2Address },
-      })
-    );
-  }, [token2Address]);
 
   const [currentPrice, setCurrentPrice] = useState();
 
-  const getCurrentExchange = () => {
-    const pair = apolloClient.readQuery({
-      query: GET_CURRENT_EXCHANGE,
-      variables: { token1: token1Address, token2: token2Address },
-    })?.pair;
-    return pair || { address: "0x0" };
-  };
+  useEffect(reactToChangedExchangeAddress, [exchangeAddress]);
+
   useEffect(() => {
-    const currentExchange = getCurrentExchange();
+    if (!currentExchange) {
+      return;
+    }
     try {
       const dex = new ethers.Contract(
         currentExchange.address,
@@ -158,30 +216,10 @@ const Exchange = () => {
       setExchangeContract(undefined);
       console.log(error);
     }
-  }, [token1Address, token2Address]);
+  }, [currentExchange]);
   const [exchangeContract, setExchangeContract] = useState<ethers.Contract>();
 
-  // Table data preparation
-  const tableData: [string, string][] = [];
-
-  useEffect(() => {
-    (pairsData?.length ? pairsData : undefined)?.forEach((pair: Pair) => {
-      tableData.push([pair.token1, pair.token2]);
-    });
-  }, [pairsData]);
-
   const submitOrder = async () => {};
-
-  const [token2Options, setToken2Options] = useState([]);
-
-  useEffect(() => {
-    setToken2Options(
-      apolloClient.readQuery({
-        query: GET_TOKEN2_OPTIONS,
-        variables: { token1: token1Address },
-      }) || []
-    );
-  }, [token1Address]);
 
   // New Exchange
   const { register: registerNE, handleSubmit: handleSubmitNE } = useForm();
@@ -215,16 +253,13 @@ const Exchange = () => {
                 setToken1Address(ev.target.value);
               }}
             >
-              {(pairsData?.length ? pairsData : undefined)?.map(
-                (pair: Pair & { token1: Token }) => {
-                  const key = pair.token1.name;
-                  return (
-                    <option key={key} value={pair.token1.address}>
-                      {key}
-                    </option>
-                  );
-                }
-              )}
+              {tokenData?.tokens?.map((token: any) => {
+                return (
+                  <option key={token.address} value={token.address}>
+                    {token.name}
+                  </option>
+                );
+              })}
             </Select>
             <TextInput
               style={{
@@ -256,19 +291,14 @@ const Exchange = () => {
               placeholder={"0.00 " + (token2?.symbol || "DOGE")}
               disabled={true}
             ></TextInput>
+            {console.log("TOKEN2: ", token2)}
             <Select
+              ref={token2SelectRef}
               onChange={(ev) => {
-                setToken2Address(ev.target.value);
+                setExchangeAddress(ev.target.value);
               }}
             >
-              {token2Options.map((token2Option: Token) => {
-                const name = token2Option.name;
-                return (
-                  <option key={name} value={token2Option.address}>
-                    {name}
-                  </option>
-                );
-              })}
+              {token2Options}
             </Select>
             <Button
               style={{ borderRadius: "0", margin: "0", height: "100%" }}
@@ -287,27 +317,8 @@ const Exchange = () => {
         </div>
         <h5>Available Exchanges</h5>
         <Table
-          rowData={
-            (pairsData?.length ? pairsData : undefined)?.pairs.length
-              ? pairsData.pairs
-              : [
-                  {
-                    address: "idk",
-                    token1: "0x6A9973322502281205dA4775adbb2249B0f85577",
-                    token2: "0x7dD057E3580DB225D263d97fcF3ee56077973F8b",
-                  },
-                  {
-                    address: "idk",
-                    token1: "0x7dD057E3580DB225D263d97fcF3ee56077973F8b",
-                    token2: "0x6A9973322502281205dA4775adbb2249B0f85577",
-                  },
-                ]
-          }
-          rowCell={(data: {
-            token1: Token;
-            token2: Token;
-            address: string;
-          }) => {
+          rowData={pairsData?.pairs || []}
+          rowCell={(data: PairWithTokens) => {
             return [
               <>
                 <button
@@ -320,9 +331,12 @@ const Exchange = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    if (token1 && token2) {
-                      setToken1Address(token1.address);
-                      setToken2Address(token2.address);
+                    let currEx = apolloClient.readQuery({
+                      query: GET_CURRENT_EXCHANGE,
+                      variables: { id: data.address },
+                    });
+                    if (currEx) {
+                      setCurrentExchange(currEx);
                     }
                   }}
                 >
@@ -344,18 +358,20 @@ const Exchange = () => {
                         margin: "20px",
                       }}
                     >
-                      <img
-                        style={{
-                          objectFit: "fill",
-                          width: "100%",
-                          height: "100%",
-                        }}
-                        src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${token1?.address ||
-                          "0x0200412995f1bafef0d3f97c4e28ac2515ec1ece"}.png
-`}
-                      ></img>
+                      {data.token1?.address && (
+                        <img
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "fill",
+                          }}
+                          src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${data.token1.address}.png`}
+                        ></img>
+                      )}
                     </div>
-                    <p>1.5 ETH / DOGE</p>
+                    <p>
+                      {data.price} {data.token1.symbol} / {data.token2.symbol}
+                    </p>
                     <div
                       style={{
                         borderRadius: "50%",
@@ -366,16 +382,17 @@ const Exchange = () => {
                         float: "right",
                       }}
                     >
-                      <img
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "fill",
-                        }}
-                        src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${token2?.address ||
-                          "0x075c60ee2cd308ff47873b38bd9a0fa5853382c4"}.png
+                      {data.token2?.address && (
+                        <img
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "fill",
+                          }}
+                          src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${data.token2.address}.png
 `}
-                      ></img>
+                        ></img>
+                      )}
                     </div>
                   </div>
                 </button>

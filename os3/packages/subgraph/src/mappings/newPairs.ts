@@ -9,6 +9,9 @@ export function handleNewPair(event: NewPairEvent): void {
   pair.token1 = address1.toHex();
   pair.token2 = address2.toHex();
   pair.address = event.params.dexAddress.toHex();
+  pair.price = 1; // This isn't accurate, but you have to set it to something and pretty sure this won't have consequences
+  pair.buys = [];
+  pair.asks = [];
   pair.save();
 
   let token1 = new Token(address1.toHex());
@@ -16,7 +19,8 @@ export function handleNewPair(event: NewPairEvent): void {
   token1.address = address1.toHex();
   token1.name = token1Contract.name();
   token1.symbol = token1Contract.symbol();
-  token1.pairs.push(pair.id);
+  token1.pairs1 = [pair.id];
+  token1.pairs2 = [];
   token1.save();
 
   let token2 = new Token(address2.toHex());
@@ -24,7 +28,8 @@ export function handleNewPair(event: NewPairEvent): void {
   token2.address = address2.toHex();
   token2.name = token2Contract.name();
   token2.symbol = token2Contract.symbol();
-  token2.pairs.push(pair.id);
+  token2.pairs2 = [pair.id];
+  token2.pairs1 = [];
   token2.save();
 }
 

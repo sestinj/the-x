@@ -51,7 +51,8 @@ type Token @entity {
   address: String!
   name: String!
   symbol: String!
-  pairs: [Pair!]!
+  pairs1: [Pair!]! # Pairs where this is token1
+  pairs2: [Pair!]!
 }
 
 # union Order = Buy | Ask

@@ -57,3 +57,11 @@ Solution: Go to advanced settings in Metamask and reset account
 Error: "Mapping terminated before handling trigger: oneshot canceled" Other than this error subgraph might otherwise seem to be working but queries show that it is empty.
 
 Solution: Check that your graph-cli version matches the one used in the .yaml file. ex) 0.0.4 or 0.0.6. Moving to 0.0.4 fixed this for me on 1/16/22
+
+---
+
+Subjects: Apollo, GraphQL
+
+Error: readQuery or readFragment is returning null even though the data is in the cache.
+
+Solution: readQuery should only be used when you want to replicate an EXACT query that has been performed. If you want a different data shape, you must use readFragment. If readFragment isn't working, make sure the id you use is in the form of "Token:0x00roiwjfaoishj892jr0u093u", i.e., you must add the object type and a colon before the actual id.

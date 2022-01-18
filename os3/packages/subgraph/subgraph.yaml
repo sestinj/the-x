@@ -9,13 +9,15 @@ dataSources:
     network: mainnet
     source:
       abi: CentralDex
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      address: "0xf5059a5D33d5853360D16C683c16e67980206f36"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       abis:
         - name: CentralDex
           file: ../contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json
+        - name: ERC20
+          file: ../contracts/artifacts/src/Token/ERC20.sol/ERC20.json
       entities:
         - Pair
         - Token
@@ -50,8 +52,8 @@ templates:
           handler: handleSell
         - event: Swap(address,address,uint256,uint256,uint256)
           handler: handleSwap
-  - kind: ethereum/contract
-    name: ERC20
+  - name: ERC20
+    kind: ethereum/contract
     network: mainnet
     source:
       abi: ERC20

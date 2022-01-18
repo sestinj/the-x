@@ -1,4 +1,4 @@
-import React, { ReactDOM } from "react";
+import React from "react";
 import { Button } from "..";
 
 interface LoginButtonProps {
