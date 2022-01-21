@@ -22,8 +22,8 @@ abstract contract ADex {
     // Implements all the usual DEX functions, but leaves token transfer implementations for child contracts
     function transferToken1(address payable reciever, uint256 quantity) virtual internal;
     function transferToken2(address payable reciever, uint256 quantity) virtual internal;
-    function transferToken1From(address sender, address reciever, uint256 quantity) virtual internal returns (bool);
-    function transferToken2From(address sender, address reciever, uint256 quantity) virtual internal returns (bool);
+    function transferToken1From(address sender, address reciever, uint256 quantity, uint256 msgValue) virtual internal returns (bool);
+    function transferToken2From(address sender, address reciever, uint256 quantity, uint256 msgValue) virtual internal returns (bool);
     function getToken1Balance() virtual internal view returns (uint256 balance);
     function getToken2Balance() virtual internal view returns (uint256 balance);
 
@@ -51,9 +51,9 @@ abstract contract ADex {
     event NewBid(uint256 price, uint256 quantity, address sender);
     event NewAsk(uint256 price, uint256 quantity, address sender);
 
-    function submitBid(uint256 price, uint256 quantity) public {
+    function submitBid(uint256 price, uint256 quantity) payable public {
         // Right now the transfer has to happen before the payback, but UniSwap does Flash Swaps, which you could implement
-        require(transferToken1From(msg.sender, address(this), quantity*price), "Transfer of funds not approved.");
+        require(transferToken1From(msg.sender, address(this), quantity*price, msg.value), "Transfer of funds not approved.");
         token1Balance += quantity;
         bids.insert(price, quantity, msg.sender);
         emit NewBid(price, quantity, msg.sender);
@@ -63,8 +63,8 @@ abstract contract ADex {
         }
     }
 
-    function submitAsk(uint256 price, uint256 quantity) public {
-        require(transferToken2From(msg.sender, address(this), quantity), "Transfer of funds not approved.");
+    function submitAsk(uint256 price, uint256 quantity) payable public {
+        require(transferToken2From(msg.sender, address(this), quantity, msg.value), "Transfer of funds not approved.");
         token2Balance += quantity;
         asks.insert(price, quantity, msg.sender);
         emit NewAsk(price, quantity, msg.sender);

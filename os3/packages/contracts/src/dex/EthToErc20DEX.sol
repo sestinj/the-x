@@ -15,11 +15,14 @@ contract EthToErc20Dex is ADex {
         token2.transfer(reciever, quantity);
     }
 
-    function transferToken1From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
-        return false;
-        // Not yet implemented
+    function transferToken1From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
+        // Since ethereum is automatically transferred to the contract via msg.value, we just have to verify that this amount was correct.
+        if (msgValue < quantity) {
+            return false;
+        }
+        return true;
     }
-    function transferToken2From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+    function transferToken2From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
         return token2.transferFrom(sender, reciever, quantity);
     }
 

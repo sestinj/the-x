@@ -15,10 +15,10 @@ contract Erc20Dex is ADex {
         token2.transfer(reciever, quantity);
     }
 
-    function transferToken1From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+    function transferToken1From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
         return token1.transferFrom(sender, reciever, quantity);
     }
-    function transferToken2From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+    function transferToken2From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
         return token2.transferFrom(sender, reciever, quantity);
     }
 
