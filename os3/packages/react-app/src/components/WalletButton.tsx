@@ -20,6 +20,9 @@ const WalletButton = ({
 
   const getSigner = async () => {
     if (signer) return; // To avoid infinite looping re-renders with the context
+    if (provider.constructor.name !== "Web3Provider") {
+      return; // because Alchemy Provider can't call eth_requestAccounts. TODO this is sketch though
+    }
     await provider.send("eth_requestAccounts", []);
     const newSigner = provider.getSigner();
     if (setSigner) {

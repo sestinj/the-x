@@ -4,5 +4,5 @@
     "centralDex": "0xC7F154467454121895C24bAcca1fAEc2756C56bB"
   },
   "name": "ropsten",
-  "alchemyKey": "iQg42SGtsJ11gAA9awS8gph4yQql9ogQ"
+  "alchemyKey": "https://eth-ropsten.alchemyapi.io/v2/iQg42SGtsJ11gAA9awS8gph4yQql9ogQ"
 }

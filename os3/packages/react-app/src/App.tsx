@@ -8,8 +8,7 @@ export const SignerContext: React.Context<{
   setSigner?: React.Dispatch<React.SetStateAction<JsonRpcSigner | undefined>>;
 }> = createContext({});
 
-let provider: ethers.providers.JsonRpcProvider = new ethers.providers.AlchemyProvider(
-  Config.name,
+let provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
   Config.alchemyKey
 );
 if ((window as any).ethereum) {

@@ -1,30 +1,19 @@
 import Layout from "../components/Layout";
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { TextInput, Select, Button, Submit } from "../components";
-import addresses from "@project/contracts/src/addresses";
+import Hr from "../components/Hr";
+import config from "@project/react-app/src/config/index.json";
 import { ethers } from "ethers";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json";
-import { SignerContext } from "../App";
+import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
+import { ProviderContext, SignerContext } from "../App";
 import Table from "../components/Table";
+import SafeImg from "../components/SafeImg/SafeImg";
 import { useForm } from "react-hook-form";
 import { gql, useQuery, useApolloClient } from "@apollo/client";
 import { Pair, Token } from "@project/subgraph/generated/schema";
-
-// TODO - You should move all graphql queries somewhere else if there are too many.
-// And should make a type for each query, with a good naming convention.
-// ex) GET_TOKENS -> type GetTokensResp = Token & {pairs1: {token1: string, token2: string, address: string}}
-type PairWithTokens = Pair & { token1: Token; token2: Token };
-
-// You should be able to autogen all of this.
-type MiniPair = {
-  token2: { id: string; name: string; symbol: string };
-  address: string;
-  token1: string;
-};
-type GetTokensResp = Token & {
-  pairs1: MiniPair[];
-};
+import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -33,32 +22,36 @@ const GET_TOKENS = gql`
       name
       symbol
       address
-      pairs1 {
-        token1 {
-          id
-        }
-        token2 {
-          id
-          name
-          symbol
-        }
-        address
-      }
     }
   }
 `;
 
-const GET_TOKEN_FRAGMENT = gql`
+const TOKEN_FRAG = gql`
   fragment token on Token {
     id
     name
     symbol
     address
-    pairs1 {
-      token1
-      token2
+  }
+`;
+
+const PAIR_FRAG = gql`
+  fragment pair on Pair {
+    id
+    token1 {
+      id
       address
+      name
+      symbol
     }
+    token2 {
+      id
+      address
+      name
+      symbol
+    }
+    address
+    price
   }
 `;
 
@@ -84,142 +77,155 @@ const GET_PAIRS = gql`
   }
 `;
 
-type GetCurrentExchangeResp = {
-  token1: string;
-  token2: string;
-  address: string;
-  price: number;
-};
-const GET_CURRENT_EXCHANGE = gql`
-  query getCurrentExchange($id: ID!) {
-    pair(id: $id) {
-      id
-      token1
-      token2
-      address
-      price
-    }
-  }
-`;
+const SHIB = {
+  id: "0x0",
+  name: "Shiba Inu",
+  symbol: "SHIB",
+  address: "0x0",
+} as Token;
+const DOGE = {
+  id: "0x1",
+  name: "Dogecoin",
+  symbol: "DOGE",
+  address: "0x1",
+} as Token;
+const SHIB_DOGE = {
+  id: "0x00x1",
+  address: "0x3",
+  price: 42,
+  token1: SHIB,
+  token2: DOGE,
+} as any;
+// TODO - when the page first loads, the selected options have no corresponding token value. Only after changing each of them can you set the exchange.
 
 const Exchange = () => {
-  const apolloClient = useApolloClient();
-  // Web3
   const { signer } = useContext(SignerContext);
-  // const provider = useContext(ProviderContext);
+  const provider = useContext(ProviderContext);
+
+  // STATE MANAGEMENT START***********************************************************
+  const apolloClient = useApolloClient();
+
+  const { data: tokenData } = useQuery<{ tokens: Token[] }>(GET_TOKENS);
+  const { data: pairData } = useQuery<{ pairs: Pair[] }>(GET_PAIRS);
+
+  const [token1, setToken1] = useState<Token>(SHIB);
+  const [token2, setToken2] = useState<Token>(DOGE);
+  const [currentPair, setCurrentPair] = useState<Pair>(SHIB_DOGE);
+
+  useEffect(() => {
+    let newPair = apolloClient.readFragment({
+      id: "Pair:" + token1.address + token2.address,
+      fragment: PAIR_FRAG,
+    });
+    if (newPair) {
+      setCurrentPair(newPair);
+    }
+
+    if (!currentPair) {
+      // There is no pair between these two, do something about it
+      console.log("NO EXCHANGE FOR THIS PAIR");
+    }
+
+    console.log("EXCHANGE Changed: ", currentPair);
+  }, [token1, token2]);
+
+  // Getting balance directly from the contract for now
+  const [token1Balance, setToken1Balance] = useState(0);
+  const [token2Balance, setToken2Balance] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!isAddress(token1.address)) {
+          return;
+        }
+        if (!signer) {
+          return;
+        }
+        const tokenContract = new ethers.Contract(
+          token1.address,
+          ERC20.abi,
+          signer
+        );
+        const signerAddress = await signer.getAddress();
+        const tx = await tokenContract.balanceOf(signerAddress);
+        setToken1Balance(tx);
+      } catch (err) {
+        console.error("Unable to getBalance of token: ", err);
+      }
+    })();
+  }, [token1]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!isAddress(token1.address)) {
+          return;
+        }
+        if (!signer) {
+          return;
+        }
+        const tokenContract = new ethers.Contract(
+          token2.address,
+          ERC20.abi,
+          signer
+        );
+        const signerAddress = await signer.getAddress();
+        const tx = await tokenContract.balanceOf(signerAddress);
+        setToken2Balance(tx);
+      } catch (err) {
+        console.log("Unable to getBalance of token: ", err);
+      }
+    })();
+  }, [token2]);
+
+  // User input state
+
+  const [quantity, setQuantity] = useState(0);
+
+  // STATE MANAGEMENT END*************************************************************
 
   // Main Exchange Contract
   var mainExchange = new ethers.Contract(
-    (addresses as any).centralDex,
+    config.addresses.centralDex,
     CentralDex.abi,
     signer
   );
 
   useEffect(() => {
     mainExchange = new ethers.Contract(
-      (addresses as any).centralDex,
+      config.addresses.centralDex,
       CentralDex.abi,
       signer
     );
   }, [signer]);
 
-  // Load pairs
-  const { data: pairsData } = useQuery<{ pairs: PairWithTokens[] }>(GET_PAIRS, {
-    variables: { language: "english" },
-  });
+  const submitOrder = async () => {
+    console.log("Submitting Order...");
+    // First, give allowance for the token
+    const tokenContract = new ethers.Contract(
+      token1.address,
+      ERC20.abi,
+      signer
+    );
 
-  // Exchange State - token1Address => currentExchange => token1, token2
-  const [token1Address, setToken1Address] = useState("");
-  const [exchangeAddress, setExchangeAddress] = useState("");
-  const [currentExchange, setCurrentExchange] = useState<Pair>();
-  const { data: tokenData, loading: tokenDataLoading } = useQuery(GET_TOKENS);
-  const [token1, setToken1] = useState<any>();
-  const [token2, setToken2] = useState<any>();
+    // Second, submit the bid to pairContract
+    const pairContract = new ethers.Contract(
+      currentPair.address,
+      Erc20Dex.abi,
+      signer
+    );
 
-  const [token2Frags, setToken2Frags] = useState([]);
-  const token2SelectRef = useRef<HTMLSelectElement | null>(null);
-  const [token2Options, setToken2Options] = useState<HTMLOptionElement[]>([]);
-
-  const reactToChangedExchangeAddress = () => {
-    console.log("REACTING: ", exchangeAddress);
-    let currEx = apolloClient.readQuery({
-      query: GET_CURRENT_EXCHANGE,
-      variables: { id: exchangeAddress },
+    const tx = await tokenContract.approve(pairContract.address, quantity);
+    console.log("Waiting for funds to be approved");
+    await tx.wait();
+    console.log("Approved amount of token1: ", tx);
+    // TODO - Everyone submits a bid at the price? They don't set their own? What do you do about this?
+    // TODO - run some checks on the quantity
+    pairContract.submitBid(currentPair.price, quantity).then((tx: any) => {
+      console.log("Submitted Bid: ", tx);
     });
-    if (!currEx) {
-      return;
-    }
-    console.log("CURREX: ", currEx);
-    let t2 = apolloClient.readFragment({
-      id: currEx.token2.__ref,
-      fragment: GET_TOKEN_FRAGMENT,
-    });
-    console.log("New token two!: ", t2);
-    setCurrentExchange(currEx);
-    setToken2(t2);
   };
-
-  useEffect(() => {
-    let newT1 = apolloClient.readFragment({
-      id: "Token:" + token1Address,
-      fragment: GET_TOKEN_FRAGMENT,
-    });
-    setToken1(newT1);
-    console.log("NEWtoken1: ", newT1, token1Address);
-
-    setToken2Frags(
-      token1?.pairs1?.map((pair: any) => {
-        return apolloClient.readFragment({
-          id: pair.token2.__ref,
-          fragment: GET_TOKEN_FRAGMENT,
-        });
-      }) || []
-    );
-    setToken2Options(
-      token1?.pairs1?.map((pair: any) => {
-        let token2Frag = apolloClient.readFragment({
-          id: pair.token2.__ref,
-          fragment: GET_TOKEN_FRAGMENT,
-        });
-        return (
-          <option key={token2Frag.name} value={pair.address}>
-            {token2Frag.name}
-          </option>
-        );
-      })
-    );
-
-    // Set the new exchange address, because the select onChange method doesn't trigger when you change the options
-    // ISSUE: This is happening before the options are loaded by the map below in the select! How to deal with this?
-
-    if (token2Options?.length) {
-      setExchangeAddress(token2Options[0].value);
-    }
-  }, [token1Address]);
-
-  const [currentPrice, setCurrentPrice] = useState();
-
-  useEffect(reactToChangedExchangeAddress, [exchangeAddress]);
-
-  useEffect(() => {
-    if (!currentExchange) {
-      return;
-    }
-    try {
-      const dex = new ethers.Contract(
-        currentExchange.address,
-        Erc20Dex.abi,
-        signer
-      );
-      setExchangeContract(dex);
-    } catch (error) {
-      setExchangeContract(undefined);
-      console.log(error);
-    }
-  }, [currentExchange]);
-  const [exchangeContract, setExchangeContract] = useState<ethers.Contract>();
-
-  const submitOrder = async () => {};
 
   // New Exchange
   const { register: registerNE, handleSubmit: handleSubmitNE } = useForm();
@@ -236,7 +242,6 @@ const Exchange = () => {
     <>
       <Layout>
         <h1>Exchange</h1>
-
         <div>
           <div
             style={{
@@ -250,8 +255,16 @@ const Exchange = () => {
           >
             <Select
               onChange={(ev) => {
-                setToken1Address(ev.target.value);
+                let newToken = apolloClient.readFragment({
+                  id: "Token:" + ev.target.value,
+                  fragment: TOKEN_FRAG,
+                });
+                if (newToken) {
+                  setToken1(newToken);
+                }
+                console.log("New Token 1: ", token1);
               }}
+              value={token1.address}
             >
               {tokenData?.tokens?.map((token: any) => {
                 return (
@@ -267,7 +280,17 @@ const Exchange = () => {
                 borderLeft: "1px solid black",
                 height: "100%",
               }}
-              placeholder={"0.00 " + (token1?.symbol || "ETH")}
+              placeholder={
+                (currentPair ? currentPair.price * quantity : "0.00") +
+                " " +
+                token1.symbol
+              }
+              value={
+                (currentPair ? currentPair.price * quantity : "0.00") +
+                " " +
+                token1.symbol
+              }
+              disabled={true}
             ></TextInput>
             <span
               style={{
@@ -277,6 +300,14 @@ const Exchange = () => {
                 position: "relative",
                 zIndex: "9999",
                 left: "-12px",
+                fontSize: "24px",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                // Switch places of the two tokens
+                let temp = token1;
+                setToken1(token2);
+                setToken2(temp);
               }}
             >
               ➡️
@@ -288,17 +319,30 @@ const Exchange = () => {
                 textAlign: "right",
                 height: "100%",
               }}
-              placeholder={"0.00 " + (token2?.symbol || "DOGE")}
-              disabled={true}
-            ></TextInput>
-            {console.log("TOKEN2: ", token2)}
-            <Select
-              ref={token2SelectRef}
+              placeholder={"0.00 " + token2.symbol}
               onChange={(ev) => {
-                setExchangeAddress(ev.target.value);
+                setQuantity(parseFloat(ev.target.value));
               }}
+            ></TextInput>
+            <Select
+              onChange={(ev) => {
+                let newToken = apolloClient.readFragment({
+                  id: "Token:" + ev.target.value,
+                  fragment: TOKEN_FRAG,
+                });
+                if (newToken) {
+                  setToken2(newToken);
+                }
+              }}
+              value={token2.address}
             >
-              {token2Options}
+              {tokenData?.tokens?.map((token: any) => {
+                return (
+                  <option key={token.address} value={token.address}>
+                    {token.name}
+                  </option>
+                );
+              })}
             </Select>
             <Button
               style={{ borderRadius: "0", margin: "0", height: "100%" }}
@@ -308,17 +352,31 @@ const Exchange = () => {
             </Button>
           </div>
           <p>
-            Current Price:{" "}
+            <span style={{ float: "left" }}>
+              Balances: <br></br>
+              {token1Balance.toString()} {token1.symbol}
+              <br></br>
+              {token2Balance.toString()} {token2.symbol}
+            </span>
             <span style={{ float: "right" }}>
-              {currentPrice || "?"} {token1?.symbol || "ETH"}/
-              {token2?.symbol || "DOGE"}
+              Current Price: {currentPair.price} {token1.symbol}/{token2.symbol}
+            </span>
+            <br></br>
+            <span style={{ float: "right" }}>Fees: 0.00</span>
+
+            <br></br>
+            <span style={{ float: "right" }}>
+              Total:{" "}
+              <b>
+                {currentPair.price} {token1.symbol}
+              </b>
             </span>
           </p>
         </div>
         <h5>Available Exchanges</h5>
         <Table
-          rowData={pairsData?.pairs || []}
-          rowCell={(data: PairWithTokens) => {
+          rowData={pairData?.pairs || []}
+          rowCell={(data: Pair) => {
             return [
               <>
                 <button
@@ -327,17 +385,32 @@ const Exchange = () => {
                     border: "none",
                     color: "white",
                     margin: "none",
-                    padding: "none",
                     fontSize: "18px",
+                    cursor: "pointer",
                   }}
                   onClick={() => {
-                    let currEx = apolloClient.readQuery({
-                      query: GET_CURRENT_EXCHANGE,
-                      variables: { id: data.address },
+                    let newToken1 = apolloClient.readFragment({
+                      id: "Token:" + (data.token1 as any).address,
+                      fragment: TOKEN_FRAG,
                     });
-                    if (currEx) {
-                      setCurrentExchange(currEx);
+                    if (newToken1) {
+                      setToken1(newToken1);
                     }
+
+                    let newToken2 = apolloClient.readFragment({
+                      id: "Token:" + (data.token2 as any).address,
+                      fragment: TOKEN_FRAG,
+                    });
+                    if (newToken2) {
+                      setToken2(newToken2);
+                    }
+                    console.log(
+                      "New tokens: ",
+                      newToken1,
+                      newToken2,
+                      token1,
+                      token2
+                    );
                   }}
                 >
                   <div
@@ -358,19 +431,21 @@ const Exchange = () => {
                         margin: "20px",
                       }}
                     >
-                      {data.token1?.address && (
-                        <img
+                      {// What's going on here? TODO THE ISSUE is that you're using the Graph autogenerated types, but they don't correspond to what Apollo gives you. Need another source of GraphQL types. I'm sure there's a tool out there so you can autogen still.
+                      (data.token1 as any).address && (
+                        <SafeImg
                           style={{
                             width: "100%",
                             height: "100%",
                             objectFit: "fill",
                           }}
-                          src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${data.token1.address}.png`}
-                        ></img>
+                          address={(data.token1 as any).address}
+                        ></SafeImg>
                       )}
                     </div>
                     <p>
-                      {data.price} {data.token1.symbol} / {data.token2.symbol}
+                      {data.price} {(data.token1 as any).symbol} /{" "}
+                      {(data.token2 as any).symbol}
                     </p>
                     <div
                       style={{
@@ -382,16 +457,15 @@ const Exchange = () => {
                         float: "right",
                       }}
                     >
-                      {data.token2?.address && (
-                        <img
+                      {(data.token2 as any).address && (
+                        <SafeImg
                           style={{
                             width: "100%",
                             height: "100%",
                             objectFit: "fill",
                           }}
-                          src={`https://raw.githubusercontent.com/dgamingfoundation/erc20-tokens-images/master/images/${data.token2.address}.png
-`}
-                        ></img>
+                          address={(data.token2 as any).address}
+                        ></SafeImg>
                       )}
                     </div>
                   </div>
@@ -432,6 +506,26 @@ const Exchange = () => {
             ></TextInput>
             <Button>Submit</Button>
           </div>
+        </div>
+        <br></br>
+        <Hr></Hr>
+        <div
+          style={{
+            margin: "20px",
+          }}
+        >
+          <h4 style={{ textAlign: "center" }}>Notes to Alpha Users</h4>
+          <ul>
+            <li>
+              Each token trade is facilitated by a smart contract between a
+              SINGLE PAIR of tokens in a SINGLE DIRECTION. So at the moment you
+              might be able to select two tokens in the dropdown for which a
+              pair doesn't actually exist. A next step for me is to create a
+              "bridge finder" that lets you trade any 2 supported tokens by
+              daisy-chaining pairs, but until then you can just use the
+              Available Pairs table - all listed pairs there are valid.
+            </li>
+          </ul>
         </div>
       </Layout>
     </>
