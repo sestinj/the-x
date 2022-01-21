@@ -3,7 +3,10 @@
 pragma solidity ^0.8.0;
 
 import './Erc20Dex.sol';
+import './EthToErc20Dex.sol';
+import './Erc20ToEthDex.sol';
 import '../governance/Dictatorship.sol';
+import './ADex.sol';
 
 // This contract is where global pools of all token types will be stored, so liquidity is shared across exchanges.
 // All governance logic will also be dealt with here (or in an inherited class).
@@ -33,14 +36,25 @@ contract CentralDex is Dictatorship {
         if (dexAddresses[token1][token2] != address(0x0)) {
             revert("AE"); // Already exists
         }
+        if (token1 == token2) {
+            revert("ST"); // Same Token
+        }
         // How can we check here whether the addresses are existing tokens?
 
-        Erc20Dex newDex = new Erc20Dex(token1, token2);
+        // TODO You're going to need a better scheme than this once you start working with tokens off-chain, but honestly this is totally fine for now. Just make the bridge finder
+        if (token1 == address(0x0)) {
+            EthToErc20Dex newDex = new EthToErc20Dex(token2);
+        } else if (token2 == address(0x0)) {
+            Erc20ToEthDex newDex = new Erc20ToEthDex(token1);
+        } else {
+            Erc20Dex newDex = new Erc20Dex(token1, token2);
+        }
         dexAddresses[token1][token2] = address(newDex);
         dexAddressesBackward[token2][token1] = address(newDex);
         exchangesForToken[token1].push(token2);
         exchangesForTokenReverse[token2].push(token1);
         exchangesFlat.push([token1, token2]);
+        
 
         emit NewPair(token1, token2, address(newDex));
 
