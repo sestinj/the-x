@@ -3,9 +3,9 @@ import { Pair, Token } from "../../generated/schema";
 import { ERC20 as ERC20Contract } from "../../generated/templates/ERC20/ERC20";
 
 export function handleNewPair(event: NewPairEvent): void {
-  let pair = new Pair(event.params.dexAddress.toHex());
   let address1 = event.params.token1;
   let address2 = event.params.token2;
+  let pair = new Pair(address1.toHex() + address2.toHex());
   pair.token1 = address1.toHex();
   pair.token2 = address2.toHex();
   pair.address = event.params.dexAddress.toHex();
