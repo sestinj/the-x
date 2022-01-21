@@ -12,12 +12,13 @@ import Exchange from "./routes/exchange";
 import CreateToken from "./routes/createToken";
 import ManageToken from "./routes/manageToken";
 import Offerings from "./routes/offerings";
+import Config from "./config/index.json";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
 const client = new ApolloClient({
   // uri: "https://api.thegraph.com/subgraphs/name/paulrberg/create-eth-app",
-  uri: "http://localhost:8000/subgraphs/name/dex-graph",
+  uri: Config.subgraphUrl,
   cache: new InMemoryCache(),
 });
 

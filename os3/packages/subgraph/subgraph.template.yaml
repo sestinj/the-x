@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: CentralDex
-    network: ropsten
+    network: {{network}}
     source:
       abi: CentralDex
-      address: "0xC7F154467454121895C24bAcca1fAEc2756C56bB"
+      address: "{{ addresses.centralDex }}"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -29,7 +29,7 @@ dataSources:
 templates:
   - name: Erc20Dex
     kind: ethereum/contract
-    network: ropsten
+    network: {{network}}
     source:
       abi: Erc20Dex
     mapping:
@@ -54,7 +54,7 @@ templates:
           handler: handleSwap
   - name: ERC20
     kind: ethereum/contract
-    network: ropsten
+    network: {{network}}
     source:
       abi: ERC20
     mapping:

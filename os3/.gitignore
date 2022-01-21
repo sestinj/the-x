@@ -27,3 +27,5 @@ packages/subgraph/generated/
 # hardhat
 packages/contracts/artifacts/
 packages/contracts/cache
+
+.DS_Store

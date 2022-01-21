@@ -1,0 +1,4 @@
+{
+  "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
+  "name": "mainnet"
+}

@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "dependencies": {
     "@graphprotocol/graph-cli": "0.20.1",
-    "@graphprotocol/graph-ts": "0.20.0"
+    "@graphprotocol/graph-ts": "0.20.0",
+    "mustache": "^4.2.0"
   },
   "license": "MIT",
   "scripts": {
     "auth": "graph auth https://api.thegraph.com/ $GRAPH_ACCESS_TOKEN",
+    "prepare:local": "mustache config/local.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "build": "graph build",
-    "codegen": "graph codegen --output-dir src/types/",
-    "deploy": "graph deploy paulrberg/create-eth-app --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
+    "codegen": "graph codegen",
+    "create:local": "graph create --node http://localhost:8020 x",
+    "deploy:local": "graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 x",
+    "deploy:remote": "graph deploy --product hosted-service sestinj/x --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --access-token $GRAPH_ACCESS_TOKEN"
   }
 }

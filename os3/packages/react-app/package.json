@@ -54,11 +54,15 @@
     ]
   },
   "scripts": {
+    "prepare:local": "cp src/config/local.json src/config/index.json",
+    "prepare:ropsten": "cp src/config/ropsten.json src/config/index.json",
+    "prepare:mainnet": "cp src/config/mainnet.json src/config/index.json",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "ipfs": "yarn build && ipfs-deploy build/",
     "start": "react-scripts start",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "deploy": "firebase deploy --only hosting"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.0",

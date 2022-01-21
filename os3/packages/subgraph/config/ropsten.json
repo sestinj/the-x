@@ -1,0 +1,6 @@
+{
+  "network": "ropsten",
+  "addresses": {
+    "centralDex": "0xC7F154467454121895C24bAcca1fAEc2756C56bB"
+  }
+}

@@ -27,7 +27,7 @@ type Ask @entity {
 # You should add a completed: Boolean! field to Buy/Ask and generally clear this up.
 
 type Swap @entity {
-  id: ID!
+  id: ID! # This particular id is the appended token1 ID and token2 ID. This will always be unique and is useful for querying.
   token1Sender: String!
   token2Sender: String!
   token1Price: Int!
@@ -51,7 +51,7 @@ type Token @entity {
   address: String!
   name: String!
   symbol: String!
-  pairs1: [Pair!]! # Pairs where this is token1
+  pairs1: [Pair!]! # Pairs where this is token1- I"M TRYING NOT TO USE THESE, THEY SEEM LIKE A CRUTCH
   pairs2: [Pair!]!
 }
 
