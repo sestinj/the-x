@@ -1,13 +1,20 @@
 import React, { createContext, useState } from "react";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { ethers } from "ethers";
+import Config from "./config/index.json";
 
 export const SignerContext: React.Context<{
   signer?: JsonRpcSigner;
   setSigner?: React.Dispatch<React.SetStateAction<JsonRpcSigner | undefined>>;
 }> = createContext({});
 
-const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+let provider: ethers.providers.JsonRpcProvider = new ethers.providers.AlchemyProvider(
+  Config.name,
+  Config.alchemyKey
+);
+if ((window as any).ethereum) {
+  provider = new ethers.providers.Web3Provider((window as any).ethereum);
+}
 
 export const ProviderContext = createContext(provider);
 

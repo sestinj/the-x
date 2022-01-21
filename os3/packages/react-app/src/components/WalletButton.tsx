@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, P } from ".";
-import { Web3Provider, JsonRpcSigner } from "@ethersproject/providers";
+import { JsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
 import { BigNumber, ethers } from "ethers";
 
 const WalletButton = ({
@@ -8,7 +8,7 @@ const WalletButton = ({
   signer,
   setSigner,
 }: {
-  provider: Web3Provider;
+  provider: JsonRpcProvider;
   signer: JsonRpcSigner | undefined;
   setSigner:
     | React.Dispatch<React.SetStateAction<JsonRpcSigner | undefined>>
@@ -34,19 +34,24 @@ const WalletButton = ({
       setBalance(balance.toString());
     });
 
-    provider
-      .getNetwork()
-      .then((network) =>
-        setNetworkName(network.name === "unknown" ? "Local Host" : network.name)
+    provider.getNetwork().then((network) => {
+      setNetworkName(
+        network.name === "unknown"
+          ? "Local Host"
+          : network.name.substring(0, 1).toUpperCase() +
+              network.name.substring(1)
       );
+    });
   };
 
   useEffect(() => {
     getSigner();
-    (window as any).ethereum.on("accountsChanged", (accounts: any) => {
-      console.log("Account changed: ", accounts);
-      getSigner();
-    });
+    if ((window as any).ethereum?.on) {
+      (window as any).ethereum.on("accountsChanged", (accounts: any) => {
+        console.log("Account changed: ", accounts);
+        getSigner();
+      });
+    }
   });
 
   return (
@@ -60,7 +65,11 @@ const WalletButton = ({
         </Button>
         <br></br>
         <P>
-          My Balance: {ethers.utils.formatEther(BigNumber.from(balance))} Ether
+          My Balance:{" "}
+          {parseFloat(
+            ethers.utils.formatEther(BigNumber.from(balance))
+          ).toFixed(4)}{" "}
+          Ether
         </P>
       </div>
     </>
