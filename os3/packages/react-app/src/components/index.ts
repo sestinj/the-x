@@ -22,7 +22,7 @@ export const Body = styled.div`
   color: white;
   display: flex;
   flex-direction: column;
-  font-size: calc(10px + 2vmin);
+  font-size: 14px;
   justify-content: center;
   min-height: calc(100vh - 70px);
 `;

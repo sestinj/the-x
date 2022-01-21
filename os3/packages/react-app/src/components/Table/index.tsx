@@ -4,11 +4,12 @@ import { TableCellDiv, BaseTable } from "..";
 interface TableProps<RowDataType> {
   rowCell: (data: RowDataType) => React.ReactNode[];
   rowData: RowDataType[];
+  style?: any;
 }
 
 function Table<RowDataType>(props: TableProps<RowDataType>) {
   return (
-    <BaseTable>
+    <BaseTable style={props.style}>
       <tbody>
         {props.rowData.map((data: RowDataType, index: number) => {
           return (
