@@ -4,6 +4,7 @@ import WalletButton from "./WalletButton";
 import React, { useContext, useRef } from "react";
 import { SignerContext, ProviderContext } from "../App";
 import Logo from "./Logo";
+import AlertArea from "./AlertArea";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -28,7 +29,10 @@ const Layout = ({ children }: LayoutProps) => {
           signer={signer}
         ></WalletButton>
       </Header>
-      <Body>{children}</Body>
+      <Body>
+        {children}
+        <AlertArea></AlertArea>
+      </Body>
     </TestBorder>
   );
 };

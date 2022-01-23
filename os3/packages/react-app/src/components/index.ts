@@ -1,9 +1,10 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import * as ReactRouterDOM from "react-router-dom";
 
 export const backgroundColor = "#161616";
 export const secondaryDark = "#323232";
 export const primaryHighlight = "#8000ff";
+export const BORDER_RADIUS = "8px";
 
 export const Header = styled.header`
   background-color: ${backgroundColor};
@@ -123,4 +124,53 @@ export const Submit = styled.input.attrs((props) => ({
 
 export const Hr = styled.hr`
   margin: 40px;
+`;
+
+export const Console = styled.textarea`
+  border: none;
+  border-radius: ${BORDER_RADIUS};
+  background-color: ${secondaryDark};
+  color: white;
+  font-family: monospace;
+  padding: 10px;
+`;
+
+// ANIMATIONS
+const rotate = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(360deg) scale(1.5);
+  }
+
+  100% {
+    transform: rotate(720deg);
+  }
+`;
+export const Rotate = styled.div`
+  display: inline-block;
+  animation: ${rotate} 3s ease-in-out infinite;
+  padding: 2rem 1rem;
+  font-size: 1.2rem;
+`;
+
+const increaseWidth = keyframes`
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+`;
+
+export const FillingBackground = styled.div`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  animation: ${increaseWidth} 15s linear infinite;
+  height: 100%;
+  background-color: #ffffff44;
 `;

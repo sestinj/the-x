@@ -13,6 +13,8 @@ import CreateToken from "./routes/createToken";
 import ManageToken from "./routes/manageToken";
 import Offerings from "./routes/offerings";
 import Config from "./config/index.json";
+import Store from "./app/store";
+import { Provider } from "react-redux";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -24,18 +26,20 @@ const client = new ApolloClient({
 
 ReactDOM.render(
   <ApolloProvider client={client}>
-    <App>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="home" element={<Home />} />
-          <Route path="exchange" element={<Exchange />} />
-          <Route path="createToken" element={<CreateToken />} />
-          <Route path="manageToken" element={<ManageToken />} />
-          <Route path="offerings" element={<Offerings />} />
-        </Routes>
-      </BrowserRouter>
-    </App>
+    <Provider store={Store}>
+      <App>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="home" element={<Home />} />
+            <Route path="exchange" element={<Exchange />} />
+            <Route path="createToken" element={<CreateToken />} />
+            <Route path="manageToken" element={<ManageToken />} />
+            <Route path="offerings" element={<Offerings />} />
+          </Routes>
+        </BrowserRouter>
+      </App>
+    </Provider>
   </ApolloProvider>,
   document.getElementById("root")
 );

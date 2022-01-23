@@ -1,5 +1,11 @@
 import Layout from "../components/Layout";
-import React, { useEffect, useState, useContext, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  Fragment,
+} from "react";
 import { TextInput, Select, Button, Submit } from "../components";
 import Hr from "../components/Hr";
 import config from "@project/react-app/src/config/index.json";
@@ -14,6 +20,9 @@ import { useForm } from "react-hook-form";
 import { gql, useQuery, useApolloClient } from "@apollo/client";
 import { Pair, Token } from "@project/subgraph/generated/schema";
 import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
+import { Transition, Dialog } from "@headlessui/react";
+import Modal from "../components/Modal";
+import Spinner from "../components/Spinner";
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -201,6 +210,7 @@ const Exchange = () => {
   }, [signer]);
 
   const submitOrder = async () => {
+    setModalOpen(true);
     console.log("Submitting Order...");
     // First, give allowance for the token
     const tokenContract = new ethers.Contract(
@@ -238,9 +248,17 @@ const Exchange = () => {
     });
   };
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <>
       <Layout>
+        <Modal
+          open={modalOpen}
+          title={"Transaction Submitted"}
+          content={<Spinner></Spinner>}
+        ></Modal>
+
         <h1>Exchange</h1>
         <div>
           <div
@@ -298,7 +316,7 @@ const Exchange = () => {
                 display: "inline-block",
                 overflow: "visible",
                 position: "relative",
-                zIndex: "9999",
+                zIndex: "10",
                 left: "-12px",
                 fontSize: "24px",
                 cursor: "pointer",
@@ -348,7 +366,7 @@ const Exchange = () => {
               style={{ borderRadius: "0", margin: "0", height: "100%" }}
               onClick={submitOrder}
             >
-              Submit Order
+              Trade
             </Button>
           </div>
           <p>
