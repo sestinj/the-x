@@ -34,7 +34,7 @@ contract EthToErc20Dex is ADex {
         return token2.balanceOf(address(this));
     }
 
-    constructor(address token2Address_) ADex() {
+    constructor(address token2Address_, uint256 quantity1_, uint256 quantity2_) ADex(quantity1_, quantity2_) {
         token2 = IERC20(token2Address_);
     }
 

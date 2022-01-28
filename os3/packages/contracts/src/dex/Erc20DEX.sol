@@ -30,7 +30,7 @@ contract Erc20Dex is ADex {
         return token2.balanceOf(address(this));
     }
 
-    constructor(address token1Address_, address token2Address_) ADex() {
+    constructor(address token1Address_, address token2Address_, uint256 quantity1_, uint256 quantity2_) ADex(quantity1_, quantity2_) {
         token1 = IERC20(token1Address_);
         token2 = IERC20(token2Address_);
         token1Balance = getToken1Balance();
