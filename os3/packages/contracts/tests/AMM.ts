@@ -34,7 +34,7 @@ describe("*", () => {
   let y_0 = 100;
   let p_0 = x_0 / y_0;
   let k_0 = x_0 * y_0;
-  let FEE;
+  let FEE: number;
 
   async function getBalances(signerIndex: number) {
     return await Promise.all([

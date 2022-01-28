@@ -37,22 +37,26 @@ contract CentralDex is Dictatorship {
             revert("ST"); // Same Token
         }
         // How can we check here whether the addresses are existing tokens?
-        if (token1 == address(0x0)) {
-            EthToErc20Dex newDex = new EthToErc20Dex(token2, quantity1, quantity2);
-        } else if (token2 == address(0x0)) {
-            Erc20ToEthDex newDex = new Erc20ToEthDex(token1, quantity1, quantity2);
-        } else {
-            Erc20Dex newDex = new Erc20Dex(token1, token2, quantity1, quantity2);
-        }
-        dexAddresses[token1][token2] = address(newDex);
-        dexAddressesBackward[token2][token1] = address(newDex);
-        exchangesForToken[token1].push(token2);
-        exchangesForTokenReverse[token2].push(token1);
-        exchangesFlat.push([token1, token2]);
+        // ADex newDex;
+        // if (token1 == address(0x0)) {
+        //     EthToErc20Dex newDex = new EthToErc20Dex(token2, quantity1, quantity2);
+        // } else if (token2 == address(0x0)) {
+        //     Erc20ToEthDex newDex = new Erc20ToEthDex(token1, quantity1, quantity2);
+        // } else {
+        //     Erc20Dex newDex = new Erc20Dex(token1, token2, quantity1, quantity2);
+        // }
+        // dexAddresses[token1][token2] = address(newDex);
+        // dexAddressesBackward[token2][token1] = address(newDex);
+        // exchangesForToken[token1].push(token2);
+        // exchangesForTokenReverse[token2].push(token1);
+        // exchangesFlat.push([token1, token2]);
 
-        emit NewPair(token1, token2, address(newDex));
+        // emit NewPair(token1, token2, address(newDex));
 
-        return address(newDex);
+        // return address(newDex);
+        
+        Erc20Dex newDex = new Erc20Dex(token1, token2, quantity1, quantity2);
+        return address(this);
     }
 
     function listExchangesToBuy(address token2) public view returns (address[] memory) {

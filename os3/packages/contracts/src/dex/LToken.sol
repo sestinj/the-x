@@ -16,12 +16,12 @@ contract LToken is ERC20 {
         x = x_;
     }
 
-    function mint(address to, uint256 quantity) {
+    function mint(address to, uint256 quantity) public {
         require(msg.sender == x, 'NP');
         _mint(to, quantity);
     }
 
-    function burn(address account, uint256 quantity) {
+    function burn(address account, uint256 quantity) public {
         require(msg.sender == x, 'NP');
         _burn(account, quantity);
     }

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import '../Token/IERC20.sol';
+import '../../Token/IERC20.sol';
 import './Bid.sol';
 import './Ask.sol';
 import './BidHeap.sol';

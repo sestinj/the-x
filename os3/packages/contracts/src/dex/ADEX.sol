@@ -3,10 +3,6 @@
 pragma solidity ^0.8.0;
 
 import '../Token/IERC20.sol';
-import './Bid.sol';
-import './Ask.sol';
-import './BidHeap.sol';
-import './AskHeap.sol';
 import './LToken.sol';
 import 'hardhat/console.sol';
 
@@ -34,12 +30,12 @@ abstract contract ADex {
 
     LToken public lToken;
 
-    constructor(uint256 quantity1, uint256 quantity2) {
+    constructor(uint256 quantity1, uint256 quantity2) payable {
         lToken = new LToken('LToken', 'LT', address(this)); // TODO - generate unique name
 
         // Deal with initial liquidity
-        require(transferToken1From(msg.sender, address(this), quantity1, msg.value), "Transfer of funds not approved.");
-        require(transferToken2From(msg.sender, address(this), quantity2, msg.value), "Transfer of funds not approved.");
+        require(transferToken1From(msg.sender, address(this), quantity1, msg.value), "NA.");
+        require(transferToken2From(msg.sender, address(this), quantity2, msg.value), "NA");
 
         updateBalance(quantity1, true, true);
         updateBalance(quantity2, true, false);
@@ -49,7 +45,7 @@ abstract contract ADex {
         lToken.mint(msg.sender, 1_000_000);
     }
 
-    function getLTokenAddress() public view {
+    function getLTokenAddress() public view returns (address) {
         return address(lToken);
     }
 
@@ -63,7 +59,7 @@ abstract contract ADex {
     uint256 public FEE = 1; // 1/1000
 
 
-    function getPrice() public view {
+    function getPrice() public view returns (uint256) {
         return p;
     }
 
@@ -88,11 +84,11 @@ abstract contract ADex {
     function buy(uint256 quantity) payable public {
         // Verify collection of payment
         require(quantity > y + FUNDS_BUFFER2, "IF");
-        require(transferToken1From(msg.sender, address(this), quantity*p, msg.value), "Transfer of funds not approved.");
+        require(transferToken1From(msg.sender, address(this), quantity*p, msg.value), "NA");
         
         // Calculate fees, send output
         uint256 fees = quantity * FEE / 1000; // TODO - SafeMath.sol
-        transferToken2(msg.sender, quantity - fees);
+        transferToken2(payable(msg.sender), quantity - fees);
 
         // TODO - give out fees!!!!
 
@@ -106,11 +102,11 @@ abstract contract ADex {
     function sell(uint256 quantity) payable public {
         // Verify collection of payment
         require(quantity * p > x + FUNDS_BUFFER1, "IF");
-        require(transferToken2From(msg.sender, address(this), quantity, msg.value), "Transfer of funds not approved.");
+        require(transferToken2From(msg.sender, address(this), quantity, msg.value), "NA");
         
         // Calculate fees, send output
         uint256 fees = quantity * p * FEE / 1000; // TODO - SafeMath.sol
-        transferToken1(msg.sender, quantity * p - fees);
+        transferToken1(payable(msg.sender), quantity * p - fees);
 
         // Update state, emit event
         updateBalance(quantity * p, false, true);
@@ -120,22 +116,18 @@ abstract contract ADex {
     }
 
     event LiquidityAdd(address sender, uint256 n);
-    /// @notice Add to the liquidity pool
-    /// @dev Currently using k=xy, enforcing equal amounts of each coin to be added when adding liquidity.
-    /// @param quantity Amount of liquidity to donate
-    /// @return Documents the return variables of a contract’s function state variable
-    /// @inheritdoc	Copies all missing tags from the base function (must be followed by the contract name)
+    
     function addLiquidity(uint256 quantity1, uint256 quantity2) payable public {
-        require(quantity1 == quantity2 * p, "Must add equal amounts of each coin.");
-        require(transferToken1From(msg.sender, address(this), quantity1, msg.value), "Transfer of funds not approved.");
-        require(transferToken2From(msg.sender, address(this), quantity2, msg.value), "Transfer of funds not approved.");
+        require(quantity1 == quantity2 * p, "UQ");
+        require(transferToken1From(msg.sender, address(this), quantity1, msg.value), "NA");
+        require(transferToken2From(msg.sender, address(this), quantity2, msg.value), "NA");
 
         updateBalance(quantity1, true, true);
         updateBalance(quantity2, true, false);
 
         // Calculate stake and mint LTokens
         uint256 s = (quantity1 + p * quantity2) / (p * y + x);
-        uint256 r = (s * quantity2) / (y - n);
+        uint256 r = (s * quantity2) / (y - quantity2);
         lToken.mint(msg.sender, r);
 
         emit LiquidityAdd(msg.sender, r);
@@ -149,8 +141,8 @@ abstract contract ADex {
         lToken.burn(msg.sender, n);
 
         // Any fees at this point?
-        transferToken1(msg.sender, s * x);
-        transferToken2(msg.sender, s * y);
+        transferToken1(payable(msg.sender), s * x);
+        transferToken2(payable(msg.sender), s * y);
 
         updateBalance(s * x, false, true);
         updateBalance(s * y, false, false);

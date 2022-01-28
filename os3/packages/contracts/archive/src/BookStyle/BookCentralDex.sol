@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.0;
 
-import './Erc20Dex.sol';
-import './EthToErc20Dex.sol';
-import './Erc20ToEthDex.sol';
-import '../governance/Dictatorship.sol';
-import './ADex.sol';
+import '../Erc20Dex.sol';
+import '../EthToErc20Dex.sol';
+import '../Erc20ToEthDex.sol';
+import '../../governance/Dictatorship.sol';
+import './BookADex.sol';
 
 // This contract is where global pools of all token types will be stored, so liquidity is shared across exchanges.
 // All governance logic will also be dealt with here (or in an inherited class).
