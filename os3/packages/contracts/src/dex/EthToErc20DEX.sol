@@ -34,8 +34,11 @@ contract EthToErc20Dex is ADex {
         return token2.balanceOf(address(this));
     }
 
-    constructor(address token2Address_, uint256 quantity1_, uint256 quantity2_) ADex(quantity1_, quantity2_) {
+    function setupTokens(address token1Address_, address token2Address_) internal override {
         token2 = IERC20(token2Address_);
     }
+
+    constructor(address token2Address_, uint256 quantity1_, uint256 quantity2_, address sender) ADex(address(0x0), token2Address_, quantity1_, quantity2_, sender) {}
+
 
 }

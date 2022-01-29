@@ -25,24 +25,28 @@ abstract contract ADex {
     IERC20 token1;
     IERC20 token2;
 
-    uint256 FUNDS_BUFFER1 = 0;
-    uint256 FUNDS_BUFFER2  = 0;
+    // As of now, these exist to avoid DBZ
+    uint256 FUNDS_BUFFER1 = 1;
+    uint256 FUNDS_BUFFER2  = 1;
 
     LToken public lToken;
 
-    constructor(uint256 quantity1, uint256 quantity2) payable {
+    function setupTokens(address token1Address_, address token2Address_) internal virtual {}
+
+    constructor(address token1Address_, address token2Address_, uint256 quantity1, uint256 quantity2, address sender) payable {
+        setupTokens(token1Address_, token2Address_);
+
         lToken = new LToken('LToken', 'LT', address(this)); // TODO - generate unique name
 
         // Deal with initial liquidity
-        require(transferToken1From(msg.sender, address(this), quantity1, msg.value), "NA.");
-        require(transferToken2From(msg.sender, address(this), quantity2, msg.value), "NA");
-
-        updateBalance(quantity1, true, true);
         updateBalance(quantity2, true, false);
+        updateBalance(quantity1, true, true);
+
+        k = x * y;
 
         // Mint initial LTokens
         // TODO Find a better way of choosing this number. Lower means less chance of exceeding 2^256, higher means more precision. Both of these concerns are kind of edge case though.
-        lToken.mint(msg.sender, 1_000_000);
+        lToken.mint(sender, 1_000_000);
     }
 
     function getLTokenAddress() public view returns (address) {
@@ -60,8 +64,27 @@ abstract contract ADex {
 
 
     function getPrice() public view returns (uint256) {
+        // This is the price if you assume dx, dy << x, y s.t. (x+dy*x/y)(y-dy) \approx xy = k
         return p;
     }
+
+    function getCostOfBuying(uint256 dy) public view returns (uint256) {
+        return k / (y - dy) - x; // = dx
+    }
+
+    function getCostOfSelling(uint256 dy) public view returns (uint256) {
+        return x  - k / (y + dy); // = dx
+    }
+
+    // function getPriceImpactOfBuying(uint256 dy) public view returns (uint256) {}
+    // function getPriceImpactOfSelling(uint256 dy) public view returns (uint256) {}
+    // function getSlippageOfBuying(uint256 dy) public view returns (uint256) {
+    //     return getPrice() - getCostOfBuying(dy) / dy;
+    // }
+
+    // function getSlippageOfSelling(uint256 dy) public view returns (uint256) {
+    //     return getPrice() - getCostOfSelling(dy) / dy;
+    // }
 
     function updateBalance(uint256 quantity, bool isIncrease, bool isToken1) internal {
         if (isToken1) {
@@ -69,7 +92,9 @@ abstract contract ADex {
         } else {
             y = isIncrease ? y + quantity : y - quantity;
         }
-        k = x * y;
+        // TODO - you shouldn't recalculate k here every time, what if this causes it to change from rounding errors?
+        // But if you only calculate during liquidityAdds and removals, won't that suddenly cause all error propogation to hit at once?
+        // k = x * y;
         p = x / y;
     }
 
@@ -81,38 +106,41 @@ abstract contract ADex {
         }
     }
 
-    function buy(uint256 quantity) payable public {
+    function buy(uint256 dy) payable public {
         // Verify collection of payment
-        require(quantity > y + FUNDS_BUFFER2, "IF");
-        require(transferToken1From(msg.sender, address(this), quantity*p, msg.value), "NA");
+        require(dy < y + FUNDS_BUFFER2, "IF");
+        require(transferToken1From(msg.sender, address(this), getCostOfBuying(dy), msg.value), "NA");
         
         // Calculate fees, send output
-        uint256 fees = quantity * FEE / 1000; // TODO - SafeMath.sol
-        transferToken2(payable(msg.sender), quantity - fees);
+        uint256 fees = dy * FEE / 1000; // TODO - SafeMath.sol
+        console.log('fees', fees, FEE / 1000);
+        transferToken2(payable(msg.sender), dy - fees);
 
         // TODO - give out fees!!!!
 
         // Update state, emit event
-        updateBalance(quantity * p, true, true);
-        updateBalance(quantity, false, false);
+        updateBalance(getCostOfBuying(dy), true, true);
+        updateBalance(dy, false, false);
 
-        emit Swap(msg.sender, quantity, p, true);
+        emit Swap(msg.sender, dy, p, true);
     }
     
-    function sell(uint256 quantity) payable public {
+    function sell(uint256 dy) payable public {
         // Verify collection of payment
-        require(quantity * p > x + FUNDS_BUFFER1, "IF");
-        require(transferToken2From(msg.sender, address(this), quantity, msg.value), "NA");
+        uint256 dx = getCostOfSelling(dy);
+        require(dx < x + FUNDS_BUFFER1, "IF");
+        require(transferToken2From(msg.sender, address(this), dy, msg.value), "NA");
         
         // Calculate fees, send output
-        uint256 fees = quantity * p * FEE / 1000; // TODO - SafeMath.sol
-        transferToken1(payable(msg.sender), quantity * p - fees);
+        uint256 fees = dx * FEE / 1000; // TODO - SafeMath.sol
+        transferToken1(payable(msg.sender), dx - fees);
 
         // Update state, emit event
-        updateBalance(quantity * p, false, true);
-        updateBalance(quantity, true, false);
+        updateBalance(dx, false, true);
+        updateBalance(dy, true, false);
 
-        emit Swap(msg.sender, quantity, p, false);
+        // TODO - Swap event needs more info (namely dx)
+        emit Swap(msg.sender, dy, p, false);
     }
 
     event LiquidityAdd(address sender, uint256 n);
@@ -124,6 +152,8 @@ abstract contract ADex {
 
         updateBalance(quantity1, true, true);
         updateBalance(quantity2, true, false);
+
+        k = x * y; // See notes above
 
         // Calculate stake and mint LTokens
         uint256 s = (quantity1 + p * quantity2) / (p * y + x);
@@ -146,6 +176,8 @@ abstract contract ADex {
 
         updateBalance(s * x, false, true);
         updateBalance(s * y, false, false);
+
+        k = x * y; // See notes above
 
         emit LiquidityRemoval(msg.sender, n);
     }

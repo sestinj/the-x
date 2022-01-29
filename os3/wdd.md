@@ -65,3 +65,11 @@ Subjects: Apollo, GraphQL
 Error: readQuery or readFragment is returning null even though the data is in the cache.
 
 Solution: readQuery should only be used when you want to replicate an EXACT query that has been performed. If you want a different data shape, you must use readFragment. If readFragment isn't working, make sure the id you use is in the form of "Token:0x00roiwjfaoishj892jr0u093u", i.e., you must add the object type and a colon before the actual id.
+
+---
+
+Subjects: Solidity, Testing
+
+Error: "ProviderError: Error: Transaction reverted: function call to a non-contract account"
+
+Solution:
