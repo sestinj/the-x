@@ -12,8 +12,8 @@
     "prepare:local": "mustache config/local.json subgraph.template.yaml > subgraph.yaml",
     "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
-    "build": "graph build",
     "codegen": "graph codegen",
+    "build": "graph build",
     "create:local": "graph create --node http://localhost:8020 x",
     "deploy:local": "graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 x",
     "deploy:remote": "graph deploy --product hosted-service sestinj/x --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ --access-token $GRAPH_ACCESS_TOKEN"

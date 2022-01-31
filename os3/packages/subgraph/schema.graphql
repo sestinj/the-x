@@ -1,49 +1,21 @@
 type Pair @entity {
-  id: ID!
+  id: ID! # This particular id is the appended token1 ID and token2 ID. This will always be unique and is useful for querying.
   token1: Token!
   token2: Token!
   address: String!
   price: Int!
-  buys: [Buy!]!
-  asks: [Ask!]!
+  swaps: [Swap!]!
 }
-
-type Buy @entity {
-  id: ID!
-  price: Int!
-  quantity: Int!
-  sender: String!
-}
-
-type Ask @entity {
-  id: ID!
-  price: Int!
-  quantity: Int!
-  sender: String!
-  # Probably needs to specify what tokens were involved
-}
-
-# TODO: The difference between a queued bid/ask and a finished purchase is confusing
-# You should add a completed: Boolean! field to Buy/Ask and generally clear this up.
 
 type Swap @entity {
-  id: ID! # This particular id is the appended token1 ID and token2 ID. This will always be unique and is useful for querying.
-  token1Sender: String!
-  token2Sender: String!
-  token1Price: Int!
-  token2Price: Int!
-  spread: Int!
-  quantity: Int!
-  # TODO addresses are more efficiently encoded as Bytes
-}
-
-type DirectPurchase @entity {
   id: ID!
-  exchange: String!
   sender: String!
-  isToken1: Boolean!
-  price: Int!
-  quantity: Int!
+  quantity1: Int!
+  quantity2: Int!
+  fees: Int!
+  newPrice: Int!
+  isForward: Boolean
+  # TODO addresses are more efficiently encoded as Bytes
 }
 
 type Token @entity {
@@ -55,11 +27,8 @@ type Token @entity {
   pairs2: [Pair!]!
 }
 
-# union Order = Buy | Ask
-
 type User @entity {
   id: ID!
   address: String!
-  asks: [Ask!]!
-  buys: [Buy!]!
+  swaps: [Swap!]!
 }

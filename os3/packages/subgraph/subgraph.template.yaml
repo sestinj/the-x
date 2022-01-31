@@ -38,20 +38,18 @@ templates:
       language: wasm/assemblyscript
       file: ./src/mappings/erc20dex.ts
       entities:
-        - Bid
-        - Ask
         - Swap
         - User
       abis:
         - name: Erc20Dex
           file: ../contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json
       eventHandlers:
-        - event: Buy(address,uint256,uint256)
-          handler: handleBuy
-        - event: Sell(address,uint256,uint256)
-          handler: handleSell
-        - event: Swap(address,address,uint256,uint256,uint256)
+        - event: Swap(address,uint128,uint128,uint128,uint256,bool)
           handler: handleSwap
+        - event: LiquidityAdd(address,uint256,uint128,uint128)
+          handler: handleLiquidityAdd
+        - event: LiquidityRemoval(address,uint256,uint128,uint128)
+          handler: handleLiquidityRemoval
   - name: ERC20
     kind: ethereum/contract
     network: {{network}}

@@ -15,6 +15,7 @@ import Offerings from "./routes/offerings";
 import Config from "./config/index.json";
 import Store from "./app/store";
 import { Provider } from "react-redux";
+import NewPair from "./routes/newpair";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -36,6 +37,7 @@ ReactDOM.render(
             <Route path="createToken" element={<CreateToken />} />
             <Route path="manageToken" element={<ManageToken />} />
             <Route path="offerings" element={<Offerings />} />
+            <Route path="newpair" element={<NewPair />} />
           </Routes>
         </BrowserRouter>
       </App>

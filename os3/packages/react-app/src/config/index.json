@@ -1,5 +1,8 @@
 {
   "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
   "name": "mainnet",
-  "alchemyKey": "iQg42SGtsJ11gAA9awS8gph4yQql9ogQ"
+  "alchemyKey": "iQg42SGtsJ11gAA9awS8gph4yQql9ogQ",
+  "addresses": {
+    "centralDex": "0x38a024C0b412B9d1db8BC398140D00F5Af3093D4"
+  }
 }

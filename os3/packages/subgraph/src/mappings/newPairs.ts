@@ -10,8 +10,7 @@ export function handleNewPair(event: NewPairEvent): void {
   pair.token2 = address2.toHex();
   pair.address = event.params.dexAddress.toHex();
   pair.price = 1; // This isn't accurate, but you have to set it to something and pretty sure this won't have consequences
-  pair.buys = [];
-  pair.asks = [];
+  pair.swaps = [];
   pair.save();
 
   let token1 = new Token(address1.toHex());

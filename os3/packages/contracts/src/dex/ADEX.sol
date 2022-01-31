@@ -54,8 +54,7 @@ abstract contract ADex {
         return address(lToken);
     }
 
-    event PriceUpdate(uint256 price);
-    event Swap(address sender, uint128 quantity, uint256 newPrice, bool isForward);
+    event Swap(address sender, uint128 quantity1, uint128 quantity2, uint128 fees, uint256 newPrice, bool isForward);
 
     uint128 public x; // balance of token1
     uint128 public y; // balance of token2
@@ -127,7 +126,7 @@ abstract contract ADex {
         updateBalance(getCostOfBuying(dy), true, true);
         updateBalance(dy, false, false);
 
-        emit Swap(msg.sender, dy, p, true);
+        emit Swap(msg.sender, getCostOfBuying(dy), dy, keep, p, true);
     }
     
     function sell(uint128 dy) payable public {
@@ -148,10 +147,10 @@ abstract contract ADex {
         updateBalance(dy, true, false);
 
         // TODO - Swap event needs more info (namely dx)
-        emit Swap(msg.sender, dy, p, false);
+        emit Swap(msg.sender, dx, dy, keep, p, false);
     }
 
-    event LiquidityAdd(address sender, uint128 n);
+    event LiquidityAdd(address sender, uint256 n, uint128 quantity1, uint128 quantity2);
     
     function addLiquidity(uint128 quantity1, uint128 quantity2) payable public {
         console.log('info', x, y);
@@ -177,10 +176,10 @@ abstract contract ADex {
         console.log("R: ", r);
         lToken.mint(msg.sender, r);
 
-        emit LiquidityAdd(msg.sender, r);
+        emit LiquidityAdd(msg.sender, r, quantity1, quantity2);
     }
 
-    event LiquidityRemoval(address sender, uint256 n);
+    event LiquidityRemoval(address sender, uint256 n, uint128 quantity1, uint128 quantity2);
     function removeLiquidity(uint256 n) public {
         // Calculate stake
         uint256 s = Q128x128.fpDiv(uint128(n), uint128(lToken.totalSupply()));
@@ -196,7 +195,7 @@ abstract contract ADex {
 
         k = x * y; // See notes above
 
-        emit LiquidityRemoval(msg.sender, n);
+        emit LiquidityRemoval(msg.sender, n, Q128x128.fpMul(s, x), Q128x128.fpMul(s, y));
     }
 }
 

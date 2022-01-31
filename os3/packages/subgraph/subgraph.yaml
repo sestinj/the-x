@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: CentralDex
-    network: ropsten
+    network: mainnet
     source:
       abi: CentralDex
-      address: "0xC7F154467454121895C24bAcca1fAEc2756C56bB"
+      address: "0xE3011A37A904aB90C8881a99BD1F6E21401f1522"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -29,7 +29,7 @@ dataSources:
 templates:
   - name: Erc20Dex
     kind: ethereum/contract
-    network: ropsten
+    network: mainnet
     source:
       abi: Erc20Dex
     mapping:
@@ -38,23 +38,21 @@ templates:
       language: wasm/assemblyscript
       file: ./src/mappings/erc20dex.ts
       entities:
-        - Bid
-        - Ask
         - Swap
         - User
       abis:
         - name: Erc20Dex
           file: ../contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json
       eventHandlers:
-        - event: Buy(address,uint256,uint256)
-          handler: handleBuy
-        - event: Sell(address,uint256,uint256)
-          handler: handleSell
-        - event: Swap(address,address,uint256,uint256,uint256)
+        - event: Swap(address,uint128,uint128,uint128,uint256,bool)
           handler: handleSwap
+        - event: LiquidityAdd(address,uint256,uint128,uint128)
+          handler: handleLiquidityAdd
+        - event: LiquidityRemoval(address,uint256,uint128,uint128)
+          handler: handleLiquidityRemoval
   - name: ERC20
     kind: ethereum/contract
-    network: ropsten
+    network: mainnet
     source:
       abi: ERC20
     mapping:
