@@ -3,6 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ParamType } from "@ethersproject/abi";
 import { BytesLike } from "ethers";
 
+// This function exists because you need a separate ethers.Contract object for each signer in order to interact on behalf of them
 export const createContracts = (
   address: string,
   abi: any,

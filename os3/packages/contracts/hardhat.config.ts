@@ -3,6 +3,7 @@
  */
 
 import "@nomiclabs/hardhat-ethers";
+import "hardhat-contract-sizer";
 
 const ALCHEMY_API_KEY =
   "https://eth-ropsten.alchemyapi.io/v2/iQg42SGtsJ11gAA9awS8gph4yQql9ogQ";
@@ -32,5 +33,12 @@ export default {
     tests: "./tests",
     cache: "./cache",
     artifacts: "./artifacts",
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+    // only: [':ERC20$'],
   },
 };

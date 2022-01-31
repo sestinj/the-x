@@ -16,7 +16,6 @@ const Logo = (props: { letter: string }) => {
         style={{
           width: "50px",
           height: "50px",
-          filter: "invert(1)",
           position: "absolute",
           left: "10px",
           top: "10px",

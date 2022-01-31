@@ -15,10 +15,10 @@ contract Erc20Dex is ADex {
         token2.transfer(reciever, quantity);
     }
 
-    function transferToken1From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+    function transferToken1From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
         return token1.transferFrom(sender, reciever, quantity);
     }
-    function transferToken2From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+    function transferToken2From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
         return token2.transferFrom(sender, reciever, quantity);
     }
 
@@ -30,11 +30,11 @@ contract Erc20Dex is ADex {
         return token2.balanceOf(address(this));
     }
 
-    constructor(address token1Address_, address token2Address_) ADex() {
+    function setupTokens(address token1Address_, address token2Address_) internal override {
         token1 = IERC20(token1Address_);
         token2 = IERC20(token2Address_);
-        token1Balance = getToken1Balance();
-        token2Balance = getToken2Balance();
     }
+
+    constructor(address token1Address_, address token2Address_, uint256 quantity1_, uint256 quantity2_, address sender) ADex(token1Address_, token2Address_, quantity1_, quantity2_, sender) {}
 
 }

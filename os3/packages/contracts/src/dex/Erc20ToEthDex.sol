@@ -15,13 +15,14 @@ contract Erc20ToEthDex is ADex {
         reciever.transfer(quantity);
     }
 
-    function transferToken1From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
+    function transferToken1From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
         return token1.transferFrom(sender, reciever, quantity);
     }
-    function transferToken2From(address sender, address reciever, uint256 quantity) override internal returns (bool) {
-        
-        return false;
-        // Not yet implemented
+    function transferToken2From(address sender, address reciever, uint256 quantity, uint256 msgValue) override internal returns (bool) {
+        if (msgValue < quantity) {
+            return false;
+        }
+        return true;
     }
 
     function getToken1Balance() override internal view returns (uint256 balance) {
@@ -32,8 +33,10 @@ contract Erc20ToEthDex is ADex {
         return address(this).balance;
     }
 
-    constructor(address token1Address_) ADex() {
+    function setupTokens(address token1Address_, address token2Address_) internal override {
         token1 = IERC20(token1Address_);
     }
+
+    constructor(address token1Address_, uint256 quantity1_, uint256 quantity2_, address sender) ADex(token1Address_, address(0x0), quantity1_, quantity2_, sender) {}
 
 }
