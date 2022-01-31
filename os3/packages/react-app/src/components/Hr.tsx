@@ -2,7 +2,7 @@ import React from "react";
 
 const Hr = () => {
   return (
-    <svg height="42" width="800">
+    <svg height="42" width="800" style={{ marginTop: "60px" }}>
       <polygon
         points="400,40 420,20 400,0 380,20"
         style={{ stroke: "white", strokeWidth: "1" }}

@@ -63,7 +63,7 @@ const WalletButton = ({
         <p>Network: {networkName}</p>
 
         <Button onClick={getSigner}>
-          {rendered === "" && "Connect Wallet"}
+          {rendered === "" && "🟡 Connect Wallet"}
           {rendered !== "" && rendered}
         </Button>
         <br></br>

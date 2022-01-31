@@ -1,10 +1,11 @@
-import { Body, Header } from ".";
-import TestBorder from "./TestBorder";
-import WalletButton from "./WalletButton";
+import { Body, Header } from "..";
+import TestBorder from "../TestBorder";
+import WalletButton from "../WalletButton";
 import React, { useContext, useRef } from "react";
-import { SignerContext, ProviderContext } from "../App";
-import Logo from "./Logo";
-import AlertArea from "./AlertArea";
+import { SignerContext, ProviderContext } from "../../App";
+import Logo from "../Logo";
+import AlertArea from "../AlertArea";
+import SideBar from "./SideBar";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ const Layout = ({ children }: LayoutProps) => {
           signer={signer}
         ></WalletButton>
       </Header>
+      <SideBar></SideBar>
       <Body>
         {children}
         <AlertArea></AlertArea>

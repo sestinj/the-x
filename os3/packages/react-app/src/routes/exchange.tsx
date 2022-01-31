@@ -23,6 +23,7 @@ import { isAddress } from "../libs"; // TODO There should be a libs package so y
 import { Transition, Dialog } from "@headlessui/react";
 import Modal from "../components/Modal";
 import Spinner from "../components/Spinner";
+import { Link } from "react-router-dom";
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -237,18 +238,7 @@ const Exchange = () => {
     });
   };
 
-  // New Exchange
-  const { register: registerNE, handleSubmit: handleSubmitNE } = useForm();
-
-  const onNESubmit = (data: any) => {
-    if (!signer) return;
-    console.log("Adding pair: ", data);
-    mainExchange.createErc20Dex(data.token1, data.token2).then((tx: any) => {
-      console.log("New Exchange created at: ", tx);
-    });
-  };
-
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(true);
 
   return (
     <>
@@ -493,23 +483,8 @@ const Exchange = () => {
           }}
         ></Table>
         <br></br>
-        <form
-          style={{ textAlign: "center" }}
-          onSubmit={handleSubmitNE(onNESubmit)}
-        >
-          <h5>Add a token pair:</h5>
-          <TextInput
-            placeholder="Token Address 1"
-            {...registerNE("token1")}
-          ></TextInput>
-          <TextInput
-            placeholder="Token Address 2"
-            {...registerNE("token2")}
-          ></TextInput>
-          <br></br>
-          <br></br>
-          <Submit value="Add New Exchange" />
-        </form>
+        <Link to="/newpair">Add New Pair</Link>
+
         <br></br>
 
         <div hidden>
