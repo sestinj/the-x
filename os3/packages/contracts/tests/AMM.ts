@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Contract, BigNumber } from "ethers";
+import { Contract, BigNumber, BigNumberish } from "ethers";
 import { fullDeployment } from "../scripts/libs/index";
 
 const assert = require("chai").assert;
@@ -12,7 +12,7 @@ import { createContracts, waitForTx, decode, isAddress } from "./libs";
 
 // TODO Instead of having an array of Contracts, one for each signer, you should make a function to do this, and memoize the Contracts
 
-const initialBalance = 100000000000000;
+const initialBalance = BigNumber.from(100000000000000);
 
 describe("*", () => {
   var signers: SignerWithAddress[];
@@ -38,11 +38,25 @@ describe("*", () => {
   var token1s: Contract[];
   var token2s: Contract[];
 
-  let x_0 = 100;
-  let y_0 = 100;
-  let p_0 = x_0 / y_0;
-  let k_0 = x_0 * y_0;
-  let FEE: number;
+  type Q128x128 = BigNumber;
+  const FP_ONE = BigNumber.from(2).pow(128);
+  function upgradeToFP(n: BigNumberish): Q128x128 {
+    return BigNumber.from(n).mul(FP_ONE);
+  }
+  function fpDiv(a: BigNumberish, b: BigNumberish): Q128x128 {
+    return upgradeToFP(a).div(BigNumber.from(b));
+  }
+  function fpMul(a: Q128x128, b: BigNumberish): BigNumber {
+    return a.mul(b).div(FP_ONE);
+  }
+
+  console.log("Testing fpMul: ", fpMul(fpDiv(1, 2), 5).toString());
+
+  let x_0 = BigNumber.from(100);
+  let y_0 = BigNumber.from(100);
+  let p_0: Q128x128 = fpDiv(x_0, y_0);
+  let k_0 = x_0.mul(y_0);
+  let FEE: Q128x128;
 
   async function getBalances(address: string) {
     return await Promise.all([
@@ -51,16 +65,16 @@ describe("*", () => {
     ]);
   }
 
-  async function getStats() {
+  async function getStats(): Promise<BigNumber[]> {
     const stats = await Promise.all([
       dexs[0].x(),
       dexs[0].y(),
       dexs[0].k(),
       dexs[0].p(),
+      dexs[0].f1(),
+      dexs[0].f2(),
     ]);
-    return stats.map((stat) => {
-      return (stat as BigNumber).toNumber();
-    });
+    return stats;
   }
 
   describe("Test Tokens", () => {
@@ -125,26 +139,27 @@ describe("*", () => {
       const lTokenAddress = await dexs[0].getLTokenAddress();
       lToken = new ethers.Contract(lTokenAddress, LToken.abi, signers[0]);
 
-      const [x, y, k, p] = await getStats();
+      const [x, y, k, p, f1, f2] = await getStats();
       const [balance1, balance2] = await getBalances(signers[0].address);
       assert(
-        x === initialBalance - balance1,
-        `Incorrect balance: ${x} !== ${initialBalance - balance1}`
+        x.eq(initialBalance.sub(balance1)),
+        `Incorrect balance: ${x} !== ${initialBalance.sub(balance1)}`
       );
       assert(
-        y === initialBalance - balance2,
-        `Incorrect balance: ${y} !== ${initialBalance - balance2}`
+        y.eq(initialBalance.sub(balance2)),
+        `Incorrect balance: ${y} !== ${initialBalance.sub(balance2)}`
       );
-      assert(x_0 === x);
-      assert(y_0 === y);
-      assert(k_0 === k, `k_0 = ${k_0} !== k = ${k}`);
-      assert(p_0 === p);
+      assert(x.eq(x_0));
+      assert(y.eq(y_0));
+      assert(k.eq(k_0), `k_0 = ${k_0} !== k = ${k}`);
+      assert(p.eq(p_0));
 
       const [dbal1, dbal2] = await getBalances(dexs[0].address);
       assert(dbal1.eq(100), "Balance of DEX of X incorrect");
       assert(dbal2.eq(100), "Balance of DEX of Y incorrect");
 
-      FEE = ((await dexs[0].FEE()) as BigNumber).toNumber() / 1000;
+      FEE = await dexs[0].FEE();
+      console.log("fee: ", FEE);
     });
 
     it("should show that the created exchange exists for both listExchangesToBuy/Sell.", async () => {
@@ -160,35 +175,54 @@ describe("*", () => {
 
   describe("Test Token Pair", () => {
     it("should execute a swap.", async () => {
-      const q = 10;
+      const q = BigNumber.from(10);
       await waitForTx(dexs[1].swap(q, true));
 
       // Balances of trader
       const [balance1, balance2] = await getBalances(signers[1].address);
-      assert(
-        balance2.eq(Math.round(initialBalance + q * (1 - FEE))),
-        `Incorrect balance: ${balance2} !== ${initialBalance + q * (1 - FEE)}`
+      const keep = upgradeToFP(1).sub(FEE); // 1 - FEE
+      console.log(
+        "keep: ",
+        keep.toString(),
+        q.toString(),
+        fpMul(keep, q),
+        balance2.toString()
       );
-      assert(balance1 < initialBalance, "Balance of x should have decreased");
+      assert(
+        balance2.eq(initialBalance.add(fpMul(keep, q))),
+        `Incorrect balance: ${balance2} !== ${initialBalance.add(
+          fpMul(keep, q)
+        )}`
+      );
+      assert(
+        balance1.lt(initialBalance),
+        `Balance of x should have decreased, ${balance1} !< ${initialBalance}`
+      );
       console.log("Balance1!!!; ", balance1);
 
       // Stats of DEX
-      const [x, y, k, p] = await getStats();
+      const [x, y, k, p, f1, f2] = await getStats();
       const [dbal1, dbal2] = await getBalances(dexs[0].address);
-      assert(dbal1.eq(x), `Balance of X ${dbal1} doesn't match x = ${x}`);
-      assert(dbal2.eq(y), `Balance of Y ${dbal2} doesn't match y = ${y}`);
-      console.log(`x: ${x}, y: ${y}, k: ${k}`);
+      assert(
+        dbal1.eq(x.add(f1)),
+        `Balance of X ${dbal1} doesn't match x + f1 = ${x} + ${f1}`
+      );
+      assert(
+        dbal2.eq(y.add(f2)),
+        `Balance of Y ${dbal2} doesn't match y + f2 = ${y} + ${f2}`
+      );
+      console.log(`x: ${x}, y: ${y}, k: ${k}, f1: ${f1}, f2: ${f2}`);
 
       //TODO - It seems that due to error rounding, it is only possible to get one of the below assertions correct each time.
       // Right now choosing to assert the second. See ADEX.sol.
       //   assert(k === x * y, `k = ${k} doesn't match with x * y = ${x * y}`);
       // Considering even just giving prices, you HAVE to be able to represent floats in Solidity. Look at how Uni does it.
       // Anywhere you see Math.round in this file should be gone.
-      assert(k === k_0, `k has changed. (from ${k_0} to ${k})`);
+      assert(k.eq(k_0), `k has changed. (from ${k_0} to ${k})`);
 
       assert(
-        p === Math.round(x / y),
-        `Price updated incorrectly. p = ${p} !== x / y = ${x / y}`
+        p.eq(fpDiv(x, y)),
+        `Price updated incorrectly. p = ${p} !== x / y = ${fpDiv(x, y)}`
       );
       x_0 = x;
       y_0 = y;
@@ -196,21 +230,31 @@ describe("*", () => {
     });
     it("should not allow adding liquidity of different values for now.", async () => {});
     it("should add liquidity.", async () => {
-      const currentPrice = ((await dexs[0].getPrice()) as BigNumber).toNumber();
-      const q2 = 20;
-      const q1 = q2 * currentPrice;
+      const currentPrice: BigNumber = await dexs[0].getPrice();
+      const q2 = BigNumber.from(20);
+      const q1 = fpMul(currentPrice, q2);
+      console.log("currentPrice", currentPrice.toString());
       await waitForTx(dexs[2].addLiquidity(q1, q2));
-      const [x, y, k, p] = await getStats();
-      assert(x === x_0 + q1);
-      assert(y === y_0 + q2);
-      assert(k === x * y);
-      assert(p === x / y);
-      const reward = ((await lToken.balanceOf(
-        signers[2].address
-      )) as BigNumber).toNumber();
-      const totalSupply = ((await lToken.totalSupply()) as BigNumber).toNumber();
-      assert(reward / totalSupply === q1 / x);
-      assert(reward / totalSupply === q2 / y);
+      console.log("2");
+      const [x, y, k, p, f1, f2] = await getStats();
+      assert(x.eq(x_0.add(q1)));
+      assert(y.eq(y_0.add(q2)));
+      assert(k.eq(x.mul(y)));
+      assert(p.eq(fpDiv(x, y)));
+      const reward = await lToken.balanceOf(signers[2].address);
+      const totalSupply: BigNumber = await lToken.totalSupply();
+      console.log(reward.toString(), totalSupply.toString());
+      console.log("QQ: ", q2, q1);
+      console.log(
+        "ass: ",
+        fpDiv(q1, x).toString(),
+        fpDiv(q2, y).toString(),
+        fpDiv(reward, totalSupply).toString()
+      );
+      const valueOfLiquidity = q1.add(fpMul(currentPrice, q2));
+      const stake = fpDiv(valueOfLiquidity, x.add(fpMul(currentPrice, y)));
+      const poolPercentage = fpDiv(reward, totalSupply);
+      assert(poolPercentage.eq(stake), `${poolPercentage} !== ${stake}`);
       x_0 = x;
       y_0 = y;
       k_0 = k;
