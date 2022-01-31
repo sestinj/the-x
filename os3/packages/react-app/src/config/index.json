@@ -1,8 +1,5 @@
 {
-  "subgraphUrl": "https://api.thegraph.com/subgraphs/name/sestinj/x",
-  "addresses": {
-    "centralDex": "0xC7F154467454121895C24bAcca1fAEc2756C56bB"
-  },
-  "name": "ropsten",
-  "alchemyKey": "https://eth-ropsten.alchemyapi.io/v2/iQg42SGtsJ11gAA9awS8gph4yQql9ogQ"
+  "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
+  "name": "mainnet",
+  "alchemyKey": "iQg42SGtsJ11gAA9awS8gph4yQql9ogQ"
 }
