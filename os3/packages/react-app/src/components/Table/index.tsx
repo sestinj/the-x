@@ -1,5 +1,5 @@
 import React from "react";
-import { TableCellDiv, BaseTable } from "..";
+import { BaseTable } from "..";
 
 interface TableProps<RowDataType> {
   rowCell: (data: RowDataType) => React.ReactNode[];
@@ -16,7 +16,7 @@ function Table<RowDataType>(props: TableProps<RowDataType>) {
             <tr key={index}>
               {props.rowCell(data).map((td, tdIndex) => (
                 <td key={tdIndex}>
-                  <TableCellDiv>{td}</TableCellDiv>
+                  <div>{td}</div>
                 </td>
               ))}
             </tr>

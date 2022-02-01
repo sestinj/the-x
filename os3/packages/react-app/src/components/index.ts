@@ -93,10 +93,7 @@ export const TableCellDiv = styled.div`
   font-size: 18px;
 `;
 
-export const BaseTable = styled.table`
-  border: 2px solid white;
-  border-radius: 8px;
-`;
+export const BaseTable = styled.table``;
 
 export const Submit = styled.input.attrs((props) => ({
   type: "submit",
@@ -133,6 +130,13 @@ export const Console = styled.textarea`
   color: white;
   font-family: monospace;
   padding: 10px;
+`;
+
+export const HoverDiv = styled.div`
+  background-color: #fff;
+  :hover {
+    background-color: #ccc;
+  }
 `;
 
 // ANIMATIONS

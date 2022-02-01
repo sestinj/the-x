@@ -24,6 +24,7 @@ import { Transition, Dialog } from "@headlessui/react";
 import Modal from "../components/Modal";
 import Spinner from "../components/Spinner";
 import { Link } from "react-router-dom";
+import TokenSelect from "../components/TokenSelect";
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -238,11 +239,12 @@ const Exchange = () => {
     });
   };
 
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
       <Layout>
+        <TokenSelect></TokenSelect>
         <Modal
           open={modalOpen}
           title={"Transaction Submitted"}

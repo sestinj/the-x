@@ -1,9 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { TextInput, primaryHighlight } from "../components";
 import Layout from "../components/Layout";
 import { useForm } from "react-hook-form";
 import { SignerContext } from "../App";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import config from "@project/react-app/src/config/index.json";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import PayableButton from "../components/PayableButton";
@@ -11,6 +11,7 @@ import Hr from "../components/Hr";
 
 const NewPair = () => {
   const { signer } = useContext(SignerContext);
+  const [requirements, setRequirements] = useState<any[]>([]);
 
   // Main Exchange Contract
   var mainExchange = new ethers.Contract(
@@ -38,7 +39,12 @@ const NewPair = () => {
     if (!signer) return;
     console.log("Adding pair: ", data);
     mainExchange
-      .createErc20Dex(data.token1, data.token2, data.quantity1, data.quantity2)
+      .createErc20Dex(
+        data.token1,
+        data.token2,
+        10 ** 18 * data.quantity1,
+        10 ** 18 * data.quantity2
+      )
       .then((tx: any) => {
         console.log("New Exchange created at: ", tx);
       });
@@ -59,6 +65,12 @@ const NewPair = () => {
             padding: "20px",
             margin: "auto",
             width: "auto",
+          }}
+          onChange={() => {
+            setRequirements([
+              { address: getValues("token1"), amount: getValues("quantity1") },
+              { address: getValues("token2"), amount: getValues("quantity2") },
+            ]);
           }}
         >
           <div
@@ -98,7 +110,7 @@ const NewPair = () => {
           <br></br>
           <PayableButton
             onClick={handleSubmitNE(onNESubmit)}
-            requirements={[getValues("token1"), getValues("token2")]}
+            requirements={requirements}
             spender={config.addresses.centralDex}
           >
             Add New Exchange

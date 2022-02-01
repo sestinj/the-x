@@ -23,6 +23,13 @@ const PayableButton = (props: PayableButtonProps) => {
       while (remainingRequirements.length) {
         const requirement =
           remainingRequirements[remainingRequirements.length - 1];
+
+        if (
+          requirement.address === "0x0000000000000000000000000000000000000000"
+        ) {
+          remainingRequirements.pop();
+        }
+
         const token = new ethers.Contract(
           requirement.address,
           ERC20.abi,
@@ -41,13 +48,16 @@ const PayableButton = (props: PayableButtonProps) => {
       }
       setApproved(true);
     };
+    checkForApproval();
   }, [signer]);
 
   const [approved, setApproved] = useState(false);
 
   const getApproval = async () => {
     const requirement = remainingRequirements[remainingRequirements.length - 1];
+    console.log(props.spender, requirement.address, remainingRequirements);
     const token = new ethers.Contract(requirement.address, ERC20.abi, signer);
+
     const tx = await token.approve(
       props.spender,
       Math.max(DEFAULT_ALLOWANCE, requirement.amount)
