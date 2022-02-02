@@ -233,9 +233,9 @@ describe("*", () => {
       const currentPrice: BigNumber = await dexs[0].getPrice();
       const q2 = BigNumber.from(20);
       const q1 = fpMul(currentPrice, q2);
-      console.log("currentPrice", currentPrice.toString());
+
       await waitForTx(dexs[2].addLiquidity(q1, q2));
-      console.log("2");
+
       const [x, y, k, p, f1, f2] = await getStats();
       assert(x.eq(x_0.add(q1)));
       assert(y.eq(y_0.add(q2)));
@@ -243,10 +243,12 @@ describe("*", () => {
       assert(p.eq(fpDiv(x, y)));
       const reward = await lToken.balanceOf(signers[2].address);
       const totalSupply: BigNumber = await lToken.totalSupply();
-      console.log(reward.toString(), totalSupply.toString());
-      console.log("QQ: ", q2, q1);
+      console.log("currentPrice", currentPrice.toString());
+      console.log("Reward: ", reward.toString());
+      console.log("Total supply: ", totalSupply.toString());
+      console.log("q1, q2: ", q2, q1);
       console.log(
-        "ass: ",
+        "q1/x, q2/y, reward/total_supply: ",
         fpDiv(q1, x).toString(),
         fpDiv(q2, y).toString(),
         fpDiv(reward, totalSupply).toString()
