@@ -9,7 +9,7 @@ dataSources:
     network: mainnet
     source:
       abi: CentralDex
-      address: "0xE3011A37A904aB90C8881a99BD1F6E21401f1522"
+      address: "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
