@@ -1,93 +1,113 @@
 import { Dialog, Transition } from "@headlessui/react";
+import { XIcon } from "@heroicons/react/outline";
 import { Fragment, ReactNode, useState } from "react";
-import { backgroundColor, Button, primaryHighlight, secondaryDark } from ".";
+import {
+  backgroundColor,
+  Button,
+  HoverDiv,
+  primaryHighlight,
+  secondaryDark,
+} from ".";
+import { baseDiv } from "./classes";
+import Table from "./Table";
 
 // TODO - instead of using props, you should use subcomponents. <Modal.Content>, <Modal.Title>, etc...
 export default function Modal(props: {
   open: boolean;
-  title: ReactNode;
-  content: ReactNode[] | ReactNode;
+  children: ReactNode[] | ReactNode | string;
+  closeModal: () => void;
 }) {
-  let [isOpen, setIsOpen] = useState(props.open);
-
-  function closeModal() {
-    setIsOpen(false);
-  }
-
-  function openModal() {
-    setIsOpen(true);
-  }
-
   return (
-    <>
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog
-          as="div"
+    <Transition appear show={props.open} as={Fragment}>
+      <Dialog
+        as="div"
+        style={{
+          position: "fixed",
+          inset: "0",
+          zIndex: "10",
+          overflowY: "auto",
+        }}
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={() => {
+          props.closeModal();
+        }}
+      >
+        <div
+          className="min-h-screen px-4 text-center"
           style={{
-            position: "fixed",
-            zIndex: "1000",
-            inset: "0",
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "center",
-            alignItems: "center",
+            minHeight: "100vh",
+            paddingLeft: "4px",
+            paddingRight: "4px",
+            textAlign: "center",
           }}
-          onClose={closeModal}
         >
-          <div style={{ textAlign: "center" }}>
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <Dialog.Overlay style={{ position: "fixed", inset: "0" }} />
-            </Transition.Child>
+          <Dialog.Overlay
+            className="fixed inset-0"
+            style={{
+              position: "fixed",
+              inset: "0",
+              backgroundColor: "#00000099",
+              zIndex: "-1", // TODO (issue rn is you can't exit by clicking on overlay. This might be solved with just onClick)
+            }}
+            onClick={() => {
+              props.closeModal();
+            }}
+          />
+          {/* This element is to trick the browser into centering the modal contents. */}
+          <span
+            className="inline-block h-screen align-middle"
+            style={{
+              display: "inline-block",
+              height: "100vh",
+              verticalAlign: "middle",
+            }}
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
 
-            {/* This element is to trick the browser into centering the modal contents. */}
-            <span
-              className="inline-block h-screen align-middle"
-              aria-hidden="true"
+          <div
+            className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl"
+            style={{
+              display: "inline-block",
+              width: "100%",
+              maxWidth: "28rem",
+              padding: "12px",
+              marginTop: "8px",
+              marginBottom: "8px",
+              overflow: "hidden",
+              textAlign: "left",
+              verticalAlign: "middle",
+              transitionProperty: "all",
+              transitionDuration: "150ms",
+              transitionTimingFunction: "linear",
+              backgroundColor: "white",
+              boxShadow: "2px 2px black",
+              borderRadius: "18px",
+            }}
+          >
+            <XIcon
+              width="30px"
+              height="30px"
+              onClick={() => {
+                props.closeModal();
+              }}
+              style={{
+                float: "right",
+                cursor: "pointer",
+              }}
+            ></XIcon>
+            <div
+              style={{
+                ...baseDiv,
+                maxHeight: "75vh",
+              }}
             >
-              &#8203;
-            </span>
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <div
-                style={{
-                  borderRadius: "8px",
-                  border: "2px solid white",
-                  backgroundColor: backgroundColor,
-                  boxShadow: `0px 0px 4px 4px ${primaryHighlight}`,
-                  padding: "8px",
-                  width: "50vmin",
-                  margin: "12px",
-                  color: "white",
-                }}
-                className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl"
-              >
-                <h3>{props.title}</h3>
-
-                {props.content}
-
-                <div style={{ marginTop: "12px" }}>
-                  <Button onClick={closeModal}>Ok</Button>
-                </div>
-              </div>
-            </Transition.Child>
+              {props.children}
+            </div>
           </div>
-        </Dialog>
-      </Transition>
-    </>
+        </div>
+      </Dialog>
+    </Transition>
   );
 }

@@ -12,20 +12,21 @@ const TestBorder = (props: TestBorderProps) => {
   return (
     <>
       <div
-        style={
-          props.provider?.network?.name === "ropsten" ||
-          props.provider?.network?.name === "rinkeby"
-            ? {
-                border: `${BORDER_WIDTH}px solid ${primaryHighlight}`,
-                height: `calc(100% - ${2 * BORDER_WIDTH}px)`,
-                width: `calc(100% - ${2 * BORDER_WIDTH}px)`,
-                position: "fixed",
-                borderRadius: "8px",
-                backgroundColor: "transparent",
-                pointerEvents: "none",
-              }
-            : {}
+        hidden={
+          !(
+            props.provider?.network?.name === "ropsten" ||
+            props.provider?.network?.name === "rinkeby"
+          )
         }
+        style={{
+          border: `${BORDER_WIDTH}px solid ${primaryHighlight}`,
+          height: `calc(100% - ${2 * BORDER_WIDTH}px)`,
+          width: `calc(100% - ${2 * BORDER_WIDTH}px)`,
+          position: "fixed",
+          borderRadius: "8px",
+          backgroundColor: "transparent",
+          pointerEvents: "none",
+        }}
       >
         <div
           style={{

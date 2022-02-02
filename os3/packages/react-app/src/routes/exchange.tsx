@@ -1,12 +1,6 @@
 import Layout from "../components/Layout";
-import React, {
-  useEffect,
-  useState,
-  useContext,
-  useRef,
-  Fragment,
-} from "react";
-import { TextInput, Select, Button, Submit } from "../components";
+import React, { useEffect, useState, useContext } from "react";
+import { TextInput, Button, SpecialButton } from "../components";
 import Hr from "../components/Hr";
 import config from "@project/react-app/src/config/index.json";
 import { ethers } from "ethers";
@@ -14,17 +8,20 @@ import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/Cent
 import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json";
 import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 import { ProviderContext, SignerContext } from "../App";
-import Table from "../components/Table";
-import SafeImg from "../components/SafeImg/SafeImg";
-import { useForm } from "react-hook-form";
+
 import { gql, useQuery, useApolloClient } from "@apollo/client";
 import { Pair, Token } from "@project/subgraph/generated/schema";
 import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
-import { Transition, Dialog } from "@headlessui/react";
 import Modal from "../components/Modal";
 import Spinner from "../components/Spinner";
-import { Link } from "react-router-dom";
 import TokenSelect from "../components/TokenSelect";
+import {
+  Token as TokenListToken,
+  DEFAULT_TOKEN,
+} from "../components/TokenSelect/compileTokenLists";
+import { useDispatch } from "react-redux";
+import { addTx, Tx } from "../redux/slices/txsSlice";
+import { addAlert, Alert } from "../redux/slices/alertSlice";
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -87,26 +84,6 @@ const GET_PAIRS = gql`
     }
   }
 `;
-
-const SHIB = {
-  id: "0x0",
-  name: "Shiba Inu",
-  symbol: "SHIB",
-  address: "0x0",
-} as Token;
-const DOGE = {
-  id: "0x1",
-  name: "Dogecoin",
-  symbol: "DOGE",
-  address: "0x1",
-} as Token;
-const SHIB_DOGE = {
-  id: "0x00x1",
-  address: "0x3",
-  price: 42,
-  token1: SHIB,
-  token2: DOGE,
-} as any;
 // TODO - when the page first loads, the selected options have no corresponding token value. Only after changing each of them can you set the exchange.
 
 const Exchange = () => {
@@ -115,13 +92,14 @@ const Exchange = () => {
 
   // STATE MANAGEMENT START***********************************************************
   const apolloClient = useApolloClient();
+  const dispatch = useDispatch();
 
   const { data: tokenData } = useQuery<{ tokens: Token[] }>(GET_TOKENS);
   const { data: pairData } = useQuery<{ pairs: Pair[] }>(GET_PAIRS);
 
-  const [token1, setToken1] = useState<Token>(SHIB);
-  const [token2, setToken2] = useState<Token>(DOGE);
-  const [currentPair, setCurrentPair] = useState<Pair>(SHIB_DOGE);
+  const [token1, setToken1] = useState<TokenListToken>(DEFAULT_TOKEN);
+  const [token2, setToken2] = useState<TokenListToken>(DEFAULT_TOKEN);
+  const [currentPair, setCurrentPair] = useState<Pair | undefined>(undefined);
 
   useEffect(() => {
     let newPair = apolloClient.readFragment({
@@ -212,6 +190,9 @@ const Exchange = () => {
   }, [signer]);
 
   const submitOrder = async () => {
+    if (!currentPair) {
+      return;
+    }
     setModalOpen(true);
     console.log("Submitting Order...");
     // First, give allowance for the token
@@ -236,20 +217,67 @@ const Exchange = () => {
     // TODO - run some checks on the quantity
     pairContract.submitBid(currentPair.price, quantity).then((tx: any) => {
       console.log("Submitted Bid: ", tx);
+
+      // If the bid went through, create an alert.
+      dispatch(
+        addAlert({
+          title: `Traded ${token1.symbol} for ${quantity} ${token2.symbol}`,
+          message: "View the transaction on Etherscan",
+          id: "TODO: THE HASH OF the TRANSACTION" + tx.hash,
+        } as Alert)
+      );
+      dispatch(addTx(tx.hash)); // TODO same as just above
     });
   };
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(true);
 
   return (
     <>
       <Layout>
-        <TokenSelect></TokenSelect>
         <Modal
           open={modalOpen}
-          title={"Transaction Submitted"}
-          content={<Spinner></Spinner>}
-        ></Modal>
+          closeModal={() => {
+            setModalOpen(false);
+          }}
+        >
+          <h3>Confirm Trade</h3>
+          <div style={{ textAlign: "center", marginBottom: "10px" }}>
+            <p>
+              <span style={{ float: "left" }}>
+                Balances: <br></br>
+                {token1Balance.toString()} {token1.symbol}
+                <br></br>
+                {token2Balance.toString()} {token2.symbol}
+              </span>
+              <span style={{ float: "right" }}>
+                Current Price: {currentPair?.price} {token1.symbol}/
+                {token2.symbol}
+              </span>
+              <br></br>
+              <span style={{ float: "right" }}>Fees: 0.00</span>
+
+              <br></br>
+              <span style={{ float: "right" }}>
+                Total:{" "}
+                <b>
+                  {currentPair?.price} {token1.symbol}
+                </b>
+              </span>
+            </p>
+
+            <Spinner style={{ filter: "invert(1)" }}></Spinner>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <SpecialButton
+              style={{
+                width: "75%",
+              }}
+            >
+              Confirm
+            </SpecialButton>
+          </div>
+        </Modal>
 
         <h1>Exchange</h1>
         <div>
@@ -261,29 +289,15 @@ const Exchange = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              height: "50px",
             }}
           >
-            <Select
-              onChange={(ev) => {
-                let newToken = apolloClient.readFragment({
-                  id: "Token:" + ev.target.value,
-                  fragment: TOKEN_FRAG,
-                });
-                if (newToken) {
-                  setToken1(newToken);
-                }
+            <TokenSelect
+              onChange={(token: TokenListToken) => {
+                setToken1(token);
                 console.log("New Token 1: ", token1);
               }}
-              value={token1.address}
-            >
-              {tokenData?.tokens?.map((token: any) => {
-                return (
-                  <option key={token.address} value={token.address}>
-                    {token.name}
-                  </option>
-                );
-              })}
-            </Select>
+            ></TokenSelect>
             <TextInput
               style={{
                 borderRight: "1px solid white",
@@ -334,31 +348,23 @@ const Exchange = () => {
                 setQuantity(parseFloat(ev.target.value));
               }}
             ></TextInput>
-            <Select
-              onChange={(ev) => {
-                let newToken = apolloClient.readFragment({
-                  id: "Token:" + ev.target.value,
-                  fragment: TOKEN_FRAG,
-                });
-                if (newToken) {
-                  setToken2(newToken);
-                }
+            <TokenSelect
+              onChange={(token: TokenListToken) => {
+                setToken2(token);
+                console.log("New Token 2: ", token1);
               }}
-              value={token2.address}
-            >
-              {tokenData?.tokens?.map((token: any) => {
-                return (
-                  <option key={token.address} value={token.address}>
-                    {token.name}
-                  </option>
-                );
-              })}
-            </Select>
+            ></TokenSelect>
             <Button
               style={{ borderRadius: "0", margin: "0", height: "100%" }}
-              onClick={submitOrder}
+              onClick={
+                currentPair
+                  ? submitOrder
+                  : () => {
+                      window.location.href = `./newpair?token1=${token1.address}&token2=${token2.address}`;
+                    }
+              }
             >
-              Trade
+              {currentPair ? "Trade" : "Add Pair"}
             </Button>
           </div>
           <p>
@@ -369,7 +375,8 @@ const Exchange = () => {
               {token2Balance.toString()} {token2.symbol}
             </span>
             <span style={{ float: "right" }}>
-              Current Price: {currentPair.price} {token1.symbol}/{token2.symbol}
+              Current Price: {currentPair?.price} {token1.symbol}/
+              {token2.symbol}
             </span>
             <br></br>
             <span style={{ float: "right" }}>Fees: 0.00</span>
@@ -378,13 +385,13 @@ const Exchange = () => {
             <span style={{ float: "right" }}>
               Total:{" "}
               <b>
-                {currentPair.price} {token1.symbol}
+                {currentPair?.price} {token1.symbol}
               </b>
             </span>
           </p>
         </div>
-        <h5>Available Exchanges</h5>
-        <Table
+        {/* <h5>Available Exchanges</h5> */}
+        {/* <Table
           rowData={pairData?.pairs || []}
           rowCell={(data: Pair) => {
             return [
@@ -483,9 +490,9 @@ const Exchange = () => {
               </>,
             ];
           }}
-        ></Table>
-        <br></br>
-        <Link to="/newpair">Add New Pair</Link>
+        ></Table> */}
+        {/* <br></br>
+        <Link to="/newpair">Add New Pair</Link> */}
 
         <br></br>
 
@@ -512,13 +519,8 @@ const Exchange = () => {
           <h4 style={{ textAlign: "center" }}>Notes to Alpha Users</h4>
           <ul>
             <li>
-              Each token trade is facilitated by a smart contract between a
-              SINGLE PAIR of tokens in a SINGLE DIRECTION. So at the moment you
-              might be able to select two tokens in the dropdown for which a
-              pair doesn't actually exist. A next step for me is to create a
-              "bridge finder" that lets you trade any 2 supported tokens by
-              daisy-chaining pairs, but until then you can just use the
-              Available Pairs table - all listed pairs there are valid.
+              Nothing specific for now, just let me know of ALL details that you
+              do not like.
             </li>
           </ul>
         </div>

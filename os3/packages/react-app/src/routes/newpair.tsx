@@ -13,6 +13,8 @@ const NewPair = () => {
   const { signer } = useContext(SignerContext);
   const [requirements, setRequirements] = useState<any[]>([]);
 
+  const searchParams = new URLSearchParams(window.location.search);
+
   // Main Exchange Contract
   var mainExchange = new ethers.Contract(
     config.addresses.centralDex,
@@ -85,11 +87,13 @@ const NewPair = () => {
             <TextInput
               style={{ gridColumn: "1", gridRow: "1" }}
               placeholder="Token Address 1"
+              value={searchParams.get("token1") || ""}
               {...registerNE("token1")}
             ></TextInput>
             <TextInput
               style={{ gridColumn: "1", gridRow: "2" }}
               placeholder="Token Address 2"
+              value={searchParams.get("token2") || ""}
               {...registerNE("token2")}
             ></TextInput>
             <TextInput

@@ -64,6 +64,27 @@ export const Button = styled.button`
   }
 `;
 
+export const SpecialButton = styled.button`
+  background-color: ${primaryHighlight};
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: center;
+  text-decoration: none;
+  margin: 0px 20px;
+  padding: 12px 24px;
+
+  :hover {
+    border: 4px solid black;
+  }
+
+  ${(props) => props.hidden && "hidden"} :focus {
+    border: none;
+    outline: none;
+  }
+`;
+
 export const P = styled.p``;
 
 export const TextInput = styled.input`

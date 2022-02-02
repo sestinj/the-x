@@ -20,6 +20,15 @@ export const DEFAULT_TOKEN_LISTS = [
   "https://gateway.ipfs.io/ipns/tokens.uniswap.org",
 ];
 
+export const DEFAULT_TOKEN = {
+  name: "Ethereum",
+  symbol: "ETH",
+  address: "0x0000000000000000000000000000000000000000",
+  chainId: 1,
+  decimals: 18,
+  logoURI: "/logo192.png",
+};
+
 export const getTokens = async (tokenLists: string[]): Promise<Token[]> => {
   const allTokens: any = {};
   const finalTokenList: Token[] = [];
