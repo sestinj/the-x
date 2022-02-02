@@ -1,4 +1,7 @@
 {
   "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
-  "name": "mainnet"
+  "name": "mainnet",
+  "addresses": {
+    "centralDex": "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E"
+  }
 }

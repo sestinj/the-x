@@ -15,7 +15,7 @@ library Q128x128 {
     }
 
     function fpMul(uint256 a, uint128 b) internal pure returns (uint128) {
-        return uint128(uint256(a) * b / ONE);
+        return uint128(a * b / ONE);
     }
 
     function fpMul(uint128 a, uint256 b) internal pure returns (uint128) {

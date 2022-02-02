@@ -163,13 +163,15 @@ abstract contract ADex {
         require(transferToken1From(msg.sender, address(this), uint256(quantity1), msg.value), "NA");
         require(transferToken2From(msg.sender, address(this), uint256(quantity2), msg.value), "NA");
 
+        uint256 prevPrice = p;
+
         updateBalance(quantity1, true, true);
         updateBalance(quantity2, true, false);
 
         k = x * y; // See notes above
 
         // Calculate stake and mint LTokens
-        uint256 s = Q128x128.fpDiv(quantity1 + Q128x128.fpMul(p, quantity2), Q128x128.fpMul(p, y) + x); // TODO - Safe math, should be separate from Q128x128. Also you're losing precision here by converting back to 128 before division.
+        uint256 s = Q128x128.fpDiv(quantity1 + Q128x128.fpMul(prevPrice, quantity2), Q128x128.fpMul(prevPrice, y) + x); // TODO - Safe math, should be separate from Q128x128. Also you're losing precision here by converting back to 128 before division.
         console.log("S: ", s, Q128x128.fpMul(s, quantity2), y - quantity2);
         uint128 t = uint128(lToken.totalSupply());
         console.log('testing');
