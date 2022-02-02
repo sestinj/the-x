@@ -5,6 +5,7 @@ type Pair @entity {
   address: String!
   price: Int!
   swaps: [Swap!]!
+  # TVL (x, y, k are needed)
 }
 
 type Swap @entity {

@@ -16,6 +16,8 @@ import Config from "./config/index.json";
 import Store from "./app/store";
 import { Provider } from "react-redux";
 import NewPair from "./routes/newpair";
+import Pools from "./routes/pools";
+import Dashboard from "./routes/dashboard";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -38,6 +40,8 @@ ReactDOM.render(
             <Route path="manageToken" element={<ManageToken />} />
             <Route path="offerings" element={<Offerings />} />
             <Route path="newpair" element={<NewPair />} />
+            <Route path="pools" element={<Pools />} />
+            <Route path="dashboard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>
       </App>

@@ -160,6 +160,21 @@ export const HoverDiv = styled.div`
   }
 `;
 
+export const GridDiv = styled.div`
+  display: grid;
+  grid-template: 8vh 8vh 8vh 8vh 8vh 8vh 8vh 8vh / 8vw 8vw 8vw 8vw 8vw 8vw 8vw 8vw 8vw 8vw 8vw 8vw;
+  gap: 20px;
+  row-gap: 20px;
+  column-gap: 20px;
+  width: 80%;
+  margin: auto;
+  /* border-collapse: collapse;
+  border: 2px dashed gray;
+  div {
+    border: 2px dashed gray;
+  } */
+`;
+
 // ANIMATIONS
 const rotate = keyframes`
   0% {
