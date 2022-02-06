@@ -1,4 +1,11 @@
-import React, { ReactChild, ReactNode, Component } from "react";
+import { ethers } from "ethers";
+import React, {
+  ReactChild,
+  ReactNode,
+  Component,
+  useState,
+  useEffect,
+} from "react";
 
 export const isAddress = (addressCandidate: string) => {
   return (
@@ -13,3 +20,24 @@ export const isAddress = (addressCandidate: string) => {
 //     return child.displayName === typeName;
 //   })
 // };
+
+export const useContract = (
+  addressOrName: string,
+  contractInterface: ethers.ContractInterface,
+  signerOrProvider?: ethers.Signer | ethers.providers.Provider | undefined
+): ethers.Contract => {
+  const [contract, setContract] = useState(
+    new ethers.Contract(addressOrName, contractInterface, signerOrProvider)
+  );
+
+  useEffect(() => {
+    const newContract = new ethers.Contract(
+      addressOrName,
+      contractInterface,
+      signerOrProvider
+    );
+    setContract(newContract);
+  }, [signerOrProvider]);
+
+  return contract;
+};

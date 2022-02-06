@@ -4,7 +4,8 @@
   "addresses": {
     "centralDex": "{{ addresses.centralDex }}",
     "testToken1": "{{ addresses.testToken1 }}",
-    "testToken2": "{{ addresses.testToken2 }}"
+    "testToken2": "{{ addresses.testToken2 }}",
+    "faucet": "{{ addresses.faucet }}"
   },
   "alchemyKey": "",
   "isTest": true

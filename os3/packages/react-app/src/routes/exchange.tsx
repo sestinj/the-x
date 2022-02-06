@@ -209,6 +209,8 @@ const Exchange = () => {
     pairContract.swap(scaledQuantity, true).then((tx: any) => {
       console.log("Submitted Bid: ", tx);
 
+      setModalOpen(false);
+
       // If the bid went through, create an alert.
       dispatch(
         addAlert({
