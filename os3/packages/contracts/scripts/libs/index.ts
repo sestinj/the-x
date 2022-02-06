@@ -1,3 +1,6 @@
+import { exec } from "child_process";
+import config from "../../../../config.json";
+
 export const fullDeployment = async (ethers: any) => {
   const FErc20Dex = await ethers.getContractFactory("FErc20Dex");
   const FEthToErc20Dex = await ethers.getContractFactory("FEthToErc20Dex");
@@ -24,4 +27,12 @@ export const fullDeployment = async (ethers: any) => {
   const centralDex = await CentralDex.deploy();
   await centralDex.deployed();
   return centralDex;
+};
+
+export const updateConfig = (updater: (oldConfig: any) => any): void => {
+  const newConfig = updater(config);
+  const stringified = JSON.stringify(newConfig);
+  exec(`cd ../.. && echo '${stringified}' > config.json`);
+  exec(`cd ../react-app && npm run prepare:local`);
+  exec(`cd ../subgraph && npm run prepare:local`);
 };

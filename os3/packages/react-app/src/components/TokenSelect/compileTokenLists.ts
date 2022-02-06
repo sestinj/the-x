@@ -1,4 +1,5 @@
 import axios from "axios";
+import config from "../../config/index.json";
 
 export type Token = {
   name: string;
@@ -16,9 +17,14 @@ export const TOKEN_LISTS = [
   "tokens.1inch.eth",
 ];
 
-export const DEFAULT_TOKEN_LISTS = [
-  "https://gateway.ipfs.io/ipns/tokens.uniswap.org",
-];
+export const DEFAULT_TOKEN_LISTS =
+  config.name === "mainnet"
+    ? config.isTest
+      ? ["local"]
+      : ["https://gateway.ipfs.io/ipns/tokens.uniswap.org"]
+    : [
+        "https://wispy-bird-88a7.uniswap.workers.dev/?url=http://testnet.tokenlist.eth.link",
+      ];
 
 export const DEFAULT_TOKEN = {
   name: "Ethereum",
@@ -30,6 +36,27 @@ export const DEFAULT_TOKEN = {
 };
 
 export const getTokens = async (tokenLists: string[]): Promise<Token[]> => {
+  if (tokenLists[0] === "local") {
+    return [
+      {
+        name: "Test One",
+        symbol: "TST1",
+        logoURI: "/logo192.png",
+        address: config.addresses.testToken1,
+        chainId: 1,
+        decimals: 18,
+      },
+      {
+        name: "Test Two",
+        symbol: "TST2",
+        logoURI: "/logo192.png",
+        address: config.addresses.testToken2,
+        chainId: 1,
+        decimals: 18,
+      },
+    ];
+  }
+
   const allTokens: any = {};
   const finalTokenList: Token[] = [];
   await Promise.all(

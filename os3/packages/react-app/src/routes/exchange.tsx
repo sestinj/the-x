@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { TextInput, Button, SpecialButton } from "../components";
 import Hr from "../components/Hr";
 import config from "@project/react-app/src/config/index.json";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json";
 import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
@@ -22,6 +22,7 @@ import {
 import { useDispatch } from "react-redux";
 import { addTx, Tx } from "../redux/slices/txsSlice";
 import { addAlert, Alert } from "../redux/slices/alertSlice";
+import PayableButton from "../components/PayableButton";
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -44,20 +45,8 @@ const TOKEN_FRAG = gql`
 `;
 
 const PAIR_FRAG = gql`
-  fragment pair on Pair {
+  fragment PairFrag on Pair {
     id
-    token1 {
-      id
-      address
-      name
-      symbol
-    }
-    token2 {
-      id
-      address
-      name
-      symbol
-    }
     address
     price
   }
@@ -99,18 +88,22 @@ const Exchange = () => {
 
   const [token1, setToken1] = useState<TokenListToken>(DEFAULT_TOKEN);
   const [token2, setToken2] = useState<TokenListToken>(DEFAULT_TOKEN);
-  const [currentPair, setCurrentPair] = useState<Pair | undefined>(undefined);
+  const [currentPair, setCurrentPair] = useState<Pair | undefined>(undefined); // TODO yuck
+  function parsePrice(): number {
+    return parseFloat(currentPair?.price.toString() || "0");
+  } // TODO - This also should not exist
 
   useEffect(() => {
+    const id = "Pair:" + (token1.address + token2.address).toLowerCase();
     let newPair = apolloClient.readFragment({
-      id: "Pair:" + token1.address + token2.address,
+      id: id,
       fragment: PAIR_FRAG,
     });
     if (newPair) {
       setCurrentPair(newPair);
     }
 
-    if (!currentPair) {
+    if (!newPair) {
       // There is no pair between these two, do something about it
       console.log("NO EXCHANGE FOR THIS PAIR");
     }
@@ -194,28 +187,26 @@ const Exchange = () => {
       return;
     }
     setModalOpen(true);
-    console.log("Submitting Order...");
-    // First, give allowance for the token
-    const tokenContract = new ethers.Contract(
-      token1.address,
-      ERC20.abi,
-      signer
-    );
+  };
 
-    // Second, submit the bid to pairContract
+  const confirmOrder = async () => {
+    console.log("Confirming");
+    if (!currentPair) {
+      return;
+    }
     const pairContract = new ethers.Contract(
       currentPair.address,
       Erc20Dex.abi,
       signer
     );
-
-    const tx = await tokenContract.approve(pairContract.address, quantity);
-    console.log("Waiting for funds to be approved");
-    await tx.wait();
-    console.log("Approved amount of token1: ", tx);
+    const scaledQuantity = ethers.utils.parseUnits(
+      quantity.toString(),
+      token2.decimals
+    );
     // TODO - Everyone submits a bid at the price? They don't set their own? What do you do about this?
     // TODO - run some checks on the quantity
-    pairContract.submitBid(currentPair.price, quantity).then((tx: any) => {
+
+    pairContract.swap(scaledQuantity, true).then((tx: any) => {
       console.log("Submitted Bid: ", tx);
 
       // If the bid went through, create an alert.
@@ -230,7 +221,7 @@ const Exchange = () => {
     });
   };
 
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
@@ -251,7 +242,7 @@ const Exchange = () => {
                 {token2Balance.toString()} {token2.symbol}
               </span>
               <span style={{ float: "right" }}>
-                Current Price: {currentPair?.price} {token1.symbol}/
+                Current Price: {currentPair?.price.toString()} {token1.symbol}/
                 {token2.symbol}
               </span>
               <br></br>
@@ -261,7 +252,8 @@ const Exchange = () => {
               <span style={{ float: "right" }}>
                 Total:{" "}
                 <b>
-                  {currentPair?.price} {token1.symbol}
+                  {(currentPair?.price || 0 * quantity).toString()}{" "}
+                  {token1.symbol}
                 </b>
               </span>
             </p>
@@ -269,13 +261,21 @@ const Exchange = () => {
             <Spinner style={{ filter: "invert(1)" }}></Spinner>
           </div>
           <div style={{ textAlign: "center" }}>
-            <SpecialButton
-              style={{
-                width: "75%",
-              }}
+            <PayableButton
+              requirements={[
+                {
+                  address: token1.address,
+                  amount: ethers.utils.parseUnits(
+                    (parsePrice() * quantity).toString(),
+                    token1.decimals
+                  ), // TODO - ew
+                },
+              ]}
+              spender={currentPair?.address || ""}
+              onClick={confirmOrder}
             >
               Confirm
-            </SpecialButton>
+            </PayableButton>
           </div>
         </Modal>
 
@@ -305,12 +305,12 @@ const Exchange = () => {
                 height: "100%",
               }}
               placeholder={
-                (currentPair ? currentPair.price * quantity : "0.00") +
+                (currentPair?.price || 0 * quantity).toString() +
                 " " +
                 token1.symbol
               }
               value={
-                (currentPair ? currentPair.price * quantity : "0.00") +
+                (currentPair?.price || 0 * quantity).toString() +
                 " " +
                 token1.symbol
               }
@@ -345,7 +345,7 @@ const Exchange = () => {
               }}
               placeholder={"0.00 " + token2.symbol}
               onChange={(ev) => {
-                setQuantity(parseFloat(ev.target.value));
+                setQuantity(parseFloat(ev.target.value) || 0);
               }}
             ></TextInput>
             <TokenSelect
@@ -370,13 +370,28 @@ const Exchange = () => {
           <p>
             <span style={{ float: "left" }}>
               Balances: <br></br>
-              {token1Balance.toString()} {token1.symbol}
+              {parseFloat(
+                ethers.utils.formatUnits(
+                  token1Balance.toString(),
+                  token1.decimals
+                )
+              ).toFixed(4)}{" "}
+              {token1.symbol}
               <br></br>
-              {token2Balance.toString()} {token2.symbol}
+              {parseFloat(
+                ethers.utils.formatUnits(
+                  token2Balance.toString(),
+                  token2.decimals
+                )
+              ).toFixed(4)}{" "}
+              {token2.symbol}
             </span>
             <span style={{ float: "right" }}>
-              Current Price: {currentPair?.price} {token1.symbol}/
-              {token2.symbol}
+              Current Price:{" "}
+              {parsePrice()
+                .toPrecision(4)
+                .toString()}{" "}
+              {token1.symbol}/{token2.symbol}
             </span>
             <br></br>
             <span style={{ float: "right" }}>Fees: 0.00</span>
@@ -385,7 +400,7 @@ const Exchange = () => {
             <span style={{ float: "right" }}>
               Total:{" "}
               <b>
-                {currentPair?.price} {token1.symbol}
+                {(parsePrice() * quantity).toString()} {token1.symbol}
               </b>
             </span>
           </p>
@@ -518,6 +533,7 @@ const Exchange = () => {
         >
           <h4 style={{ textAlign: "center" }}>Notes to Alpha Users</h4>
           <ul>
+            {/* <li>If you are looking to give feedback, first do so however you would on your own. After this, it would be helpful to know everything that gave you pause, wasn't super obvious, bothered your aesthetic sense, or wasn't included that you thought should be.</li> */}
             <li>
               Nothing specific for now, just let me know of ALL details that you
               do not like.

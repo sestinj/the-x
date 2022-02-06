@@ -26,9 +26,9 @@ const SideBarIcon = (props: SideBarIconProps) => {
               style={{
                 transform: isHovered ? "scale(1.2)" : "none",
               }}
-              width="40px"
-              height="40px"
-              color={props.isCurrent ? "lightgray" : "white"}
+              width="30px"
+              height="30px"
+              color={props.isCurrent ? "gray" : "white"}
             ></props.datum.icon>
           }
         >

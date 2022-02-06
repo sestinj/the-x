@@ -40,6 +40,7 @@
     "graphql": "^15.8.0",
     "install": "^0.13.0",
     "ipfs-deploy": "^11.1.0",
+    "mustache": "^4.2.0",
     "npm": "^8.3.0",
     "plotly.js": "^2.8.3",
     "react": "17.0.2",
@@ -60,7 +61,7 @@
     ]
   },
   "scripts": {
-    "prepare:local": "cp src/config/local.json src/config/index.json",
+    "prepare:local": "mustache ../../config.json src/config/local.template.json > src/config/local.json && cp src/config/local.json src/config/index.json",
     "prepare:ropsten": "cp src/config/ropsten.json src/config/index.json",
     "prepare:mainnet": "cp src/config/mainnet.json src/config/index.json",
     "build": "react-scripts build",
@@ -68,7 +69,8 @@
     "ipfs": "yarn build && ipfs-deploy build/",
     "start": "react-scripts start",
     "test": "react-scripts test",
-    "deploy": "firebase deploy --only hosting"
+    "deploy": "firebase deploy --only hosting",
+    "full:local": "npm run prepare:local && npm run start"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.0",

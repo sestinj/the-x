@@ -2,6 +2,10 @@
   "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
   "name": "mainnet",
   "addresses": {
-    "centralDex": "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E"
-  }
+    "centralDex": "0xAe9Ed85dE2670e3112590a2BB17b7283ddF44d9c",
+    "testToken1": "0xD1760AA0FCD9e64bA4ea43399Ad789CFd63C7809",
+    "testToken2": "0x75b0B516B47A27b1819D21B26203Abf314d42CCE"
+  },
+  "alchemyKey": "",
+  "isTest": true
 }

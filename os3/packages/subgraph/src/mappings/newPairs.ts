@@ -1,5 +1,7 @@
+import { BigDecimal } from "@graphprotocol/graph-ts";
 import { NewPair as NewPairEvent } from "../../generated/CentralDex/CentralDex";
 import { Pair, Token } from "../../generated/schema";
+import { Erc20Dex } from "../../generated/templates";
 import { ERC20 as ERC20Contract } from "../../generated/templates/ERC20/ERC20";
 
 export function handleNewPair(event: NewPairEvent): void {
@@ -9,27 +11,39 @@ export function handleNewPair(event: NewPairEvent): void {
   pair.token1 = address1.toHex();
   pair.token2 = address2.toHex();
   pair.address = event.params.dexAddress.toHex();
-  pair.price = 1; // This isn't accurate, but you have to set it to something and pretty sure this won't have consequences
+  pair.price = BigDecimal.fromString("1"); // This isn't accurate, but you have to set it to something and pretty sure this won't have consequences
   pair.swaps = [];
   pair.save();
 
   let token1 = new Token(address1.toHex());
-  let token1Contract = ERC20Contract.bind(address1);
+  if (address1.toHex() == "0x0000000000000000000000000000000000000000") {
+    token1.name = "Ethereum";
+    token1.symbol = "ETH";
+  } else {
+    let token1Contract = ERC20Contract.bind(address1);
+    token1.name = token1Contract.name();
+    token1.symbol = token1Contract.symbol();
+  }
   token1.address = address1.toHex();
-  token1.name = token1Contract.name();
-  token1.symbol = token1Contract.symbol();
   token1.pairs1 = [pair.id];
   token1.pairs2 = [];
   token1.save();
 
   let token2 = new Token(address2.toHex());
-  let token2Contract = ERC20Contract.bind(address2);
+  if (address2.toHex() == "0x0000000000000000000000000000000000000000") {
+    token2.name = "Ethereum";
+    token2.symbol = "ETH";
+  } else {
+    let token2Contract = ERC20Contract.bind(address2);
+    token2.name = token2Contract.name();
+    token2.symbol = token2Contract.symbol();
+  }
   token2.address = address2.toHex();
-  token2.name = token2Contract.name();
-  token2.symbol = token2Contract.symbol();
-  token2.pairs2 = [pair.id];
-  token2.pairs1 = [];
+  token2.pairs1 = [pair.id];
+  token2.pairs2 = [];
   token2.save();
+
+  Erc20Dex.create(event.params.dexAddress);
 }
 
 // Events need a handler. And this handler should add an entity with its addX function. They are distinct things, but confusingly the same in this case because there is only one event per entity, when the exchange is first created.

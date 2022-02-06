@@ -1,0 +1,11 @@
+{
+  "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
+  "name": "mainnet",
+  "addresses": {
+    "centralDex": "{{ addresses.centralDex }}",
+    "testToken1": "{{ addresses.testToken1 }}",
+    "testToken2": "{{ addresses.testToken2 }}"
+  },
+  "alchemyKey": "",
+  "isTest": true
+}

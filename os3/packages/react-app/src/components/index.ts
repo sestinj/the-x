@@ -93,6 +93,7 @@ export const TextInput = styled.input`
   font-size: 18px;
   padding: 10px;
   color: white;
+  outline: none;
 `;
 
 export const Select = styled.select`

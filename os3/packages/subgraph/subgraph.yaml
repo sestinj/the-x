@@ -9,7 +9,7 @@ dataSources:
     network: mainnet
     source:
       abi: CentralDex
-      address: "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E"
+      address: "0xAe9Ed85dE2670e3112590a2BB17b7283ddF44d9c"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -44,7 +44,7 @@ templates:
         - name: Erc20Dex
           file: ../contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json
       eventHandlers:
-        - event: Swap(address,uint128,uint128,uint128,uint256,bool)
+        - event: Swap(address,uint128,uint128,uint128,uint256,bool,address,address)
           handler: handleSwap
         - event: LiquidityAdd(address,uint256,uint128,uint128)
           handler: handleLiquidityAdd

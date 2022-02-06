@@ -6,7 +6,11 @@ export const alertSlice = createSlice({
   name: "alerts",
   initialState: {
     alerts: [
-      { title: "test", message: "This is a test alert", id: "1234567890" },
+      {
+        title: "This is an alert",
+        message: "They'll show up when you make transactions.",
+        id: "1234567890",
+      },
     ] as Alert[],
     archivedAlerts: [] as Alert[],
   },

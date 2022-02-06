@@ -1,3 +1,5 @@
 {
-  "name": "mainnet"
+  "name": "mainnet",
+  "isTest": false,
+  "alchemyKey": ""
 }

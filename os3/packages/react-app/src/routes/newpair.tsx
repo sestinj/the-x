@@ -11,9 +11,17 @@ import Hr from "../components/Hr";
 
 const NewPair = () => {
   const { signer } = useContext(SignerContext);
-  const [requirements, setRequirements] = useState<any[]>([]);
-
   const searchParams = new URLSearchParams(window.location.search);
+  const [requirements, setRequirements] = useState<any[]>([
+    {
+      address: searchParams.get("token1") || "",
+      amount: BigNumber.from(10).pow(24),
+    },
+    {
+      address: searchParams.get("token2") || "",
+      amount: BigNumber.from(10).pow(24),
+    },
+  ]);
 
   // Main Exchange Contract
   var mainExchange = new ethers.Contract(
@@ -35,18 +43,37 @@ const NewPair = () => {
     register: registerNE,
     handleSubmit: handleSubmitNE,
     getValues,
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      token1: searchParams.get("token1") || "",
+      token2: searchParams.get("token2") || "",
+      quantity1: undefined,
+      quantity2: undefined,
+    },
+  });
+
+  function isZeroAddress(address: string): boolean {
+    return address === "0x0000000000000000000000000000000000000000";
+  }
 
   const onNESubmit = (data: any) => {
     if (!signer) return;
     console.log("Adding pair: ", data);
+    const exp = BigNumber.from(10).pow(18); // TODO - not all tokens have same # of decimals
+
+    const value1 = BigNumber.from(data.quantity1).mul(exp);
+    const value2 = BigNumber.from(data.quantity2).mul(exp);
+    let txValue = BigNumber.from(0);
+    if (isZeroAddress(data.token1)) {
+      txValue = txValue.add(value1);
+    }
+    if (isZeroAddress(data.token2)) {
+      txValue = txValue.add(value2);
+    }
     mainExchange
-      .createErc20Dex(
-        data.token1,
-        data.token2,
-        10 ** 18 * data.quantity1,
-        10 ** 18 * data.quantity2
-      )
+      .createErc20Dex(data.token1, data.token2, value1, value2, {
+        value: txValue,
+      })
       .then((tx: any) => {
         console.log("New Exchange created at: ", tx);
       });
@@ -73,6 +100,11 @@ const NewPair = () => {
               { address: getValues("token1"), amount: getValues("quantity1") },
               { address: getValues("token2"), amount: getValues("quantity2") },
             ]);
+            console.log(
+              "requirements changed: ",
+              getValues("token1"),
+              getValues("token2")
+            );
           }}
         >
           <div
@@ -87,13 +119,11 @@ const NewPair = () => {
             <TextInput
               style={{ gridColumn: "1", gridRow: "1" }}
               placeholder="Token Address 1"
-              value={searchParams.get("token1") || ""}
               {...registerNE("token1")}
             ></TextInput>
             <TextInput
               style={{ gridColumn: "1", gridRow: "2" }}
               placeholder="Token Address 2"
-              value={searchParams.get("token2") || ""}
               {...registerNE("token2")}
             ></TextInput>
             <TextInput

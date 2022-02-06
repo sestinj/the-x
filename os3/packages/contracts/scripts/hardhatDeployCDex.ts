@@ -1,7 +1,8 @@
 const hre = require("hardhat");
 const { ethers } = hre;
 import { exec } from "child_process";
-import { fullDeployment } from "./libs/index";
+import { fullDeployment, updateConfig } from "./libs/index";
+import config from "../../../config.json";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -11,6 +12,11 @@ async function main() {
   const centralDex = await fullDeployment(ethers);
   console.log("Central DEX deployed to:", centralDex.address);
   exec(`printf ${centralDex.address} | pbcopy`);
+
+  updateConfig((oldConfig) => {
+    oldConfig.addresses.centralDex = centralDex.address;
+    return oldConfig;
+  });
 }
 main()
   .then(() => process.exit(0))

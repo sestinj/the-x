@@ -239,7 +239,10 @@ describe("*", () => {
       const [x, y, k, p, f1, f2] = await getStats();
       assert(x.eq(x_0.add(q1)));
       assert(y.eq(y_0.add(q2)));
-      assert(k.eq(x.mul(y)));
+      assert(
+        k.eq(x.mul(y)),
+        `k !== x * y: ${k.toString()}, ${x.toString()}, ${y.toString()}`
+      );
       assert(p.eq(fpDiv(x, y)));
       const reward = await lToken.balanceOf(signers[2].address);
       const totalSupply: BigNumber = await lToken.totalSupply();

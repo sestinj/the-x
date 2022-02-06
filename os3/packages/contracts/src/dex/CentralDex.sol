@@ -41,16 +41,17 @@ contract CentralDex is Dictatorship {
         if (token1 == address(0x0)) {
             dexAddress = FEthToErc20Dex.createDex(token2, quantity1, quantity2, msg.sender);
             require(msg.value == quantity1, "UQ");
-            (bool sent, bytes memory data) = payable(dexAddress).call{value: quantity1}("");
+            bool sent = ADex(dexAddress).receiveEther{value: quantity1}();
+            // (bool sent, bytes memory data) = payable(dexAddress).call{value: 100}("");
             require(sent, "TF");
+            console.log(IERC20(token2).allowance(msg.sender, address(this)));
             require(IERC20(token2).transferFrom(msg.sender, dexAddress, quantity2), "NA");
         } else if (token2 == address(0x0)) {
             dexAddress = FErc20ToEthDex.createDex(token1, quantity1, quantity2, msg.sender);
             require(IERC20(token1).transferFrom(msg.sender, dexAddress, quantity1), "NA");
             require(msg.value == quantity2, "UQ");
-            (bool sent, bytes memory data) = payable(dexAddress).call{value: quantity2}("");
+            bool sent = ADex(dexAddress).receiveEther{value: quantity2}();
             require(sent, "TF");
-            
         } else {
             dexAddress = FErc20Dex.createDex(token1, token2, quantity1, quantity2, msg.sender);
             require(IERC20(token1).transferFrom(msg.sender, dexAddress, quantity1), "NA");

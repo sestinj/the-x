@@ -44,7 +44,7 @@ templates:
         - name: Erc20Dex
           file: ../contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json
       eventHandlers:
-        - event: Swap(address,uint128,uint128,uint128,uint256,bool)
+        - event: Swap(address,uint128,uint128,uint128,uint256,bool,address,address)
           handler: handleSwap
         - event: LiquidityAdd(address,uint256,uint128,uint128)
           handler: handleLiquidityAdd

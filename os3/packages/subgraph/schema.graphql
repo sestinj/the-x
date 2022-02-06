@@ -3,7 +3,7 @@ type Pair @entity {
   token1: Token!
   token2: Token!
   address: String!
-  price: Int!
+  price: BigDecimal!
   swaps: [Swap!]!
   # TVL (x, y, k are needed)
 }
@@ -11,11 +11,13 @@ type Pair @entity {
 type Swap @entity {
   id: ID!
   sender: String!
-  quantity1: Int!
-  quantity2: Int!
-  fees: Int!
-  newPrice: Int!
+  quantity1: BigInt!
+  quantity2: BigInt!
+  fees: BigInt!
+  newPrice: BigDecimal!
   isForward: Boolean
+  token1: String!
+  token2: String!
   # TODO addresses are more efficiently encoded as Bytes
 }
 

@@ -6,13 +6,13 @@ import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 
 interface PayableButtonProps {
   onClick: () => void;
-  requirements: { address: string; amount: number }[];
+  requirements: { address: string; amount: BigNumber }[];
   spender: string;
-  children: React.ReactNode;
+  children: React.ReactNode | string | React.ReactNode[];
 }
 
 const PayableButton = (props: PayableButtonProps) => {
-  const DEFAULT_ALLOWANCE = 1000000000000;
+  const DEFAULT_ALLOWANCE = BigNumber.from(10).pow(24);
 
   const { signer } = useContext(SignerContext);
   const remainingRequirements = [...props.requirements];
@@ -20,14 +20,19 @@ const PayableButton = (props: PayableButtonProps) => {
   useEffect(() => {
     const checkForApproval = async () => {
       const ownerAddress = await signer?.getAddress();
+      if (!ownerAddress || !props.spender) {
+        return;
+      }
+      console.log(JSON.stringify(remainingRequirements));
       while (remainingRequirements.length) {
         const requirement =
           remainingRequirements[remainingRequirements.length - 1];
-
+        console.log("Checking", requirement);
         if (
           requirement.address === "0x0000000000000000000000000000000000000000"
         ) {
           remainingRequirements.pop();
+          continue;
         }
 
         const token = new ethers.Contract(
@@ -40,6 +45,7 @@ const PayableButton = (props: PayableButtonProps) => {
           ownerAddress,
           props.spender
         );
+
         if (tx.gt(requirement.amount)) {
           remainingRequirements.pop();
         } else {
@@ -53,14 +59,17 @@ const PayableButton = (props: PayableButtonProps) => {
 
   const [approved, setApproved] = useState(false);
 
-  const getApproval = async () => {
+  const getApproval = async (event: any) => {
+    event.preventDefault(); // TODO - does this cause issues with react-hook-forms?
     const requirement = remainingRequirements[remainingRequirements.length - 1];
-    console.log(props.spender, requirement.address, remainingRequirements);
+
     const token = new ethers.Contract(requirement.address, ERC20.abi, signer);
 
     const tx = await token.approve(
       props.spender,
-      Math.max(DEFAULT_ALLOWANCE, requirement.amount)
+      DEFAULT_ALLOWANCE.gt(requirement.amount)
+        ? DEFAULT_ALLOWANCE
+        : requirement.amount
     );
     await tx.wait();
     // TODO - How do I verify it went through?

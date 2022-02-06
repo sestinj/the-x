@@ -23,6 +23,10 @@ abstract contract ADex {
     function getToken1Balance() virtual internal view returns (uint256 balance);
     function getToken2Balance() virtual internal view returns (uint256 balance);
 
+    function receiveEther() payable public returns (bool) {
+        return true;
+    }
+
     IERC20 token1;
     IERC20 token2;
 
@@ -43,7 +47,7 @@ abstract contract ADex {
         updateBalance(uint128(quantity2), true, false);
         updateBalance(uint128(quantity1), true, true);
 
-        k = x * y;
+        k = uint256(x) * uint256(y);
 
         // Mint initial LTokens
         // TODO Find a better way of choosing this number. Lower means less chance of exceeding 2^256, higher means more precision. Both of these concerns are kind of edge case though.
@@ -54,12 +58,13 @@ abstract contract ADex {
         return address(lToken);
     }
 
-    event Swap(address sender, uint128 quantity1, uint128 quantity2, uint128 fees, uint256 newPrice, bool isForward);
+    event Swap(address sender, uint128 quantity1, uint128 quantity2, uint128 fees, uint256 newPrice, bool isForward, address token1, address token2);
 
     uint128 public x; // balance of token1
     uint128 public y; // balance of token2
     uint256 public p; // = x / y
-    uint128 public k; // = x * y
+    uint256 public k; // = x * y
+    // NOTE - x and y are safe as long as their values are less than roughly 10^24, but k is definitely not safe as a uint128. Hence the upgrade
     uint256 public FEE = Q128x128.fpDiv(1, 1000); // 1/1000
     uint128 public f1;
     uint128 public f2;
@@ -71,11 +76,11 @@ abstract contract ADex {
     }
 
     function getCostOfBuying(uint128 dy) public view returns (uint128) {
-        return k / (y - dy) - x; // = dx
+        return uint128(k / (y - dy) - x); // = dx
     }
 
     function getCostOfSelling(uint128 dy) public view returns (uint128) {
-        return x  - k / (y + dy); // = dx
+        return x  - uint128(k / (y + dy)); // = dx
     }
 
     // function getPriceImpactOfBuying(uint128 dy) public view returns (uint256) {}
@@ -96,7 +101,7 @@ abstract contract ADex {
         }
         // TODO - you shouldn't recalculate k here every time, what if this causes it to change from rounding errors?
         // But if you only calculate during liquidityAdds and removals, won't that suddenly cause all error propogation to hit at once?
-        // k = x * y;
+        // k = uint256(x) * uint256(y);
         p = Q128x128.fpDiv(x, y);
         console.log("New p:", x, y, p);
     }
@@ -112,7 +117,8 @@ abstract contract ADex {
     function buy(uint128 dy) payable public {
         // Verify collection of payment
         require(dy < y + FUNDS_BUFFER2, "IF");
-        require(transferToken1From(msg.sender, address(this), uint256(getCostOfBuying(dy)), msg.value), "NA");
+        uint128 cost = getCostOfBuying(dy);
+        require(transferToken1From(msg.sender, address(this), uint256(cost), msg.value), "NA");
         
         // Calculate fees, send output
         // Fees round up, not down. Their fault for placing tiny trades, that shouldn't be incentivized.
@@ -123,10 +129,12 @@ abstract contract ADex {
         f2 += dy - keep;
 
         // Update state, emit event
-        updateBalance(getCostOfBuying(dy), true, true);
+        updateBalance(cost, true, true);
         updateBalance(dy, false, false);
 
-        emit Swap(msg.sender, getCostOfBuying(dy), dy, keep, p, true);
+        console.log("QQ", cost, dy);
+
+        emit Swap(msg.sender, cost, dy, dy - keep, p, true, address(token1), address(token2));
     }
     
     function sell(uint128 dy) payable public {
@@ -147,7 +155,7 @@ abstract contract ADex {
         updateBalance(dy, true, false);
 
         // TODO - Swap event needs more info (namely dx)
-        emit Swap(msg.sender, dx, dy, keep, p, false);
+        emit Swap(msg.sender, dx, dy, dx - keep, p, false, address(token1), address(token2));
     }
 
     event LiquidityAdd(address sender, uint256 n, uint128 quantity1, uint128 quantity2);
@@ -167,7 +175,7 @@ abstract contract ADex {
         updateBalance(quantity1, true, true);
         updateBalance(quantity2, true, false);
 
-        k = x * y; // See notes above
+        k = uint256(x) * uint256(y); // See notes above
 
         // Calculate stake and mint LTokens
         uint256 s = Q128x128.fpDiv(quantity1 + Q128x128.fpMul(prevPrice, quantity2), Q128x128.fpMul(prevPrice, y) + x); // TODO - Safe math, should be separate from Q128x128. Also you're losing precision here by converting back to 128 before division.
@@ -195,7 +203,7 @@ abstract contract ADex {
         updateBalance(Q128x128.fpMul(s, x), false, true);
         updateBalance(Q128x128.fpMul(s, y), false, false);
 
-        k = x * y; // See notes above
+        k = uint256(x) * uint256(y); // See notes above
 
         emit LiquidityRemoval(msg.sender, n, Q128x128.fpMul(s, x), Q128x128.fpMul(s, y));
     }

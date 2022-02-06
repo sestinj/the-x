@@ -24,7 +24,7 @@ const SideBar = () => {
           gridTemplateColumns: "auto auto",
           gridTemplateRows: "auto",
           position: "fixed",
-          left: `${5 - (open ? 0 : 70)}px`,
+          left: `${5 - (open ? 0 : 90)}px`,
           transitionDelay: "100",
         }}
       >
@@ -34,8 +34,8 @@ const SideBar = () => {
             height: "auto",
             padding: "10px",
             display: "grid",
-            gridTemplateColumns: "auto",
-            gridTemplateRows: `repeat(${SideBarData.length}, 60px)`,
+            gridTemplateColumns: "auto auto",
+            gridTemplateRows: `repeat(${SideBarData.length}, 40px)`,
             textAlign: "center",
             background: backgroundColor,
             border: "1px solid white",
