@@ -8,7 +8,7 @@ export const alertSlice = createSlice({
     alerts: [
       {
         title: "This is an alert",
-        message: "They'll show up when you make transactions.",
+        message: "They'll show up when you make transactions. v1.2",
         id: "1234567890",
       },
     ] as Alert[],

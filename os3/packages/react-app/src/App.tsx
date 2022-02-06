@@ -12,6 +12,7 @@ let provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcPro
   Config.alchemyKey
 );
 if ((window as any).ethereum) {
+  console.log("window.ethereum exists");
   provider = new ethers.providers.Web3Provider((window as any).ethereum);
 }
 

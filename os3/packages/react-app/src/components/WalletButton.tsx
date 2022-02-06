@@ -19,11 +19,19 @@ const WalletButton = ({
   const [balance, setBalance] = useState("0");
 
   const getSigner = async () => {
+    console.log("Get Signer");
     if (signer) return; // To avoid infinite looping re-renders with the context
-    if (provider.constructor.name !== "Web3Provider") {
+    console.log(
+      "Signer doesn't exist yet",
+      provider,
+      provider.constructor.name
+    );
+    if (provider.constructor.name !== "r") {
       return; // because Alchemy Provider can't call eth_requestAccounts. TODO this is sketch though
     }
+    console.log("Using Web3 Provider");
     await provider.send("eth_requestAccounts", []);
+    console.log("Accounts requested");
     const newSigner = provider.getSigner();
     if (setSigner) {
       setSigner(newSigner);
