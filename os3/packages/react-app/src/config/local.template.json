@@ -5,7 +5,11 @@
     "centralDex": "{{ addresses.centralDex }}",
     "testToken1": "{{ addresses.testToken1 }}",
     "testToken2": "{{ addresses.testToken2 }}",
-    "faucet": "{{ addresses.faucet }}"
+    "faucets": {
+      "0x0000000000000000000000000000000000000000": "",
+      "{{ addresses.testToken1 }}": "",
+      "{{ addresses.testToken2 }}": ""
+    }
   },
   "alchemyKey": "",
   "isTest": true

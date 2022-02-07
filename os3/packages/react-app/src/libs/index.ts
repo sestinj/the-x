@@ -41,3 +41,7 @@ export const useContract = (
 
   return contract;
 };
+
+export const isZeroAddress = (address: string): boolean => {
+  return address === "0x0000000000000000000000000000000000000000";
+};

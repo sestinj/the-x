@@ -3,8 +3,13 @@
   "name": "mainnet",
   "addresses": {
     "centralDex": "0xdB012DD3E3345e2f8D23c0F3cbCb2D94f430Be8C",
-    "testToken1": "0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4",
-    "testToken2": "0x1eB5C49630E08e95Ba7f139BcF4B9BA171C9a8C7"
+    "testToken1": "0x1AEAdf44fE81382c063FE012Db76333172cd5024",
+    "testToken2": "0x55B9409DAaF8036A32A1EA228D0f7B6D72f02899",
+    "faucets": {
+      "0x0000000000000000000000000000000000000000": "",
+      "0x1AEAdf44fE81382c063FE012Db76333172cd5024": "",
+      "0x55B9409DAaF8036A32A1EA228D0f7B6D72f02899": ""
+    }
   },
   "alchemyKey": "",
   "isTest": true

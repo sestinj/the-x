@@ -19,6 +19,7 @@ import NewPair from "./routes/newpair";
 import Pools from "./routes/pools";
 import Dashboard from "./routes/dashboard";
 import Notifications from "./routes/notifications";
+import Faucet from "./routes/faucet";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -44,6 +45,7 @@ ReactDOM.render(
             <Route path="pools" element={<Pools />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="faucet" element={<Faucet />} />
           </Routes>
         </BrowserRouter>
       </App>

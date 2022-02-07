@@ -32,6 +32,7 @@ const TokenSelect = (props: TokenSelectProps) => {
 
   return (
     <>
+      {console.log("aaa", currentToken)}
       <button
         style={{
           backgroundColor: secondaryDark,

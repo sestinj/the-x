@@ -39,7 +39,7 @@ const Popover = (props: PopoverProps) => {
               position: "absolute",
               gridColumn: "2",
               ...baseDiv,
-              marginLeft: "8px",
+              marginLeft: "24px",
               width: "auto",
             }}
           >

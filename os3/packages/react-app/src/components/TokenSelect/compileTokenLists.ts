@@ -36,29 +36,35 @@ export const DEFAULT_TOKEN = {
 };
 
 export const getTokens = async (tokenLists: string[]): Promise<Token[]> => {
+  const testTokens = [
+    {
+      name: "Test One",
+      symbol: "TST1",
+      logoURI: "/logo192.png",
+      address: config.addresses.testToken1,
+      chainId: 1,
+      decimals: 18,
+    },
+    {
+      name: "Test Two",
+      symbol: "TST2",
+      logoURI: "/logo192.png",
+      address: config.addresses.testToken2,
+      chainId: 1,
+      decimals: 18,
+    },
+  ];
   if (tokenLists[0] === "local") {
-    return [
-      {
-        name: "Test One",
-        symbol: "TST1",
-        logoURI: "/logo192.png",
-        address: config.addresses.testToken1,
-        chainId: 1,
-        decimals: 18,
-      },
-      {
-        name: "Test Two",
-        symbol: "TST2",
-        logoURI: "/logo192.png",
-        address: config.addresses.testToken2,
-        chainId: 1,
-        decimals: 18,
-      },
-    ];
+    return testTokens;
   }
 
   const allTokens: any = {};
-  const finalTokenList: Token[] = [];
+  let finalTokenList: Token[] = [DEFAULT_TOKEN];
+
+  if (config.name === "ropsten") {
+    finalTokenList.push(...testTokens);
+  }
+
   await Promise.all(
     tokenLists.map((tokenListUrl: string) => {
       return axios.get(tokenListUrl).then((result: any) => {

@@ -230,16 +230,20 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(sender, recipient, amount);
 
         uint256 senderBalance = _balances[sender];
-        console.log('B', senderBalance, amount);
+        console.log('B', senderBalance, amount, recipient);
+        console.log('c', address(this));
         require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
+        console.log("C");
         unchecked {
             _balances[sender] = senderBalance - amount;
         }
+        console.log("D");
         _balances[recipient] += amount;
-
+        console.log("E");
         emit Transfer(sender, recipient, amount);
-
+        console.log("F");
         _afterTokenTransfer(sender, recipient, amount);
+        console.log("G");
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing

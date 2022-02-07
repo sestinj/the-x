@@ -26,7 +26,10 @@ const WalletButton = ({
       provider,
       provider.constructor.name
     );
-    if (provider.constructor.name !== "r") {
+    if (
+      provider.constructor.name !== "Web3Provider" &&
+      provider.constructor.name !== "r"
+    ) {
       return; // because Alchemy Provider can't call eth_requestAccounts. TODO this is sketch though
     }
     console.log("Using Web3 Provider");

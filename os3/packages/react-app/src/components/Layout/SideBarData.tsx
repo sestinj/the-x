@@ -22,6 +22,7 @@ import {
   TableIcon,
   TemplateIcon,
   UserGroupIcon,
+  FilterIcon,
 } from "@heroicons/react/solid";
 
 export default [
@@ -49,6 +50,11 @@ export default [
     title: "Manage Personal Token",
     route: "/manageToken",
     icon: CogIcon,
+  },
+  {
+    title: "Faucet",
+    route: "/faucet",
+    icon: FilterIcon,
   },
   // {
   //   title: "Notifications",

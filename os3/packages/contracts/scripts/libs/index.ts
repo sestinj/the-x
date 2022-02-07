@@ -32,7 +32,10 @@ export const fullDeployment = async (ethers: any) => {
 export const updateConfig = (updater: (oldConfig: any) => any): void => {
   const newConfig = updater(config);
   const stringified = JSON.stringify(newConfig);
+  console.log("CONFIG: ", newConfig, stringified);
   exec(`cd ../.. && echo '${stringified}' > config.json`);
   exec(`cd ../react-app && npm run prepare:local`);
   exec(`cd ../subgraph && npm run prepare:local`);
 };
+
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
