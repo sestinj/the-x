@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { baseDiv, rounded } from "./classes";
+import { baseDiv } from "./classes";
 // TODO - Should definitely be using subcomponenents here
 interface PopoverProps {
   button: React.ReactNode;

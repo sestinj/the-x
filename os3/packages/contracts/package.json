@@ -16,5 +16,8 @@
   "scripts": {
     "deploy:local": "hardhat run scripts/hardhatDeployCDex.ts --network local && hardhat run scripts/setupLocalTokens.ts",
     "deploy:ropsten": "hardhat run scripts/hardhatDeployCDex.ts --network ropsten && hardhat run scripts/setupLocalTokens.ts"
+  },
+  "dependencies": {
+    "@opengsn/provider": "^2.2.5"
   }
 }

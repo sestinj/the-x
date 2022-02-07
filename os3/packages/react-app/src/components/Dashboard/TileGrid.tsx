@@ -1,7 +1,6 @@
 import { CheckIcon, PencilIcon } from "@heroicons/react/outline";
 import React, { useState } from "react";
 import { Button, GridDiv } from "..";
-import Tile from "./Tiles/Tile";
 
 // This is where you use Redux to let people change their positioning of the tiles, and redo changes they've made.
 // Eventually even transactions should be redoable changes, at least for a short amount of time like with Gmail. Is this possible?

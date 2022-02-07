@@ -2,7 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-abstract contract AFaucet {
+import "@opengsn/contracts/src/BaseRelayRecipient.sol";
+
+abstract contract AFaucet is BaseRelayRecipient {
     function transferToken(address payable reciever, uint256 quantity) virtual internal returns (bool sent);
     function getTokenBalance() virtual internal view returns (uint256 balance);
 
@@ -11,7 +13,11 @@ abstract contract AFaucet {
 
     mapping(address => uint16) private dripCounts;
 
-    constructor() {}
+    constructor(address forwarder_) {
+        trustedForwarder = forwarder_; // 0xeB230bF62267E94e657b5cbE74bdcea78EB3a5AB;
+    }
+
+    string public override versionRecipient = "2.0.0";
 
     function dripOrDrown() public {
         if (dripCounts[msg.sender] >= DRIP_LIMIT) {

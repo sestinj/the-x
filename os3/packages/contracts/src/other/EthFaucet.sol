@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import './AFaucet.sol';
 
 contract EthFaucet is AFaucet {
-    constructor() AFaucet() {}
+    constructor(address forwarder_) AFaucet(forwarder_) {}
 
     function transferToken(address payable reciever, uint256 quantity) override internal returns (bool sent) {
         (sent,) = reciever.call{value: quantity}("");

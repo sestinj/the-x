@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { FillingBackground, secondaryDark } from ".";
+import { secondaryDark } from ".";
 import { baseDiv, shadow } from "./classes";
 import { Alert, archiveAlert } from "../redux/slices/alertSlice";
 import { useDispatch } from "react-redux";

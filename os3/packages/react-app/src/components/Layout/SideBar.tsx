@@ -1,6 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { backgroundColor } from "..";
 import SideBarData from "./SideBarData";
 import SideBarIcon from "./SideBarIcon";
@@ -47,7 +46,7 @@ const SideBar = () => {
               <SideBarIcon
                 key={index}
                 datum={datum}
-                isCurrent={index == currentlyOpen}
+                isCurrent={index === currentlyOpen}
               ></SideBarIcon>
             );
           })}

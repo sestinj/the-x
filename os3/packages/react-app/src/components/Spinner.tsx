@@ -1,6 +1,5 @@
 import React from "react";
 import { Rotate } from ".";
-import Logo from "./Logo";
 
 const Spinner = (props: { style: any }) => {
   return (

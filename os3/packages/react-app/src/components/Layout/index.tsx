@@ -15,8 +15,8 @@ const Layout = ({ children }: LayoutProps) => {
   const { signer, setSigner } = useContext(SignerContext);
   const provider = useContext(ProviderContext);
 
-  const modalRef = useRef();
-  const testBorderRef = useRef<any>(null);
+  // const modalRef = useRef();
+  // const testBorderRef = useRef<any>(null);
 
   return (
     <TestBorder provider={provider}>

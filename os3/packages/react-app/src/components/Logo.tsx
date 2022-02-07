@@ -12,6 +12,7 @@ const Logo = (props: { letter: string }) => {
         onMouseLeave={() => {
           setLetter(props.letter);
         }}
+        alt={"The X Logo"}
         src={`${letter}.svg`}
         style={{
           width: "50px",

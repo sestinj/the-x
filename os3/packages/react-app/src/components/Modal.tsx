@@ -1,15 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
-import { Fragment, ReactNode, useState } from "react";
-import {
-  backgroundColor,
-  Button,
-  HoverDiv,
-  primaryHighlight,
-  secondaryDark,
-} from ".";
+import { Fragment, ReactNode } from "react";
 import { baseDiv } from "./classes";
-import Table from "./Table";
 
 // TODO - instead of using props, you should use subcomponents. <Modal.Content>, <Modal.Title>, etc...
 export default function Modal(props: {

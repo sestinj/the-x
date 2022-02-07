@@ -1,28 +1,10 @@
-import { ChatIcon } from "@heroicons/react/outline";
 import {
-  HomeIcon,
-  CurrencyDollarIcon,
   CogIcon,
-  TrendingUpIcon,
-  PlusCircleIcon,
-  BellIcon,
-  PhotographIcon,
-  PlayIcon,
-  BriefcaseIcon,
-  AcademicCapIcon,
-  ClockIcon,
-  EmojiHappyIcon,
-  FingerPrintIcon,
-  LightBulbIcon,
-  PaperClipIcon,
-  QrcodeIcon,
-  RssIcon,
-  SearchIcon,
-  ShoppingCartIcon,
-  TableIcon,
-  TemplateIcon,
-  UserGroupIcon,
+  CurrencyDollarIcon,
   FilterIcon,
+  HomeIcon,
+  PlusCircleIcon,
+  TrendingUpIcon,
 } from "@heroicons/react/solid";
 
 export default [

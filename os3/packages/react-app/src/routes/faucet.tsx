@@ -1,16 +1,24 @@
-import React, { useContext, useEffect, useState } from "react";
+import {
+  ArrowCircleUpIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/outline";
+import ERC20Faucet from "@project/contracts/artifacts/src/other/ERC20Faucet.sol/ERC20Faucet.json";
+import EthFaucet from "@project/contracts/artifacts/src/other/EthFaucet.sol/EthFaucet.json";
+import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 import { BigNumber, ethers } from "ethers";
-import Layout from "../components/Layout";
+import React, { useContext, useEffect, useState } from "react";
 import { SignerContext } from "../App";
+import { Button, SpecialButton } from "../components";
+import Info from "../components/Info";
+import Layout from "../components/Layout";
+import Modal from "../components/Modal";
+import Spinner from "../components/Spinner";
 import TokenSelect from "../components/TokenSelect";
 import { DEFAULT_TOKEN } from "../components/TokenSelect/compileTokenLists";
-import { Button } from "../components";
-import { isZeroAddress, useContract } from "../libs";
 import config from "../config/index.json";
-import EthFaucet from "@project/contracts/artifacts/src/other/EthFaucet.sol/EthFaucet.json";
-import ERC20Faucet from "@project/contracts/artifacts/src/other/ERC20Faucet.sol/ERC20Faucet.json";
-import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
-import Info from "../components/Info";
+import { getEtherscanUrlTx, isZeroAddress } from "../libs";
+import useTx, { TxStatusTypes } from "../libs/hooks/useTx";
 
 const Faucet = () => {
   const { signer } = useContext(SignerContext);
@@ -94,8 +102,101 @@ const Faucet = () => {
     console.log("Tx: ", tx);
   };
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const { sendTx, status, receipt, tx, error } = useTx(
+    faucetContract?.dripOrDrown,
+    {
+      onConfirm: (receipt: any) => {
+        console.log("Confirmed: ", receipt);
+      },
+      onPending: (tx: any) => {
+        console.log("Sent: ", tx);
+      },
+      onError: (error: any) => {
+        console.log("Error: ", error);
+      },
+      title: `Drip or Drown`,
+      description: `Claimed free ${token.symbol} from faucet.`,
+    }
+  );
   return (
     <Layout>
+      <Modal
+        open={modalOpen}
+        closeModal={() => {
+          setModalOpen(false);
+        }}
+      >
+        <div
+          style={{
+            alignItems: "center",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          {status === TxStatusTypes.sending ? (
+            <>
+              <p>Waiting for approval...</p>
+              <Spinner style={{ filter: "invert(1)" }}></Spinner>
+              <p>Confirm the transaction in your wallet.</p>
+            </>
+          ) : status === TxStatusTypes.pending ? (
+            <>
+              <p>Transaction sent</p>
+              <ArrowCircleUpIcon
+                strokeWidth={2} // TODO - would look nice.
+                width="30%"
+                height="30%"
+                color="black"
+              ></ArrowCircleUpIcon>
+            </>
+          ) : status === TxStatusTypes.confirmed ? (
+            <>
+              <p>Transaction confirmed</p>
+              <CheckCircleIcon
+                width="30%"
+                height="30%"
+                color="black"
+              ></CheckCircleIcon>
+            </>
+          ) : (
+            <>
+              <p>Error: {error?.toString()}</p>
+              <ExclamationCircleIcon
+                width="30%"
+                height="30%"
+                color="black"
+              ></ExclamationCircleIcon>
+            </>
+          )}
+          {status === TxStatusTypes.unsent ? (
+            <></>
+          ) : (
+            <>
+              <p>
+                View on{" "}
+                <a
+                  href={getEtherscanUrlTx(tx?.hash, config.name)}
+                  target={"_blank"}
+                >
+                  Etherscan
+                </a>
+                .
+              </p>
+              <SpecialButton
+                onClick={() => {
+                  setModalOpen(false);
+                }}
+                style={{ width: "100%", margin: "20px" }}
+              >
+                Close
+              </SpecialButton>
+            </>
+          )}
+        </div>
+      </Modal>
       <div style={{ display: "flex" }}>
         <h1>Faucet</h1>
         <Info>Use the faucet to get tokens for free on the test network.</Info>
@@ -118,7 +219,10 @@ const Faucet = () => {
         ></TokenSelect>
         {faucetContract && (
           <Button
-            onClick={drip}
+            onClick={() => {
+              sendTx();
+              setModalOpen(true);
+            }}
             style={{ borderRadius: "0", margin: "0", height: "100%" }}
           >
             Get {token.symbol}

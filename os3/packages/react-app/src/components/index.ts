@@ -1,5 +1,5 @@
-import styled, { keyframes } from "styled-components";
 import * as ReactRouterDOM from "react-router-dom";
+import styled, { keyframes } from "styled-components";
 
 export const backgroundColor = "#161616";
 export const secondaryDark = "#323232";
@@ -66,6 +66,7 @@ export const Button = styled.button`
 
 export const SpecialButton = styled.button`
   background-color: ${primaryHighlight};
+  border: none;
   border-radius: 8px;
   color: white;
   cursor: pointer;
@@ -76,7 +77,7 @@ export const SpecialButton = styled.button`
   padding: 12px 24px;
 
   :hover {
-    border: 4px solid black;
+    filter: brightness(0.85);
   }
 
   ${(props) => props.hidden && "hidden"} :focus {

@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Button, primaryHighlight } from ".";
+import React, { useContext, useEffect, useState } from "react";
+import { Button } from ".";
 import { SignerContext } from "../App";
 import { BigNumber, ethers } from "ethers";
 import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";

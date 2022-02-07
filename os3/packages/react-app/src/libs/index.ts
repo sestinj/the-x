@@ -1,11 +1,5 @@
 import { ethers } from "ethers";
-import React, {
-  ReactChild,
-  ReactNode,
-  Component,
-  useState,
-  useEffect,
-} from "react";
+import { useEffect, useState } from "react";
 
 export const isAddress = (addressCandidate: string) => {
   return (
@@ -45,3 +39,8 @@ export const useContract = (
 export const isZeroAddress = (address: string): boolean => {
   return address === "0x0000000000000000000000000000000000000000";
 };
+
+export function getEtherscanUrlTx(txHash: string, network: string) {
+  const prefix = network === "mainnet" ? "" : network + ".";
+  return `https://${prefix}etherscan.io/tx/${txHash}`;
+}

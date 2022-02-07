@@ -1,17 +1,15 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { XIcon } from "@heroicons/react/solid";
-import { baseDiv, rounded } from "../classes";
+import { ChevronDownIcon } from "@heroicons/react/outline";
+import React, { useEffect, useState } from "react";
+import { HoverDiv, secondaryDark } from "..";
+import Modal from "../Modal";
+import SafeImg from "../SafeImg/SafeImg";
 import Table from "../Table";
 import {
+  DEFAULT_TOKEN,
   DEFAULT_TOKEN_LISTS,
   getTokens,
   Token,
-  DEFAULT_TOKEN,
 } from "./compileTokenLists";
-import Modal from "../Modal";
-import { backgroundColor, HoverDiv, secondaryDark, Select } from "..";
-import { ChevronDownIcon } from "@heroicons/react/outline";
-import { Dialog, Transition } from "@headlessui/react";
 
 interface TokenSelectProps {
   onChange: (token: Token) => void;
@@ -32,7 +30,6 @@ const TokenSelect = (props: TokenSelectProps) => {
 
   return (
     <>
-      {console.log("aaa", currentToken)}
       <button
         style={{
           backgroundColor: secondaryDark,
@@ -48,8 +45,8 @@ const TokenSelect = (props: TokenSelectProps) => {
           setOpen(true);
         }}
       >
-        <img
-          src={currentToken.logoURI}
+        <SafeImg
+          address={currentToken.logoURI}
           style={{
             borderRadius: "50%",
             width: "30px",
@@ -57,7 +54,8 @@ const TokenSelect = (props: TokenSelectProps) => {
             overflow: "clip",
             gridColumn: "1",
           }}
-        ></img>
+        ></SafeImg>
+
         <p style={{ color: "white", gridColumn: "2" }}>{currentToken.symbol}</p>
         <ChevronDownIcon
           width="20px"
@@ -94,8 +92,8 @@ const TokenSelect = (props: TokenSelectProps) => {
                     setOpen(false);
                   }}
                 >
-                  <img
-                    src={data.logoURI}
+                  <SafeImg
+                    address={data.logoURI}
                     style={{
                       borderRadius: "50%",
                       width: "30px",
@@ -103,7 +101,7 @@ const TokenSelect = (props: TokenSelectProps) => {
                       overflow: "clip",
                       gridColumn: "1",
                     }}
-                  ></img>
+                  ></SafeImg>
                   <p style={{ gridColumn: "2 / 3" }}>
                     <b>
                       {data.symbol}
