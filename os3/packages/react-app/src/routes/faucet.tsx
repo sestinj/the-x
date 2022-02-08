@@ -25,6 +25,18 @@ const Faucet = () => {
   const [token, setToken] = useState(DEFAULT_TOKEN);
   const [balance, setBalance] = useState(BigNumber.from(0));
   const [faucetBalance, setFaucetBalance] = useState(BigNumber.from(0));
+  const [address, setAddress] = useState("");
+
+  useEffect(() => {
+    const aa = async () => {
+      if (!signer) {
+        return;
+      }
+      const ad = await signer.getAddress();
+      setAddress(ad);
+    };
+    aa();
+  });
 
   useEffect(() => {
     async function getBalance() {
@@ -71,6 +83,9 @@ const Faucet = () => {
   }, [faucetContract]);
 
   useEffect(() => {
+    if (isZeroAddress(token.address)) {
+      setFaucetContract(undefined); // TODO - This is just for now!!! Remove when you get to GSN
+    }
     if ((config.addresses.faucets as any)[token.address]) {
       if (isZeroAddress(token.address)) {
         setFaucetContract(
@@ -266,6 +281,15 @@ const Faucet = () => {
         )}{" "}
         {token.symbol}
       </p>
+      {isZeroAddress(token.address) && (
+        <p>
+          If you have exactly zero Ether, use{" "}
+          <a href="https://faucet.egorfine.com/" target={"_blank"}>
+            this faucet
+          </a>{" "}
+          to get some first for gas fees.<br></br>(Your address is {address})
+        </p>
+      )}
     </Layout>
   );
 };
