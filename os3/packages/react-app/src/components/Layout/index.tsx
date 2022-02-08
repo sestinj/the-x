@@ -1,10 +1,10 @@
+import React, { useContext } from "react";
 import { Body, Header } from "..";
+import { ProviderContext, SignerContext } from "../../App";
+import AlertArea from "../AlertArea";
+import Logo from "../Logo";
 import TestBorder from "../TestBorder";
 import WalletButton from "../WalletButton";
-import React, { useContext, useRef } from "react";
-import { SignerContext, ProviderContext } from "../../App";
-import Logo from "../Logo";
-import AlertArea from "../AlertArea";
 import SideBar from "./SideBar";
 
 interface LayoutProps {
@@ -13,7 +13,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const { signer, setSigner } = useContext(SignerContext);
-  const provider = useContext(ProviderContext);
+  const { provider, setProvider } = useContext(ProviderContext);
 
   // const modalRef = useRef();
   // const testBorderRef = useRef<any>(null);
@@ -26,6 +26,7 @@ const Layout = ({ children }: LayoutProps) => {
         {/* <LoginButton modalRef={modalRef}></LoginButton> */}
         <WalletButton
           provider={provider}
+          setProvider={setProvider}
           setSigner={setSigner}
           signer={signer}
         ></WalletButton>

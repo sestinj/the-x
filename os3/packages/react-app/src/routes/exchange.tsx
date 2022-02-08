@@ -1,28 +1,27 @@
-import Layout from "../components/Layout";
-import React, { useEffect, useState, useContext } from "react";
-import { TextInput, Button, SpecialButton } from "../components";
-import Hr from "../components/Hr";
-import config from "@project/react-app/src/config/index.json";
-import { BigNumber, ethers } from "ethers";
+import { gql, useApolloClient, useQuery } from "@apollo/client";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json";
 import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
-import { ProviderContext, SignerContext } from "../App";
-
-import { gql, useQuery, useApolloClient } from "@apollo/client";
+import config from "@project/react-app/src/config/index.json";
 import { Pair, Token } from "@project/subgraph/generated/schema";
-import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
+import { ethers } from "ethers";
+import React, { useContext, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { ProviderContext, SignerContext } from "../App";
+import { Button, TextInput } from "../components";
+import Hr from "../components/Hr";
+import Layout from "../components/Layout";
 import Modal from "../components/Modal";
+import PayableButton from "../components/PayableButton";
 import Spinner from "../components/Spinner";
 import TokenSelect from "../components/TokenSelect";
 import {
-  Token as TokenListToken,
   DEFAULT_TOKEN,
+  Token as TokenListToken,
 } from "../components/TokenSelect/compileTokenLists";
-import { useDispatch } from "react-redux";
-import { addTx, Tx } from "../redux/slices/txsSlice";
+import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
 import { addAlert, Alert } from "../redux/slices/alertSlice";
-import PayableButton from "../components/PayableButton";
+import { addTx } from "../redux/slices/txsSlice";
 
 const GET_TOKENS = gql`
   query getTokens {
@@ -77,7 +76,7 @@ const GET_PAIRS = gql`
 
 const Exchange = () => {
   const { signer } = useContext(SignerContext);
-  const provider = useContext(ProviderContext);
+  const { provider } = useContext(ProviderContext);
 
   // STATE MANAGEMENT START***********************************************************
   const apolloClient = useApolloClient();

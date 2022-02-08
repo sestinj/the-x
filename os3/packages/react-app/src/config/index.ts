@@ -1,12 +1,12 @@
-import ropsten from "./ropsten.json";
-import mainnet from "./mainnet.json";
-import local from "./local.json";
-import index from "./index.json";
 import { useContext } from "react";
 import { ProviderContext } from "../App";
+import index from "./index.json";
+import local from "./local.json";
+import mainnet from "./mainnet.json";
+import ropsten from "./ropsten.json";
 
 async function config() {
-  const provider = useContext(ProviderContext);
+  const { provider } = useContext(ProviderContext);
   const network = await provider.getNetwork();
   switch (network.name) {
     case "ropsten":

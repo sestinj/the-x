@@ -1,6 +1,6 @@
-import React, { createContext, useState } from "react";
-import { JsonRpcSigner } from "@ethersproject/providers";
+import { JsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
 import { ethers } from "ethers";
+import React, { createContext, useState } from "react";
 import Config from "./config/index.json";
 
 export const SignerContext: React.Context<{
@@ -8,14 +8,17 @@ export const SignerContext: React.Context<{
   setSigner?: React.Dispatch<React.SetStateAction<JsonRpcSigner | undefined>>;
 }> = createContext({});
 
-let provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
+let initialProvider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
   Config.alchemyKey
 );
 if ((window as any).ethereum) {
-  provider = new ethers.providers.Web3Provider((window as any).ethereum);
+  initialProvider = new ethers.providers.Web3Provider((window as any).ethereum);
 }
 
-export const ProviderContext = createContext(provider);
+export const ProviderContext: React.Context<{
+  provider: JsonRpcProvider;
+  setProvider?: React.Dispatch<React.SetStateAction<JsonRpcProvider>>;
+}> = createContext({ provider: initialProvider });
 
 interface AppProps {
   children: React.ReactNode;
@@ -23,11 +26,12 @@ interface AppProps {
 
 const App = ({ children }: AppProps) => {
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
+  const [provider, setProvider] = useState<JsonRpcProvider>(initialProvider);
 
   return (
     <>
       <SignerContext.Provider value={{ signer, setSigner }}>
-        <ProviderContext.Provider value={provider}>
+        <ProviderContext.Provider value={{ provider, setProvider }}>
           {children}
         </ProviderContext.Provider>
       </SignerContext.Provider>

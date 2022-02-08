@@ -1,5 +1,6 @@
 {
   "name": "mainnet",
   "isTest": false,
-  "alchemyKey": ""
+  "alchemyKey": "",
+  "fortmaticKey": "pk_live_C02C9E087F8C3588"
 }

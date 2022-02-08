@@ -171,7 +171,8 @@ const Faucet = () => {
               ></ExclamationCircleIcon>
             </>
           )}
-          {status === TxStatusTypes.unsent ? (
+          {status === TxStatusTypes.unsent ||
+          status === TxStatusTypes.sending ? (
             <></>
           ) : (
             <>
