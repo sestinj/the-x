@@ -9,6 +9,9 @@
       "0x0000000000000000000000000000000000000000": "",
       "{{ addresses.testToken1 }}": "",
       "{{ addresses.testToken2 }}": ""
+    },
+    "gsn": {
+      "paymaster": ""
     }
   },
   "alchemyKey": "",

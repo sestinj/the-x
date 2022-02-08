@@ -94,13 +94,25 @@ const Faucet = () => {
     }
   }, [token, signer]);
 
-  const drip = async () => {
-    if (!faucetContract) {
-      return;
-    }
-    const tx = await faucetContract.dripOrDrown();
-    console.log("Tx: ", tx);
-  };
+  // const drip = async () => {
+  //   if (!faucetContract) {
+  //     return;
+  //   }
+  //   const conf = {
+  //     ourContract: faucetContract.address,
+  //     paymaster: config.addresses.gsn.paymaster,
+  //     gasPrice: 20000000000, // 20 Gwei
+  //   };
+  //   let gsnProvider = await new gsn.RelayProvider(window.ethereum, {
+  //     forwarderAddress: conf.forwarder,
+  //     paymasterAddress: conf.paymaster,
+  //     verbose: false,
+  //   }).init();
+  //   provider = new ethers.providers.Web3Provider(gsnProvider);
+  //   userAddr = gsnProvider.origProvider.selectedAddress;
+  //   const tx = await faucetContract.dripOrDrown();
+  //   console.log("Tx: ", tx);
+  // };
 
   const [modalOpen, setModalOpen] = useState(false);
   const { sendTx, status, receipt, tx, error } = useTx(
@@ -223,6 +235,7 @@ const Faucet = () => {
             onClick={() => {
               sendTx();
               setModalOpen(true);
+              // drip();
             }}
             style={{ borderRadius: "0", margin: "0", height: "100%" }}
           >
