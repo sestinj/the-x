@@ -1,6 +1,10 @@
-import { Swap as NewSwapEvent } from "../../generated/templates/Erc20Dex/Erc20Dex";
-import { Swap, Pair } from "../../generated/schema";
 import { BigDecimal, log } from "@graphprotocol/graph-ts";
+import { LiquidityPosition, Pair, Swap, User } from "../../generated/schema";
+import {
+  LiquidityAdd as LiquidityAddEvent,
+  LiquidityRemoval as LiquidityRemovalEvent,
+  Swap as NewSwapEvent,
+} from "../../generated/templates/Erc20Dex/Erc20Dex";
 
 export function handleSwap(event: NewSwapEvent): void {
   const shift = BigDecimal.fromString(
@@ -29,4 +33,43 @@ export function handleSwap(event: NewSwapEvent): void {
     pair.price = swap.newPrice;
     pair.save();
   }
+}
+
+export function handleLiquidityAdd(event: LiquidityAddEvent): void {
+  let liquidityPosition = LiquidityPosition.load(
+    event.params.sender.toHex() + event.address.toHex()
+  );
+  if (liquidityPosition !== null) {
+    liquidityPosition.amount = liquidityPosition.amount.plus(event.params.n);
+  } else {
+    liquidityPosition = new LiquidityPosition(
+      event.params.sender.toHex() + event.address.toHex()
+    ); // Deterministic ID??? UserID + exchangeID
+    liquidityPosition.pair = event.address.toHex();
+    liquidityPosition.amount = event.params.n;
+  }
+  liquidityPosition.save();
+
+  let user = User.load(event.params.sender.toHex());
+  if (user !== null) {
+    user.liquidityPositions = [liquidityPosition.id];
+  } else {
+    user = new User(event.params.sender.toHex());
+    user.liquidityPositions = [liquidityPosition.id];
+    user.address = event.params.sender.toHex();
+    user.swaps = [];
+  }
+  user.save();
+}
+
+export function handleLiquidityRemoval(event: LiquidityRemovalEvent): void {
+  let liquidityPosition = LiquidityPosition.load(
+    event.params.sender.toHex() + event.address.toHex()
+  );
+  if (liquidityPosition !== null) {
+    liquidityPosition.amount = liquidityPosition.amount.minus(event.params.n);
+  } else {
+    // This should never happen
+  }
+  liquidityPosition.save();
 }

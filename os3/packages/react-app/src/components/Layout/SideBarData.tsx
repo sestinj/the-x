@@ -1,5 +1,6 @@
 import {
   CogIcon,
+  CollectionIcon,
   CurrencyDollarIcon,
   FilterIcon,
   HomeIcon,
@@ -19,9 +20,14 @@ export default [
     icon: TrendingUpIcon,
   },
   {
-    title: "Liquidity Pools",
+    title: "Add Token Pair",
     route: "/newpair",
     icon: PlusCircleIcon,
+  },
+  {
+    title: "Liquidity Pools",
+    route: "/pools",
+    icon: CollectionIcon,
   },
   {
     title: "New Personal Token",

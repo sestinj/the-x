@@ -44,3 +44,5 @@ export function getEtherscanUrlTx(txHash: string, network: string) {
   const prefix = network === "mainnet" ? "" : network + ".";
   return `https://${prefix}etherscan.io/tx/${txHash}`;
 }
+
+export { default as validateTokenAmount } from "./validateTokenAmount";

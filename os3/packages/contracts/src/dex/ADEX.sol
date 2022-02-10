@@ -38,6 +38,8 @@ abstract contract ADex {
 
     function setupTokens(address token1Address_, address token2Address_) internal virtual {}
 
+    event LiquidityAdd(address sender, uint256 n, uint128 quantity1, uint128 quantity2);
+
     constructor(address token1Address_, address token2Address_, uint256 quantity1, uint256 quantity2, address sender) payable {
         setupTokens(token1Address_, token2Address_);
 
@@ -52,6 +54,8 @@ abstract contract ADex {
         // Mint initial LTokens
         // TODO Find a better way of choosing this number. Lower means less chance of exceeding 2^256, higher means more precision. Both of these concerns are kind of edge case though.
         lToken.mint(sender, 1_000_000);
+
+        emit LiquidityAdd(msg.sender, 1_000_000, uint128(quantity1), uint128(quantity2));
     }
 
     function getLTokenAddress() public view returns (address) {
@@ -157,8 +161,6 @@ abstract contract ADex {
         // TODO - Swap event needs more info (namely dx)
         emit Swap(msg.sender, dx, dy, dx - keep, p, false, address(token1), address(token2));
     }
-
-    event LiquidityAdd(address sender, uint256 n, uint128 quantity1, uint128 quantity2);
     
     function addLiquidity(uint128 quantity1, uint128 quantity2) payable public {
         console.log('info', x, y);

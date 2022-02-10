@@ -34,4 +34,12 @@ type User @entity {
   id: ID!
   address: String!
   swaps: [Swap!]!
+  liquidityPositions: [LiquidityPosition!]!
+  # foundedPairs: [Pair!]!
+}
+
+type LiquidityPosition @entity {
+  id: ID!
+  pair: Pair!
+  amount: BigInt!
 }

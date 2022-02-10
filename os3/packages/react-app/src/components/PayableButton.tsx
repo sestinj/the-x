@@ -1,8 +1,8 @@
+import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
+import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { Button } from ".";
 import { SignerContext } from "../App";
-import { BigNumber, ethers } from "ethers";
-import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 
 interface PayableButtonProps {
   onClick: () => void;
@@ -71,8 +71,7 @@ const PayableButton = (props: PayableButtonProps) => {
         ? DEFAULT_ALLOWANCE
         : requirement.amount
     );
-    await tx.wait();
-    // TODO - How do I verify it went through?
+    // await tx.wait();
     remainingRequirements.pop();
     if (remainingRequirements.length === 0) {
       setApproved(true);

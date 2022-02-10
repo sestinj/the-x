@@ -5,6 +5,7 @@ import { addTx } from "../../redux/slices/txsSlice";
 
 export enum TxStatusTypes {
   unsent = "Unsent",
+  signerNotFound = "Signer Not Found",
   sending = "Sending",
   pending = "Pending",
   confirmed = "Confirmed",
@@ -17,7 +18,7 @@ export enum TxStatusTypes {
 
 // }
 
-interface UseTxOptions {
+export interface UseTxOptions {
   onSend?: () => void;
   onPending?: (tx: any) => void;
   onConfirm?: (receipt: any) => void;
@@ -28,18 +29,22 @@ interface UseTxOptions {
   description?: string;
 }
 
-function useTx(txFunction: any, options: UseTxOptions, ...args: any[]) {
+function useTx(txFunction: any, options: UseTxOptions) {
   const dispatch = useDispatch();
   const [status, setStatus] = useState<TxStatusTypes>(TxStatusTypes.unsent);
   const [receipt, setReceipt] = useState<any | undefined>(undefined);
   const [tx, setTx] = useState<any | undefined>(undefined);
   const [error, setError] = useState<any | undefined>(undefined);
 
-  async function sendTx() {
+  async function sendTx(...args: any[]) {
     if (!txFunction) {
+      setStatus(TxStatusTypes.signerNotFound);
       return;
     }
-    if (status !== TxStatusTypes.unsent) {
+    if (
+      status !== TxStatusTypes.unsent &&
+      status !== TxStatusTypes.signerNotFound
+    ) {
       return; // Only send once!
     }
 
@@ -48,7 +53,7 @@ function useTx(txFunction: any, options: UseTxOptions, ...args: any[]) {
     }
     setStatus(TxStatusTypes.sending);
 
-    const transaction = await txFunction(args);
+    const transaction = await txFunction(...args);
 
     setTx(Object.create(transaction));
     setStatus(TxStatusTypes.pending);
@@ -60,7 +65,7 @@ function useTx(txFunction: any, options: UseTxOptions, ...args: any[]) {
 
     try {
       const receipt = await transaction.wait();
-      txConfirmed(receipt);
+      txConfirmed(receipt, transaction);
     } catch (err) {
       setStatus(TxStatusTypes.error);
       setError(err);
@@ -70,7 +75,7 @@ function useTx(txFunction: any, options: UseTxOptions, ...args: any[]) {
     }
   }
 
-  async function txConfirmed(receipt: any) {
+  async function txConfirmed(receipt: any, transaction: any) {
     setReceipt(receipt);
     setStatus(TxStatusTypes.confirmed);
     if (options.onConfirm) {
@@ -81,7 +86,7 @@ function useTx(txFunction: any, options: UseTxOptions, ...args: any[]) {
       addAlert({
         title: "Transaction Confirmed",
         message: options.description || "Click here to view on Etherscan",
-        id: tx.hash,
+        id: transaction.hash,
       } as Alert)
     );
   }

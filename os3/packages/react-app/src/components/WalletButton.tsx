@@ -46,10 +46,13 @@ const WalletButton = ({
   const [rendered, setRendered] = useState("");
   const [networkName, setNetworkName] = useState("");
   const [balance, setBalance] = useState("0");
+  const [connected, setConnected] = useState(false);
 
-  async function getWeb3ModalProvider() {
-    const instance = await web3Modal.connect();
-
+  function handleConnection(instance: any) {
+    if (connected) {
+      return;
+    }
+    setConnected(true);
     const web3ModalProvider = new ethers.providers.Web3Provider(instance);
 
     const web3ModalSigner = web3ModalProvider.getSigner();
@@ -78,7 +81,18 @@ const WalletButton = ({
     });
   }
 
+  async function getWeb3ModalProvider() {
+    const instance = await web3Modal.connect();
+
+    handleConnection(instance);
+  }
+
   useEffect(() => {
+    // If a cached provider is found, automatically connect without having to toggle modal
+    if (web3Modal.cachedProvider !== "") {
+      getWeb3ModalProvider();
+    }
+
     // Subscribe to accounts change
     provider.on("accountsChanged", (accounts: string[]) => {
       console.log(accounts);

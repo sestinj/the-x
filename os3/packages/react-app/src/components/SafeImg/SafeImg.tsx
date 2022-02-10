@@ -20,7 +20,7 @@ const SafeImg = (props: SafeImgProps) => {
   return (
     <>
       <StyledImg
-        style={{ ...props.style, filter: exists ? "none" : "invert(1)" }}
+        style={{ filter: exists ? "none" : "invert(1)", ...props.style }}
         src={exists ? address : "logo512.png"}
         onError={() => {
           if (props.address === address) {

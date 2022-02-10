@@ -9,7 +9,7 @@ contract ERC20Faucet is AFaucet {
 
     IERC20 token;
 
-    constructor(address tokenAddress, uint256 dripSize, address forwarder_) AFaucet(forwarder_) {
+    constructor(address tokenAddress, uint256 dripSize) AFaucet() {
         token = IERC20(tokenAddress);
         DRIP_SIZE = dripSize;
     }
