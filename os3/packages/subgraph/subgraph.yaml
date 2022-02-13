@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: CentralDex
-    network: mainnet
+    network: ropsten
     source:
       abi: CentralDex
-      address: "0xcB0f2a13098f8e841e6Adfa5B17Ec00508b27665"
+      address: "0x431378b3ee88FB2338BF2A2Ca7d2c9C289487aa5"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -29,7 +29,7 @@ dataSources:
 templates:
   - name: Erc20Dex
     kind: ethereum/contract
-    network: mainnet
+    network: ropsten
     source:
       abi: Erc20Dex
     mapping:
@@ -52,7 +52,7 @@ templates:
           handler: handleLiquidityRemoval
   - name: ERC20
     kind: ethereum/contract
-    network: mainnet
+    network: ropsten
     source:
       abi: ERC20
     mapping:

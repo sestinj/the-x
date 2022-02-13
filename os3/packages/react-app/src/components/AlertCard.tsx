@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { secondaryDark } from ".";
-import { baseDiv, shadow } from "./classes";
-import { Alert, archiveAlert } from "../redux/slices/alertSlice";
-import { useDispatch } from "react-redux";
 import { XIcon } from "@heroicons/react/outline";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { secondaryDark } from ".";
+import { Alert, archiveAlert } from "../redux/slices/alertSlice";
+import { baseDiv, shadow } from "./classes";
 
 // TODO - you keep writing borderRadius: 8px, so what's the best way to make this a standard? maybe ...notation would be cool
 
@@ -30,6 +30,10 @@ const AlertCard = (props: AlertCardProps) => {
         ...shadow,
         paddingRight: "20px",
         paddingLeft: "20px",
+        cursor: "pointer",
+      }}
+      onClick={() => {
+        window.open(props.alert.actionUrl, "_blank");
       }}
     >
       {/* <FillingBackground></FillingBackground> */}

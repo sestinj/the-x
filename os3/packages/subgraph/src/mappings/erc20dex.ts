@@ -1,4 +1,4 @@
-import { BigDecimal, log } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
 import { LiquidityPosition, Pair, Swap, User } from "../../generated/schema";
 import {
   LiquidityAdd as LiquidityAddEvent,
@@ -31,6 +31,9 @@ export function handleSwap(event: NewSwapEvent): void {
   );
   if (pair !== null) {
     pair.price = swap.newPrice;
+    pair.volume = pair.volume.plus(
+      event.params.quantity2.times(BigInt.fromString("2"))
+    );
     pair.save();
   }
 }

@@ -95,6 +95,11 @@ export const TextInput = styled.input`
   padding: 10px;
   color: white;
   outline: none;
+
+  @media (max-width: 1224px) {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 `;
 
 export const Select = styled.select`

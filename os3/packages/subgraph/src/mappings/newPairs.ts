@@ -1,4 +1,4 @@
-import { BigDecimal } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import { NewPair as NewPairEvent } from "../../generated/CentralDex/CentralDex";
 import { Pair, Token } from "../../generated/schema";
 import { Erc20Dex } from "../../generated/templates";
@@ -12,6 +12,8 @@ export function handleNewPair(event: NewPairEvent): void {
   pair.token2 = address2.toHex();
   pair.address = event.params.dexAddress.toHex();
   pair.price = BigDecimal.fromString("1"); // This isn't accurate, but you have to set it to something and pretty sure this won't have consequences
+  pair.volume = BigInt.fromString("0");
+  pair.tvl = BigInt.fromString("0");
   pair.swaps = [];
   pair.save();
 

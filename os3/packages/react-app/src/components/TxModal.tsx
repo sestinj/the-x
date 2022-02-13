@@ -3,12 +3,14 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/solid";
+import { BigNumber } from "ethers";
 import React from "react";
 import { SpecialButton } from ".";
 import config from "../config/index.json";
 import { getEtherscanUrlTx } from "../libs";
 import useTx, { TxStatusTypes, UseTxOptions } from "../libs/hooks/useTx";
 import Modal from "./Modal";
+import PayableButton from "./PayableButton";
 import Spinner from "./Spinner";
 
 interface TxModalProps {
@@ -19,6 +21,8 @@ interface TxModalProps {
   txFunction: any;
   options: UseTxOptions;
   confirmMessage?: string;
+  requirements?: { address: string; amount: BigNumber }[];
+  spender?: string;
 }
 
 const TxModal = (props: TxModalProps) => {
@@ -38,14 +42,24 @@ const TxModal = (props: TxModalProps) => {
           status === TxStatusTypes.signerNotFound) && (
           <div>
             {props.children}
-            <SpecialButton
+            <PayableButton
+              onClick={() => {
+                sendTx(...props.args);
+              }}
+              requirements={(props.spender && props.requirements) || []}
+              spender={props.spender || ""}
+              style={{ width: "100%", margin: "20px" }}
+            >
+              {props.confirmMessage || "Confirm"}
+            </PayableButton>
+            {/* <SpecialButton
               onClick={() => {
                 sendTx(...props.args);
               }}
               style={{ width: "100%", margin: "20px" }}
             >
               {props.confirmMessage || "Confirm"}
-            </SpecialButton>
+            </SpecialButton> */}
           </div>
         )}
         {status === TxStatusTypes.sending ? (

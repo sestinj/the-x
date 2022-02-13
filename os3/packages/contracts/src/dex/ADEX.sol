@@ -120,7 +120,7 @@ abstract contract ADex {
 
     function buy(uint128 dy) payable public {
         // Verify collection of payment
-        require(dy < y + FUNDS_BUFFER2, "IF");
+        require(dy + FUNDS_BUFFER2 < y, "IF");
         uint128 cost = getCostOfBuying(dy);
         require(transferToken1From(msg.sender, address(this), uint256(cost), msg.value), "NA");
         
@@ -144,7 +144,7 @@ abstract contract ADex {
     function sell(uint128 dy) payable public {
         // Verify collection of payment
         uint128 dx = getCostOfSelling(dy);
-        require(dx < x + FUNDS_BUFFER1, "IF");
+        require(dx + FUNDS_BUFFER1 < x, "IF");
         require(transferToken2From(msg.sender, address(this), uint256(dy), msg.value), "NA");
         
         // Calculate fees, send output
@@ -168,7 +168,7 @@ abstract contract ADex {
         console.log(k);
         console.log(p);
         console.log(Q128x128.fpMul(quantity2, p));
-        require(quantity1 == Q128x128.fpMul(quantity2, p), "UQ");
+        // require(quantity1 == Q128x128.fpMul(quantity2, p), "UQ");
         require(transferToken1From(msg.sender, address(this), uint256(quantity1), msg.value), "NA");
         require(transferToken2From(msg.sender, address(this), uint256(quantity2), msg.value), "NA");
 

@@ -1,7 +1,7 @@
 import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
-import { Button } from ".";
+import { SpecialButton } from ".";
 import { SignerContext } from "../App";
 
 interface PayableButtonProps {
@@ -9,6 +9,7 @@ interface PayableButtonProps {
   requirements: { address: string; amount: BigNumber }[];
   spender: string;
   children: React.ReactNode | string | React.ReactNode[];
+  style?: React.CSSProperties;
 }
 
 const PayableButton = (props: PayableButtonProps) => {
@@ -19,6 +20,9 @@ const PayableButton = (props: PayableButtonProps) => {
 
   useEffect(() => {
     const checkForApproval = async () => {
+      if (props.requirements.length == 0) {
+        setApproved(true);
+      }
       const ownerAddress = await signer?.getAddress();
       if (!ownerAddress || !props.spender) {
         return;
@@ -34,18 +38,18 @@ const PayableButton = (props: PayableButtonProps) => {
           remainingRequirements.pop();
           continue;
         }
-
+        console.log("a", requirement);
         const token = new ethers.Contract(
           requirement.address,
           ERC20.abi,
           signer
         );
-
+        console.log("b");
         const tx: BigNumber = await token.allowance(
           ownerAddress,
           props.spender
         );
-
+        console.log("c");
         if (tx.gt(requirement.amount)) {
           remainingRequirements.pop();
         } else {
@@ -78,15 +82,16 @@ const PayableButton = (props: PayableButtonProps) => {
     }
   };
   return (
-    <Button
+    <SpecialButton
       onClick={approved ? props.onClick : getApproval}
       style={{
-        backgroundColor: approved ? "white" : "#0088ff",
-        color: approved ? "black" : "white",
+        ...props.style,
+        backgroundColor: approved ? "" : "#0088ff",
+        color: approved ? "" : "white",
       }}
     >
       {approved ? props.children : "Approve access to your tokens first"}
-    </Button>
+    </SpecialButton>
   );
 };
 

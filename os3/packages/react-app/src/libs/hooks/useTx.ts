@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { getEtherscanUrlTx } from "..";
+import config from "../../config/index.json";
 import { addAlert, Alert } from "../../redux/slices/alertSlice";
 import { addTx } from "../../redux/slices/txsSlice";
 
@@ -87,6 +89,7 @@ function useTx(txFunction: any, options: UseTxOptions) {
         title: "Transaction Confirmed",
         message: options.description || "Click here to view on Etherscan",
         id: transaction.hash,
+        actionUrl: getEtherscanUrlTx(transaction.hash, config.name),
       } as Alert)
     );
   }

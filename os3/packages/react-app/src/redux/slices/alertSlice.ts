@@ -1,6 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export type Alert = { title: string; message: string; id: string };
+export type Alert = {
+  title: string;
+  message: string;
+  id: string;
+  actionUrl: string;
+};
 
 export const alertSlice = createSlice({
   name: "alerts",

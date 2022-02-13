@@ -19,7 +19,8 @@ import {
   DEFAULT_TOKEN,
   Token as TokenListToken,
 } from "../components/TokenSelect/compileTokenLists";
-import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
+import { getEtherscanUrlTx, isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
+import useMobileMediaQuery from "../libs/hooks/useMobileMediaQuery";
 import { addAlert, Alert } from "../redux/slices/alertSlice";
 import { addTx } from "../redux/slices/txsSlice";
 
@@ -77,6 +78,8 @@ const GET_PAIRS = gql`
 const Exchange = () => {
   const { signer } = useContext(SignerContext);
   const { provider } = useContext(ProviderContext);
+
+  const isMobile = useMobileMediaQuery();
 
   // STATE MANAGEMENT START***********************************************************
   const apolloClient = useApolloClient();
@@ -216,6 +219,7 @@ const Exchange = () => {
           title: `Traded ${token1.symbol} for ${quantity} ${token2.symbol}`,
           message: "View the transaction on Etherscan",
           id: "TODO: THE HASH OF the TRANSACTION" + tx.hash,
+          actionUrl: getEtherscanUrlTx(tx.hash, config.name),
         } as Alert)
       );
       dispatch(addTx(tx.hash)); // TODO same as just above
@@ -290,36 +294,41 @@ const Exchange = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              height: "50px",
+              height: isMobile ? "" : "50px",
+              flexDirection: isMobile ? "column" : "row",
             }}
           >
-            <TokenSelect
-              onChange={(token: TokenListToken) => {
-                setToken1(token);
-                console.log("New Token 1: ", token1);
-              }}
-            ></TokenSelect>
-            <TextInput
-              style={{
-                borderRight: "1px solid white",
-                borderLeft: "1px solid black",
-                height: "100%",
-              }}
-              placeholder={
-                (currentPair?.price || 0 * quantity).toString() +
-                " " +
-                token1.symbol
-              }
-              value={
-                (currentPair?.price || 0 * quantity).toString() +
-                " " +
-                token1.symbol
-              }
-              disabled={true}
-            ></TextInput>
+            <div style={{ display: "flex", alignItems: "stretch" }}>
+              <TokenSelect
+                onChange={(token: TokenListToken) => {
+                  setToken1(token);
+                  console.log("New Token 1: ", token1);
+                }}
+              ></TokenSelect>
+              <TextInput
+                style={{
+                  borderRight: isMobile ? "" : "1px solid white",
+                  borderLeft: isMobile ? "" : "1px solid black",
+                  order: isMobile ? "-1" : "",
+                }}
+                placeholder={
+                  (currentPair?.price || 0 * quantity).toString() +
+                  " " +
+                  token1.symbol
+                }
+                value={
+                  (currentPair?.price || 0 * quantity).toString() +
+                  " " +
+                  token1.symbol
+                }
+                disabled={true}
+              ></TextInput>
+            </div>
             <span
               style={{
                 width: "0px",
+                height: "0px",
+                top: "-16px",
                 display: "inline-block",
                 overflow: "visible",
                 position: "relative",
@@ -335,28 +344,34 @@ const Exchange = () => {
                 setToken2(temp);
               }}
             >
-              ➡️
+              {isMobile ? "⬇️" : "➡️"}
             </span>
-            <TextInput
-              style={{
-                borderLeft: "1px solid white",
-                borderRight: "1px solid black",
-                textAlign: "right",
-                height: "100%",
-              }}
-              placeholder={"0.00 " + token2.symbol}
-              onChange={(ev) => {
-                setQuantity(parseFloat(ev.target.value) || 0);
-              }}
-            ></TextInput>
-            <TokenSelect
-              onChange={(token: TokenListToken) => {
-                setToken2(token);
-                console.log("New Token 2: ", token1);
-              }}
-            ></TokenSelect>
+            <div style={{ display: "flex", alignItems: "stretch" }}>
+              <TextInput
+                style={{
+                  borderLeft: isMobile ? "" : "1px solid white",
+                  borderRight: isMobile ? "" : "1px solid black",
+                  textAlign: "right",
+                }}
+                placeholder={"0.00 " + token2.symbol}
+                onChange={(ev) => {
+                  setQuantity(parseFloat(ev.target.value) || 0);
+                }}
+              ></TextInput>
+              <TokenSelect
+                onChange={(token: TokenListToken) => {
+                  setToken2(token);
+                  console.log("New Token 2: ", token1);
+                }}
+              ></TokenSelect>
+            </div>
             <Button
-              style={{ borderRadius: "0", margin: "0", height: "100%" }}
+              style={{
+                borderRadius: "0",
+                margin: "0",
+                height: "100%",
+                width: isMobile ? "100%" : "",
+              }}
               onClick={
                 currentPair
                   ? submitOrder

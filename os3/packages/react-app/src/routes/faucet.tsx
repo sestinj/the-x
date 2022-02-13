@@ -145,6 +145,8 @@ const Faucet = () => {
           title: `Drip or Drown`,
           description: `Claimed free ${token.symbol} from faucet.`,
         }}
+        requirements={[]}
+        spender=""
       >
         Confirm that you would like to recieve free {token.symbol}.
       </TxModal>

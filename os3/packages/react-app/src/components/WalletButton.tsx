@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import Web3Modal from "web3modal";
 import { Button, P } from ".";
 import config from "../config/index.json";
+import useMobileMediaQuery from "../libs/hooks/useMobileMediaQuery";
 
 // // Example for Polygon/Matic:
 // const customNetworkOptions = {
@@ -47,6 +48,8 @@ const WalletButton = ({
   const [networkName, setNetworkName] = useState("");
   const [balance, setBalance] = useState("0");
   const [connected, setConnected] = useState(false);
+
+  const isMobile = useMobileMediaQuery();
 
   function handleConnection(instance: any) {
     if (connected) {
@@ -117,7 +120,7 @@ const WalletButton = ({
   return (
     <>
       <div style={{ display: "flex" }}>
-        {rendered && <p>Network: {networkName}</p>}
+        {rendered && !isMobile && <p>Network: {networkName}</p>}
 
         <Button
           onClick={async () => {
@@ -129,7 +132,7 @@ const WalletButton = ({
           {rendered !== "" && rendered}
         </Button>
         <br></br>
-        {rendered && (
+        {rendered && !isMobile && (
           <P>
             My Balance:{" "}
             {parseFloat(

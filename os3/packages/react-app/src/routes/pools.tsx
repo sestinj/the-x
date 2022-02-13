@@ -2,7 +2,7 @@ import { gql, useQuery } from "@apollo/client";
 import ADex from "@project/contracts/artifacts/src/dex/ADex.sol/ADex.json";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import config from "@project/react-app/src/config/index.json";
-import { Pair } from "@project/subgraph/generated/schema";
+import { LiquidityPosition, Pair } from "@project/subgraph/generated/schema";
 import { ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -71,7 +71,9 @@ const Pools = () => {
   const [signerAddress, setSignerAddress] = useState("");
 
   const { data: pairData } = useQuery<{ pairs: Pair[] }>(GET_PAIRS);
-  const { data: userPairsData } = useQuery<{ pairs: Pair[] }>(GET_USER_PAIRS, {
+  const { data: userPositionsData } = useQuery<{
+    liquidityPositions: (LiquidityPosition & { pair: Pair })[];
+  }>(GET_USER_PAIRS, {
     variables: { id: signerAddress },
   });
   const [currentPair, setCurrentPair] = useState<Pair | undefined>();
@@ -155,6 +157,17 @@ const Pools = () => {
             (currentPair?.token2 as any)?.symbol
           } to pool.`,
         }}
+        requirements={[
+          {
+            address: (currentPair?.token1 as any)?.address,
+            amount: addData.quantity1,
+          },
+          {
+            address: (currentPair?.token2 as any)?.address,
+            amount: addData.quantity2,
+          },
+        ]}
+        spender={currentPairContract?.address}
       >
         Confirm that you would like to add liquidity.
       </TxModal>
@@ -331,7 +344,57 @@ const Pools = () => {
       )}
 
       <h3>My Liquidity</h3>
-      {/* {userPairsData ? <Table></Table> : "Choose a pair below to invest in your first liquidity pool!"} */}
+      {userPositionsData ? (
+        <Table
+          rowCell={(position: LiquidityPosition & { pair: Pair }) => {
+            return [
+              <div
+                style={{
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  ...baseDiv,
+                  backgroundColor: secondaryDark,
+                }}
+                onClick={() => {
+                  setCurrentPair(position.pair);
+                }}
+              >
+                <SafeImg
+                  // address={currentToken.logoURI}
+                  address="/logo192.png"
+                  style={{
+                    borderRadius: "50%",
+                    width: "30px",
+                    height: "30px",
+                    overflow: "clip",
+                    gridColumn: "1",
+                    filter: "invert(1)",
+                  }}
+                ></SafeImg>
+                {(position.pair.token1 as any)?.symbol}
+                {" / "}
+                {(position.pair.token2 as any)?.symbol}
+                <SafeImg
+                  // address={currentToken.logoURI}
+                  address="/logo192.png"
+                  style={{
+                    borderRadius: "50%",
+                    width: "30px",
+                    height: "30px",
+                    overflow: "clip",
+                    gridColumn: "1",
+                    filter: "invert(1)",
+                  }}
+                ></SafeImg>
+              </div>,
+            ];
+          }}
+          rowData={userPositionsData?.liquidityPositions || []}
+        ></Table>
+      ) : (
+        "Choose a pair below to invest in your first liquidity pool!"
+      )}
       <h3>All Pools</h3>
       <Table
         rowCell={(pair: Pair) => {
