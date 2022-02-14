@@ -20,6 +20,8 @@ export enum TxStatusTypes {
 
 // }
 
+// TODO - It would be nice if you could overwrite the title and description as you send the tx with pertinent info. Might use spread operator to overwrite options, give an additional UseTxOptions argument in the sendTx function
+
 export interface UseTxOptions {
   onSend?: () => void;
   onPending?: (tx: any) => void;

@@ -2,74 +2,79 @@
 
 pragma solidity ^0.8.0;
 
-import './ERC20.sol';
+import './AAuction.sol';
+import './ManagedToken.sol'; // Go back later and make an interface so this is less heavy?
 
-contract ICO is ERC20 {
+contract FixedPriceAuction is AAuction {
 
     // should we keep some of the token as liquidity for the exchange automatically? There has to be a market from the start and that won't necessarily happen if you just sell some initial tokens.
 
-    address owner;
+    uint256 public price;
 
-    uint256 public icoPrice;
+    bool public open;
 
-    bool public icoOpen;
-
-    uint256 public icoSupply;
+    uint256 public supply;
 
     // This is the percentage of the total token amount to be owned by the token owner at the beginning.
     // Though token supply is dynamic (with fixed price) during ICO, this is a constant.
+    // Eventually make this more complex so you can have multiple initial shareholders. this is like the cap table
     uint256 public personalStake;
 
-    struct ICOPurchase {
+    struct Purchase {
         address purchaser;
         uint256 amount;
     }
 
-    ICOPurchase[] public icoPurchases;
+    Purchase[] public purchases;
+
+    ManagedToken internal token;
 
     /**
     @dev As of now the ICO is opened immediately upon construction, but there may be a
     use case where you want to initialize the ICO and be able to alter the supply/price
     before finalizing and opening.
      */
-    function openICO() internal {
-        icoOpen = true;
+    function setOpen() internal {
+        open = true;
     }
+
+    event AuctionClosed();
 
     /**
     * @dev Transfers purchased tokens to purchasers, and purchasing funds to token owner.
     **/
-    function closeICO() public {
-        require(msg.sender == owner, "You do not have permission to close the ICO.");
-        icoOpen = false;
-        for (uint i; i < icoPurchases.length; i++) {
+    function setClosed() public {
+        require(msg.sender == owner, "NP");
+        open = false;
+        for (uint i; i < purchases.length; i++) {
             // Mint tokens to each purchaser
-            _mint(icoPurchases[i].purchaser, icoPurchases[i].amount);
+            token.mint(purchases[i].purchaser, purchases[i].amount);
         }
         // Calculate personal stake to give to owner
         // TODO: How do I work with fractions? personalStake is a fraction?
         // Also this is the wrong calculation
-        _mint(owner, personalStake*icoSupply);
+        token.mint(owner, personalStake * supply);
         // Isn't transfer the preferred way to send Ether?
-        (bool sent,) = owner.call{value: icoSupply*icoPrice}("");
-        require(sent, "Failed to transfer proceeds to owner.");
+        (bool sent,) = owner.call{value: supply * price}("");
+        require(sent, "TF");
+        emit AuctionClosed();
     }
 
-    constructor(string memory name_, string memory symbol_, address owner_, uint256 icoPrice_, uint256 personalStake_) ERC20(name_, symbol_) {
+    constructor(string memory name_, string memory symbol_, address owner_, uint256 price_, uint256 personalStake_) {
         owner = owner_;
-        icoPrice = icoPrice_;
+        price = price_;
         personalStake = personalStake_;
-        openICO();
+        token = new ManagedToken(name_, symbol_, address(this));
+        setOpen();
     }
 
-    event IcoPurchase(address purchaser, uint256 amount);
+    event PurchaseEvent(address purchaser, uint256 amount);
 
-    function purchase(uint256 amount) payable public {
-        // Or just make this parameterless.
-        require(amount*icoPrice == msg.value, "Transaction value must match amount parameter times price.");
-        icoPurchases.push(ICOPurchase(msg.sender, amount));
-        icoSupply += amount;
-        emit IcoPurchase(msg.sender, amount);
+    function purchase() payable public {
+        uint256 amount = msg.value / price;
+        purchases.push(Purchase(msg.sender, amount));
+        supply += amount;
+        emit PurchaseEvent(msg.sender, amount);
     }
 
     /**
@@ -77,9 +82,9 @@ contract ICO is ERC20 {
     the purchasers will be payed back.
      */
     function bail() internal {
-        for (uint i; i < icoPurchases.length; i++) {
-            (bool sent,) = icoPurchases[i].purchaser.call{value: icoPurchases[i].amount}("");
-            require(sent, "Failed to pay back purchaser.");
+        for (uint i; i < purchases.length; i++) {
+            (bool sent,) = purchases[i].purchaser.call{value: purchases[i].amount}("");
+            require(sent, "TF");
         }
     }
 

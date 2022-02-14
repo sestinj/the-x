@@ -26,6 +26,28 @@ dataSources:
           handler: handleNewPair
       file: ./src/mappings/newPairs.ts
       language: wasm/assemblyscript
+  - kind: ethereum/contract
+    name: AuctionFactory
+    network: {{network}}
+    source:
+      abi: AuctionFactory
+      address: "{{ addresses.auctionFactory }}"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      abis:
+        - name: AuctionFactory
+          file: ../contracts/artifacts/src/auction/AuctionFactory.sol/AuctionFactory.json
+        - name: ERC20
+          file: ../contracts/artifacts/src/Token/ERC20.sol/ERC20.json
+      entities:
+        - AuctionPurchase
+        - Auction
+      eventHandlers:
+        - event: NewAuction(address,address,uint256,address,uint256)
+          handler: handleNewAuction
+      file: ./src/mappings/newAuction.ts
+      language: wasm/assemblyscript
 templates:
   - name: Erc20Dex
     kind: ethereum/contract
@@ -65,3 +87,24 @@ templates:
         - Token
       file: ./src/mappings/newPairs.ts
       language: wasm/assemblyscript
+  - name: FixedPriceAuction
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: FixedPriceAuction
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/auction.ts
+      entities:
+        - Auction
+        - AuctionPurchase
+      abis:
+        - name: FixedPriceAuction
+          file: ../contracts/artifacts/src/auction/FixedPriceAuction.sol/FixedPriceAuction.json
+      eventHandlers:
+        - event: PurchaseEvent(address,uint256)
+          handler: handlePurchase
+        - event: AuctionClosed()
+          handler: handleAuctionClosed

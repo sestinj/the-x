@@ -5,44 +5,55 @@ pragma solidity ^0.8.0;
 abstract contract AAuction {
     address owner;
 
-    uint256 public price;
+    // KEEPING IT SIMPLE FOR NOW. Make something concrete first. Just keeping this here as a reminder.
 
-    bool public open;
+    // uint256 public price;
 
-    uint256 public supply;
+    // bool public open;
 
-    struct Purchase {
-        address purchaser;
-        uint256 amount;
-    }
+    // uint256 public supply;
 
-    Purchase[] public purchases;
+    // struct Purchase {
+    //     address purchaser;
+    //     uint256 amount;
+    // }
 
-    /**
-    @dev As of now the ICO is opened immediately upon construction, but there may be a
-    use case where you want to initialize the ICO and be able to alter the supply/price
-    before finalizing and opening.
-     */
-    function _setOpen() internal {
-        open = true;
-    }
+    // Purchase[] public purchases;
 
-    function setOpen() virtual internal {}
+    // /**
+    // @dev As of now the ICO is opened immediately upon construction, but there may be a
+    // use case where you want to initialize the ICO and be able to alter the supply/price
+    // before finalizing and opening.
+    //  */
+    // function _setOpen() internal {
+    //     open = true;
+    // }
 
-    /**
-    * @dev Transfers purchased tokens to purchasers, and purchasing funds to token owner.
-    **/
-    function _setClosed() internal {
-        require(msg.sender == owner, "You do not have permission to close the ICO.");
-        open = false;
-    }
+    // function setOpen() virtual internal {}
 
-    function setClosed() virtual public {}
+    // /**
+    // * @dev Transfers purchased tokens to purchasers, and purchasing funds to token owner.
+    // **/
+    // function _setClosed() internal {
+    //     require(msg.sender == owner, "You do not have permission to close the ICO.");
+    //     open = false;
+    // }
 
-    constructor(string memory name_, string memory symbol_, address owner_, uint256 icoPrice_, uint256 personalStake_) {
-        // owner = owner_;
-        // icoPrice = icoPrice_;
-        // personalStake = personalStake_;
-        // openICO();
-    }
+    // function setClosed() virtual public {}
+
+    // constructor(string memory name_, string memory symbol_, address owner_, uint256 icoPrice_, uint256 personalStake_) {
+    //     // owner = owner_;
+    //     // icoPrice = icoPrice_;
+    //     // personalStake = personalStake_;
+    //     // openICO();
+    // }
+
+    // event PurchaseEvent(address purchaser, uint256 amount, uint256 price);
+
+    // function purchase(uint256 amount) payable public {
+    //     return;
+    // }
+    // function bail() internal {
+    //     return;
+    // }
 }

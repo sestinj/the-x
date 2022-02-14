@@ -3,6 +3,7 @@
   "name": "mainnet",
   "addresses": {
     "centralDex": "{{ addresses.centralDex }}",
+    "auctionFactory": "{{ addresses.auctionFactory }}",
     "testToken1": "{{ addresses.testToken1 }}",
     "testToken2": "{{ addresses.testToken2 }}",
     "faucets": {

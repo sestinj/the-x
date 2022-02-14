@@ -45,3 +45,20 @@ type LiquidityPosition @entity {
   pair: Pair!
   amount: BigInt!
 }
+
+type Auction @entity {
+  id: ID!
+  owner: String!
+  price: BigInt!
+  supply: BigInt!
+  open: Boolean!
+  personalStake: BigInt!
+  purchases: [AuctionPurchase!]!
+  tokenAddress: String!
+}
+
+type AuctionPurchase @entity {
+  id: ID!
+  purchaser: String!
+  amount: BigInt!
+}

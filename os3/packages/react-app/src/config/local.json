@@ -2,13 +2,14 @@
   "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
   "name": "mainnet",
   "addresses": {
-    "centralDex": "0xA997528Ea5f84E30BF4316D2A7123243e4AD5F13",
-    "testToken1": "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
-    "testToken2": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+    "centralDex": "0xA7c59f010700930003b33aB25a7a0679C860f29c",
+    "auctionFactory": "0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c",
+    "testToken1": "0x18E317A7D70d8fBf8e6E893616b52390EbBdb629",
+    "testToken2": "0x4b6aB5F819A515382B0dEB6935D793817bB4af28",
     "faucets": {
       "0x0000000000000000000000000000000000000000": "",
-      "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3": "",
-      "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0": ""
+      "0x18E317A7D70d8fBf8e6E893616b52390EbBdb629": "",
+      "0x4b6aB5F819A515382B0dEB6935D793817bB4af28": ""
     },
     "gsn": {
       "paymaster": ""

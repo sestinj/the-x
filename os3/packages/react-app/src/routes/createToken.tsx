@@ -1,37 +1,49 @@
-import React, { useContext } from "react";
+import AuctionFactory from "@project/contracts/artifacts/src/auction/AuctionFactory.sol/AuctionFactory.json";
+import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
-import IcoFactory from "@project/contracts/artifacts/src/Token/TokenFactory.sol/TokenFactory.json";
-import { ethers } from "ethers";
-import addresses from "@project/contracts/src/addresses";
 import { SignerContext } from "../App";
-import { Submit, TextInput } from "../components";
+import { primaryHighlight, Submit, TextInput } from "../components";
 import Hr from "../components/Hr";
+import Info from "../components/Info";
 import Layout from "../components/Layout";
-import { primaryHighlight } from "../components";
+import TxModal from "../components/TxModal";
+import config from "../config/index.json";
+import { useContract } from "../libs";
 
 const CreateToken = () => {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, watch } = useForm();
+  const data = watch(); // honestly get your shit together
   const { signer } = useContext(SignerContext);
 
-  const onSubmit = async (data: any) => {
-    const icoFactoryContract = new ethers.Contract(
-      addresses.icoFactory,
-      IcoFactory.abi,
-      signer
-    );
-    const tx = await icoFactoryContract.createNewIco(
-      data.name,
-      data.symbol,
-      data.icoPrice,
-      data.owner,
-      data.personalStake
-    );
-    console.log(tx.toString());
-  };
+  const factoryContract = useContract(
+    config.addresses.auctionFactory,
+    AuctionFactory.abi,
+    signer
+  );
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
       <Layout>
+        <TxModal
+          open={modalOpen}
+          closeModal={() => {
+            setModalOpen(false);
+          }}
+          args={[
+            data.name,
+            data.symbol,
+            data.price,
+            data.owner,
+            data.personalStake,
+          ]}
+          txFunction={factoryContract.createNewAuction}
+          options={{ title: "New Auction Created", description: "Description" }}
+        >
+          Confirm that you want to create a new token.
+        </TxModal>
+
         <h1
           style={{
             marginBottom: "-20px",
@@ -56,7 +68,9 @@ const CreateToken = () => {
               margin: "auto",
               width: "50%",
             }}
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={() => {
+              setModalOpen(true);
+            }}
           >
             <label htmlFor="tokenSymbol">Token Symbol</label>
             <br></br>
@@ -76,16 +90,6 @@ const CreateToken = () => {
             ></TextInput>
             <br></br>
             <br></br>
-            <label htmlFor="initialVolume">Initial Volume</label>
-            <br></br>
-            <TextInput
-              id="initialVolume"
-              type="number"
-              placeholder="1,000,000"
-              {...register("initialVolume")}
-            ></TextInput>
-            <br></br>
-            <br></br>
             <label htmlFor="personalStake">Personal Stake</label>
             <br></br>
             <TextInput
@@ -95,13 +99,18 @@ const CreateToken = () => {
             ></TextInput>
             <br></br>
             <br></br>
-            <label htmlFor="tokenPrice">Token Price</label>
+            <label htmlFor="price">Auction Price</label>
+            <Info>
+              This is the static price of the token during the auction. Once the
+              auction ends, the price of the token will be determined by the
+              markets.
+            </Info>
             <br></br>
             <TextInput
-              id="tokenPrice"
+              id="price"
               placeholder="1.00"
               type="number"
-              {...register("tokenPrice")}
+              {...register("price")}
             ></TextInput>
             <br></br>
             <br></br>

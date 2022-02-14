@@ -1,6 +1,7 @@
 {
   "network": "mainnet",
   "addresses": {
-    "centralDex": "{{ addresses.centralDex }}"
+    "centralDex": "{{ addresses.centralDex }}",
+    "auctionFactory": "{{ addresses.auctionFactory }}"
   }
 }

@@ -1,5 +1,22 @@
 import { exec } from "child_process";
+import { ethers } from "hardhat";
+import util from "util";
 import config from "../../../../config.json";
+
+const waitForExec = util.promisify(exec);
+
+export const deployContract = async (
+  name: string,
+  configUpdate: (oldConfig: any, address: string) => any
+) => {
+  const ContractFactory = await ethers.getContractFactory(name);
+  const contract = await ContractFactory.deploy();
+  await contract.deployed();
+
+  await updateConfig((oldConfig) => configUpdate(oldConfig, contract.address));
+
+  return contract;
+};
 
 export const fullDeployment = async (ethers: any) => {
   const FErc20Dex = await ethers.getContractFactory("FErc20Dex");
@@ -29,13 +46,15 @@ export const fullDeployment = async (ethers: any) => {
   return centralDex;
 };
 
-export const updateConfig = (updater: (oldConfig: any) => any): void => {
+export const updateConfig = async (
+  updater: (oldConfig: any) => any
+): Promise<void> => {
   const newConfig = updater(config);
   const stringified = JSON.stringify(newConfig);
-  console.log("CONFIG: ", newConfig, stringified);
-  exec(`cd ../.. && echo '${stringified}' > config.json`);
-  exec(`cd ../react-app && npm run prepare:local`);
-  exec(`cd ../subgraph && npm run prepare:local`);
+  // console.log("CONFIG: ", newConfig, stringified);
+  await waitForExec(`cd ../.. && echo '${stringified}' > config.json`);
+  await waitForExec(`cd ../react-app && npm run prepare:local`);
+  await waitForExec(`cd ../subgraph && npm run prepare:local`);
 };
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
