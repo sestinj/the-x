@@ -1,25 +1,25 @@
-import "./index.css";
-
 import { ApolloProvider, InMemoryCache } from "@apollo/react-hooks";
 import ApolloClient from "apollo-boost";
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-
-import App from "./App";
-import Home from "./routes/home";
-import Exchange from "./routes/exchange";
-import CreateToken from "./routes/createToken";
-import ManageToken from "./routes/manageToken";
-import Offerings from "./routes/offerings";
-import Config from "./config/index.json";
-import Store from "./app/store";
 import { Provider } from "react-redux";
-import NewPair from "./routes/newpair";
-import Pools from "./routes/pools";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import App from "./App";
+import Store from "./app/store";
+import Config from "./config/index.json";
+import "./index.css";
+import AuctionPage from "./routes/auctions/auction";
+import Auctions from "./routes/auctions/index";
+import CreateToken from "./routes/createToken";
 import Dashboard from "./routes/dashboard";
-import Notifications from "./routes/notifications";
+import Exchange from "./routes/exchange";
 import Faucet from "./routes/faucet";
+import Home from "./routes/home";
+import ManageToken from "./routes/manageToken";
+import NewPair from "./routes/newpair";
+import Notifications from "./routes/notifications";
+import Offerings from "./routes/offerings";
+import Pools from "./routes/pools";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -46,6 +46,8 @@ ReactDOM.render(
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="faucet" element={<Faucet />} />
+            <Route path="auctions" element={<Auctions />} />
+            <Route path="auctions/:auctionId" element={<AuctionPage />} />
           </Routes>
         </BrowserRouter>
       </App>

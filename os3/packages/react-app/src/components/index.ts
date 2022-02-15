@@ -15,6 +15,13 @@ export const Header = styled.header`
   justify-content: flex-end;
   color: white;
   padding-right: 20px;
+
+  & ::selection {
+    background: ${primaryHighlight}; /* WebKit/Blink Browsers */
+  }
+  & ::-moz-selection {
+    background: ${primaryHighlight}; /* Gecko Browsers */
+  }
 `;
 
 export const Body = styled.div`
@@ -26,6 +33,13 @@ export const Body = styled.div`
   font-size: 14px;
   justify-content: center;
   min-height: calc(100vh - 70px);
+
+  & ::selection {
+    background: ${primaryHighlight}; /* WebKit/Blink Browsers */
+  }
+  & ::-moz-selection {
+    background: ${primaryHighlight}; /* Gecko Browsers */
+  }
 `;
 
 export const Image = styled.img`
