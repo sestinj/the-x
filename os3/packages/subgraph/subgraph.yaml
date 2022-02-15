@@ -9,7 +9,7 @@ dataSources:
     network: mainnet
     source:
       abi: CentralDex
-      address: "0xA7c59f010700930003b33aB25a7a0679C860f29c"
+      address: "0x2b5A4e5493d4a54E717057B127cf0C000C876f9B"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -31,7 +31,7 @@ dataSources:
     network: mainnet
     source:
       abi: AuctionFactory
-      address: "0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c"
+      address: "0x413b1AfCa96a3df5A686d8BFBF93d30688a7f7D9"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -46,6 +46,8 @@ dataSources:
       eventHandlers:
         - event: NewAuction(address,address,uint256,address,uint256)
           handler: handleNewAuction
+        - event: NewManagedToken(address,string,string,address)
+          handler: handleNewManagedToken
       file: ./src/mappings/newAuction.ts
       language: wasm/assemblyscript
 templates:
@@ -100,6 +102,7 @@ templates:
       entities:
         - Auction
         - AuctionPurchase
+        - Token
       abis:
         - name: FixedPriceAuction
           file: ../contracts/artifacts/src/auction/FixedPriceAuction.sol/FixedPriceAuction.json

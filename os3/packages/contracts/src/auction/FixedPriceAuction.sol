@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import './AAuction.sol';
 import './ManagedToken.sol'; // Go back later and make an interface so this is less heavy?
+import 'hardhat/console.sol';
 
 contract FixedPriceAuction is AAuction {
 
@@ -53,18 +54,18 @@ contract FixedPriceAuction is AAuction {
         // Calculate personal stake to give to owner
         // TODO: How do I work with fractions? personalStake is a fraction?
         // Also this is the wrong calculation
-        token.mint(owner, personalStake * supply);
+        token.mint(owner, personalStake * supply / 100);
         // Isn't transfer the preferred way to send Ether?
         (bool sent,) = owner.call{value: supply * price}("");
         require(sent, "TF");
         emit AuctionClosed();
     }
 
-    constructor(string memory name_, string memory symbol_, address owner_, uint256 price_, uint256 personalStake_) {
+    constructor(string memory name_, string memory symbol_, address owner_, uint256 price_, uint256 personalStake_, address tokenAddress_) {
         owner = owner_;
         price = price_;
         personalStake = personalStake_;
-        token = new ManagedToken(name_, symbol_, address(this));
+        token = ManagedToken(tokenAddress_);
         setOpen();
     }
 

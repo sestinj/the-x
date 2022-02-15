@@ -1,8 +1,10 @@
 import { gql, useQuery } from "@apollo/client";
-import React, { useEffect, useRef } from "react";
-import Layout from "../components/Layout";
+import React from "react";
 import Plot from "react-plotly.js";
 import { backgroundColor, Button, Link, primaryHighlight } from "../components";
+import Layout from "../components/Layout";
+
+// TODO - add a token image URL, etc... Description for auction page, etc... THis might be how you can introduce an IPFS file hosting tool
 
 const ManageToken = () => {
   const { loading, error, data: tokenData } = useQuery(

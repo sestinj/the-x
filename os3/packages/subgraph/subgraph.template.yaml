@@ -46,6 +46,8 @@ dataSources:
       eventHandlers:
         - event: NewAuction(address,address,uint256,address,uint256)
           handler: handleNewAuction
+        - event: NewManagedToken(address,string,string,address)
+          handler: handleNewManagedToken
       file: ./src/mappings/newAuction.ts
       language: wasm/assemblyscript
 templates:
@@ -100,6 +102,7 @@ templates:
       entities:
         - Auction
         - AuctionPurchase
+        - Token
       abis:
         - name: FixedPriceAuction
           file: ../contracts/artifacts/src/auction/FixedPriceAuction.sol/FixedPriceAuction.json

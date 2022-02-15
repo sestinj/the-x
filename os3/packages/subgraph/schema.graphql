@@ -54,7 +54,7 @@ type Auction @entity {
   open: Boolean!
   personalStake: BigInt!
   purchases: [AuctionPurchase!]!
-  tokenAddress: String!
+  token: Token!
 }
 
 type AuctionPurchase @entity {

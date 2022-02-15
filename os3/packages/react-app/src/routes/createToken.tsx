@@ -2,7 +2,7 @@ import AuctionFactory from "@project/contracts/artifacts/src/auction/AuctionFact
 import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { SignerContext } from "../App";
-import { primaryHighlight, Submit, TextInput } from "../components";
+import { Button, primaryHighlight, TextInput } from "../components";
 import Hr from "../components/Hr";
 import Info from "../components/Info";
 import Layout from "../components/Layout";
@@ -55,7 +55,7 @@ const CreateToken = () => {
         <h6>Cash Out on Your Potential, Kickstart Your Career</h6>
 
         <div style={{ paddingLeft: "10%", paddingRight: "10%" }}>
-          <form
+          <div
             style={{
               border: "2px solid white",
               borderRadius: "8px",
@@ -67,9 +67,6 @@ const CreateToken = () => {
               padding: "20px",
               margin: "auto",
               width: "50%",
-            }}
-            onSubmit={() => {
-              setModalOpen(true);
             }}
           >
             <label htmlFor="tokenSymbol">Token Symbol</label>
@@ -125,8 +122,15 @@ const CreateToken = () => {
             <br></br>
 
             <p>This will give you $X worth of tokens.</p>
-            <Submit />
-          </form>
+            <Button
+              onClick={() => {
+                console.log("factory address: ", factoryContract.address);
+                setModalOpen(true);
+              }}
+            >
+              Create Token
+            </Button>
+          </div>
           <br></br>
           <div style={{ textAlign: "center" }}>
             <Hr></Hr>

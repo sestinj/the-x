@@ -17,10 +17,14 @@ async function main() {
     return oldConfig;
   });
 
-  await deployContract("AuctionFactory", (oldConfig: any, address: string) => {
-    oldConfig.addresses.auctionFactory = address;
-    return oldConfig;
-  });
+  const auctionFactoryContract = await deployContract(
+    "AuctionFactory",
+    (oldConfig: any, address: string) => {
+      oldConfig.addresses.auctionFactory = address;
+      return oldConfig;
+    }
+  );
+  console.log(`Deployed Auction factory to ${auctionFactoryContract.address}`);
 }
 main()
   .then(() => process.exit(0))

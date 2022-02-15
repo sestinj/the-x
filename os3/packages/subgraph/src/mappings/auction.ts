@@ -4,7 +4,7 @@ import {
   PurchaseEvent as NewPurchaseEvent,
 } from "../../generated/templates/FixedPriceAuction/FixedPriceAuction";
 
-export function handleNewAuction(event: NewPurchaseEvent): void {
+export function handlePurchase(event: NewPurchaseEvent): void {
   let auction = Auction.load(event.address.toHex());
 
   auction.supply = auction.supply.plus(event.params.amount);

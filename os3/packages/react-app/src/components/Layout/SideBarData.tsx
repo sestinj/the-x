@@ -4,6 +4,7 @@ import {
   CurrencyDollarIcon,
   FilterIcon,
   HomeIcon,
+  LightningBoltIcon,
   PlusCircleIcon,
   TrendingUpIcon,
 } from "@heroicons/react/solid";
@@ -43,6 +44,11 @@ export default [
     title: "Faucet",
     route: "/faucet",
     icon: FilterIcon,
+  },
+  {
+    title: "Auctions",
+    route: "/auctions",
+    icon: LightningBoltIcon,
   },
   // {
   //   title: "Notifications",
