@@ -1,5 +1,7 @@
 import { gql, useApolloClient, useQuery } from "@apollo/client";
+import FixedPriceAuction from "@project/contracts/artifacts/src/auction/FixedPriceAuction.sol/FixedPriceAuction.json";
 import { Auction } from "@project/subgraph/generated/schema";
+import { ethers } from "ethers";
 import React, { useContext, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -8,13 +10,17 @@ import { Button, secondaryDark, TextInput } from "../../components";
 import { baseDiv } from "../../components/classes";
 import Layout from "../../components/Layout";
 import Table from "../../components/Table";
+import Timer from "../../components/Timer";
+import TxModal from "../../components/TxModal";
+import useContract from "../../libs/hooks/useContract";
 import useMobileMediaQuery from "../../libs/hooks/useMobileMediaQuery";
-import useTimer from "../../libs/hooks/useTimer";
 
 const GET_AUCTION = gql`
   query getAuctions($id: ID!) {
     auction(id: $id) {
       id
+      endDate
+      startDate
       owner
       price
       supply
@@ -29,6 +35,7 @@ const GET_AUCTION = gql`
       purchases {
         id
         purchaser
+        blockNumber
         amount
       }
     }
@@ -48,19 +55,73 @@ const AuctionPage = () => {
 
   const { data: auctionData } = useQuery<{
     auction: Auction & {
-      purchases: { id: string; amount: BigInt; purchaser: string }[];
+      purchases: {
+        id: string;
+        amount: BigInt;
+        purchaser: string;
+        blockNumber: BigInt;
+      }[];
+      token: { id: string; address: string; symbol: string; name: string };
     };
   }>(GET_AUCTION, { variables: { id: auctionId } });
 
-  const [eth, setEth] = useState(0);
+  const auctionContract = useContract(
+    auctionData?.auction.id || "",
+    FixedPriceAuction.abi,
+    signer
+  );
 
-  const time = useTimer(new Date(auctionData?.auction.endDate || ""));
+  const [eth, setEth] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <Layout>
-      <h2>{}</h2>
+      <TxModal
+        open={modalOpen}
+        closeModal={() => {
+          setModalOpen(false);
+        }}
+        args={[]}
+        txFunction={auctionContract?.purchase}
+        options={{ value: ethers.utils.parseEther(eth.toString()) }}
+      >
+        Confirm that you want to purchase {auctionData?.auction.token.symbol}{" "}
+        tokens for {eth.toString()}.
+      </TxModal>
+
+      <div style={{ display: "grid", gridTemplate: "auto / auto auto" }}>
+        <div style={{ gridColumn: "1" }}>
+          <h1>{auctionData?.auction.token.name}</h1>
+          <h2>{auctionData?.auction.token.symbol}</h2>
+        </div>
+
+        <div
+          style={{
+            border: auctionData?.auction.open
+              ? "2px solid green"
+              : "2px solid gray",
+            ...baseDiv,
+            gridColumn: "2",
+          }}
+        >
+          {auctionData?.auction.open ? (
+            <Timer
+              endDate={
+                new Date(
+                  parseFloat(
+                    ((auctionData?.auction.endDate as any) as string) || ""
+                  ) * 1000
+                )
+              }
+            ></Timer>
+          ) : (
+            "Auction Complete"
+          )}
+        </div>
+      </div>
+
       <h1>Auction</h1>
-      {console.log(auctionId, auctionData)}
+      <p>{auctionData?.auction.type}</p>
 
       <div
         style={{
@@ -107,7 +168,12 @@ const AuctionPage = () => {
               : "0.00"
           } ${(auctionData?.auction as any)?.token.symbol}`}
         ></TextInput>
-        <Button style={{ margin: "0", borderRadius: "0" }} onClick={() => {}}>
+        <Button
+          style={{ margin: "0", borderRadius: "0" }}
+          onClick={() => {
+            setModalOpen(true);
+          }}
+        >
           Purchase
         </Button>
       </div>
@@ -122,9 +188,13 @@ const AuctionPage = () => {
       <Table
         rowData={auctionData?.auction.purchases || []}
         rowCell={(data) => {
-          return [data.purchaser, data.amount];
+          return [
+            data.purchaser,
+            ethers.utils.formatEther(data.amount.toString()),
+            data.blockNumber.toString(),
+          ];
         }}
-        rowHeaders={["Address", "Tokens Purchased"]}
+        rowHeaders={["Address", "Tokens Purchased", "Block Number"]}
         style={{
           backgroundColor: secondaryDark,
           ...baseDiv,

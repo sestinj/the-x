@@ -19,7 +19,8 @@ import {
   DEFAULT_TOKEN,
   Token as TokenListToken,
 } from "../components/TokenSelect/compileTokenLists";
-import { getEtherscanUrlTx, isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
+import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
+import { getEtherscanUrlTx } from "../libs/etherscan/index";
 import useMobileMediaQuery from "../libs/hooks/useMobileMediaQuery";
 import { addAlert, Alert } from "../redux/slices/alertSlice";
 import { addTx } from "../redux/slices/txsSlice";
@@ -41,6 +42,15 @@ const TOKEN_FRAG = gql`
     name
     symbol
     address
+  }
+`;
+
+const GET_PRICE_HISTORY = gql`
+  query priceHistory($id: ID!) {
+    pair(id: $id) {
+      id
+      priceHistory
+    }
   }
 `;
 

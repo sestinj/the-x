@@ -12,6 +12,7 @@ export function handlePurchase(event: NewPurchaseEvent): void {
   let purchase = new AuctionPurchase(event.transaction.hash.toHex());
   purchase.amount = event.params.amount;
   purchase.purchaser = event.params.purchaser.toHex();
+  purchase.blockNumber = event.block.number;
   purchase.save();
 
   auction.purchases = [event.transaction.hash.toHex()];

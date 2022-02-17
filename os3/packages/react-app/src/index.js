@@ -20,6 +20,7 @@ import NewPair from "./routes/newpair";
 import Notifications from "./routes/notifications";
 import Offerings from "./routes/offerings";
 import Pools from "./routes/pools";
+import Portfolio from "./routes/portfolio";
 
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
@@ -48,6 +49,7 @@ ReactDOM.render(
             <Route path="faucet" element={<Faucet />} />
             <Route path="auctions" element={<Auctions />} />
             <Route path="auctions/:auctionId" element={<AuctionPage />} />
+            <Route path="portfolio" element={<Portfolio />} />
           </Routes>
         </BrowserRouter>
       </App>

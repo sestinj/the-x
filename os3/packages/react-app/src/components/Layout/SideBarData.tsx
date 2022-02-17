@@ -1,4 +1,5 @@
 import {
+  ChartPieIcon,
   CogIcon,
   CollectionIcon,
   CurrencyDollarIcon,
@@ -49,6 +50,11 @@ export default [
     title: "Auctions",
     route: "/auctions",
     icon: LightningBoltIcon,
+  },
+  {
+    title: "Portfolio",
+    route: "/portfolio",
+    icon: ChartPieIcon,
   },
   // {
   //   title: "Notifications",

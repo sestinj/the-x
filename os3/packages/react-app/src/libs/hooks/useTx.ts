@@ -1,9 +1,10 @@
+import { BigNumber } from "ethers";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { getEtherscanUrlTx } from "..";
 import config from "../../config/index.json";
 import { addAlert, Alert } from "../../redux/slices/alertSlice";
 import { addTx } from "../../redux/slices/txsSlice";
+import { getEtherscanUrlTx } from "../etherscan/index";
 
 export enum TxStatusTypes {
   unsent = "Unsent",
@@ -31,6 +32,7 @@ export interface UseTxOptions {
   onError?: (err: any) => void;
   title?: string;
   description?: string;
+  value?: BigNumber;
 }
 
 function useTx(txFunction: any, options: UseTxOptions) {
@@ -57,7 +59,7 @@ function useTx(txFunction: any, options: UseTxOptions) {
     }
     setStatus(TxStatusTypes.sending);
 
-    const transaction = await txFunction(...args);
+    const transaction = await txFunction(...args, { value: options.value });
 
     setTx(Object.create(transaction));
     setStatus(TxStatusTypes.pending);

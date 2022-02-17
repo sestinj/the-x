@@ -4,6 +4,7 @@ import {
   NewManagedToken as NewManagedTokenEvent,
 } from "../../generated/AuctionFactory/AuctionFactory";
 import { Auction, Token } from "../../generated/schema";
+import { FixedPriceAuction } from "../../generated/templates";
 
 export function handleNewAuction(event: NewAuctionEvent): void {
   let auction = new Auction(event.params.auctionAddress.toHex());
@@ -14,7 +15,15 @@ export function handleNewAuction(event: NewAuctionEvent): void {
   auction.personalStake = event.params.personalStake;
   auction.purchases = [];
   auction.token = event.params.tokenAddress.toHex();
+  auction.description = "";
+  auction.startDate = event.block.timestamp;
+  auction.endDate = event.block.timestamp.plus(
+    BigInt.fromString("864000") // 60 * 60 * 24 * 10
+  );
+  auction.type = "Fixed Price";
   auction.save();
+
+  FixedPriceAuction.create(event.params.auctionAddress);
 }
 
 export function handleNewManagedToken(event: NewManagedTokenEvent): void {

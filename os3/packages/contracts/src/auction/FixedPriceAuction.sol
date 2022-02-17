@@ -75,6 +75,7 @@ contract FixedPriceAuction is AAuction {
         uint256 amount = msg.value / price;
         purchases.push(Purchase(msg.sender, amount));
         supply += amount;
+        console.log("Purchase", msg.sender, amount);
         emit PurchaseEvent(msg.sender, amount);
     }
 

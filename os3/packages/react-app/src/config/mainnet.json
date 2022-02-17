@@ -2,5 +2,6 @@
   "name": "mainnet",
   "isTest": false,
   "alchemyKey": "",
-  "fortmaticKey": "pk_live_C02C9E087F8C3588"
+  "fortmaticKey": "pk_live_C02C9E087F8C3588",
+  "etherscanKey": "797SV3DZ817FFFPVMTB922NJS8MNXNXEZ3"
 }

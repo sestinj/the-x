@@ -25,6 +25,11 @@ const GET_ALL_AUCTIONS = gql`
         purchaser
         amount
       }
+      token {
+        id
+        symbol
+        name
+      }
     }
   }
 `;
@@ -40,7 +45,8 @@ const Auctions = () => {
 
   const { data: auctionData } = useQuery<{
     auctions: (Auction & {
-      purchase: { id: string; amount: BigInt; purchaser: string };
+      purchases: { id: string; amount: BigInt; purchaser: string }[];
+      token: { id: string; address: string; symbol: string; name: string };
     })[];
   }>(GET_ALL_AUCTIONS);
 
@@ -54,9 +60,9 @@ const Auctions = () => {
           ...baseDiv,
         }}
         cellStyle={{ borderTop: "1px solid white", padding: "10px" }}
-        rowHeaders={["Open", "Price (ETH)", "TVL", "Purchasers"]}
+        rowHeaders={["Open", "Symbol", "Price (ETH)", "TVL", "Purchasers"]}
         rowAction={(data) => {
-          window.open(`/auctions/${data.id}`);
+          window.open(`/auctions/${data.id}`, "_self");
         }}
         rowCell={(data) => {
           return [
@@ -69,6 +75,7 @@ const Auctions = () => {
             ) : (
               <XCircleIcon width="30px" height="30px" color="red"></XCircleIcon>
             ),
+            <div>{data.token.symbol}</div>,
             <div>{data.price}</div>,
             <div>
               {parseFloat((data.supply as any) as string) *

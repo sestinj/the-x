@@ -2,14 +2,14 @@
   "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
   "name": "mainnet",
   "addresses": {
-    "centralDex": "0x2b5A4e5493d4a54E717057B127cf0C000C876f9B",
-    "auctionFactory": "0x413b1AfCa96a3df5A686d8BFBF93d30688a7f7D9",
-    "testToken1": "0x74Cf9087AD26D541930BaC724B7ab21bA8F00a27",
-    "testToken2": "0xefAB0Beb0A557E452b398035eA964948c750b2Fd",
+    "centralDex": "0x54B8d8E2455946f2A5B8982283f2359812e815ce",
+    "auctionFactory": "0xf090f16dEc8b6D24082Edd25B1C8D26f2bC86128",
+    "testToken1": "0x02df3a3F960393F5B349E40A599FEda91a7cc1A7",
+    "testToken2": "0x821f3361D454cc98b7555221A06Be563a7E2E0A6",
     "faucets": {
       "0x0000000000000000000000000000000000000000": "",
-      "0x74Cf9087AD26D541930BaC724B7ab21bA8F00a27": "",
-      "0xefAB0Beb0A557E452b398035eA964948c750b2Fd": ""
+      "0x02df3a3F960393F5B349E40A599FEda91a7cc1A7": "",
+      "0x821f3361D454cc98b7555221A06Be563a7E2E0A6": ""
     },
     "gsn": {
       "paymaster": ""
@@ -17,5 +17,6 @@
   },
   "alchemyKey": "",
   "isTest": true,
-  "fortmaticKey": "pk_test_5FBD281126D5508F"
+  "fortmaticKey": "pk_test_5FBD281126D5508F",
+  "etherscanKey": "797SV3DZ817FFFPVMTB922NJS8MNXNXEZ3"
 }

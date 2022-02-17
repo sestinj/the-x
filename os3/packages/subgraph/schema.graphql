@@ -55,10 +55,15 @@ type Auction @entity {
   personalStake: BigInt!
   purchases: [AuctionPurchase!]!
   token: Token!
+  startDate: BigInt!
+  endDate: BigInt!
+  description: String!
+  type: String!
 }
 
 type AuctionPurchase @entity {
   id: ID!
   purchaser: String!
   amount: BigInt!
+  blockNumber: BigInt!
 }

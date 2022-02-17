@@ -7,7 +7,7 @@ import { BigNumber } from "ethers";
 import React from "react";
 import { SpecialButton } from ".";
 import config from "../config/index.json";
-import { getEtherscanUrlTx } from "../libs";
+import { getEtherscanUrlTx } from "../libs/etherscan/index";
 import useTx, { TxStatusTypes, UseTxOptions } from "../libs/hooks/useTx";
 import Modal from "./Modal";
 import PayableButton from "./PayableButton";
