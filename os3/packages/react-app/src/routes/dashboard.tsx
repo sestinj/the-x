@@ -1,17 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
-import { TextInput, primaryHighlight, Button } from "../components";
-import Layout from "../components/Layout";
-import { useForm } from "react-hook-form";
-import { SignerContext } from "../App";
-import { BigNumber, ethers } from "ethers";
-import config from "@project/react-app/src/config/index.json";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
-import PayableButton from "../components/PayableButton";
-import Hr from "../components/Hr";
-import { useQuery } from "@apollo/client";
+import config from "@project/react-app/src/config/index.json";
+import { ethers } from "ethers";
+import React, { useContext, useEffect } from "react";
+import { SignerContext } from "../App";
+import PortfolioPie from "../components/charts/PortfolioPie";
 import TileGrid from "../components/Dashboard/TileGrid";
 import NumberTile from "../components/Dashboard/Tiles/NumberTile";
-import { CheckIcon, PencilIcon } from "@heroicons/react/solid";
+import Tile from "../components/Dashboard/Tiles/Tile";
+import Layout from "../components/Layout";
 
 // Have a concept of tiles (this can also be used on the main user dashboard, and they should be moveable, and thrid parties can make integrations so there is an app store for tiles, just like we talked about at Mayanalytics)
 // Like looker
@@ -44,16 +40,16 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
 
       <TileGrid>
-        <NumberTile
-          value={10000}
-          gridRow="1 / 3"
-          gridColumn="1 / 3"
-        ></NumberTile>
+        <Tile gridRow="1 / 5" gridColumn="1 / 3">
+          <div>
+            <PortfolioPie></PortfolioPie>
+          </div>
+        </Tile>
         <NumberTile value={88} gridRow="7" gridColumn="8"></NumberTile>
         <NumberTile
           value={42069}
-          gridRow="3 / 6"
-          gridColumn="2 / 5"
+          gridRow="5 / 6"
+          gridColumn="4 / 5"
         ></NumberTile>
       </TileGrid>
     </Layout>

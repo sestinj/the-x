@@ -1,5 +1,12 @@
 import { BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
-import { LiquidityPosition, Pair, Swap, User } from "../../generated/schema";
+import {
+  DailyStats,
+  HourlyStats,
+  LiquidityPosition,
+  Pair,
+  Swap,
+  User,
+} from "../../generated/schema";
 import {
   LiquidityAdd as LiquidityAddEvent,
   LiquidityRemoval as LiquidityRemovalEvent,
@@ -18,12 +25,14 @@ export function handleSwap(event: NewSwapEvent): void {
   swap.quantity1 = event.params.quantity1;
   swap.quantity2 = event.params.quantity2;
   swap.fees = event.params.fees;
-  swap.newPrice = BigDecimal.fromString(event.params.newPrice.toString()).div(
+  let newPrice = BigDecimal.fromString(event.params.newPrice.toString()).div(
     shift
   );
+  swap.newPrice = newPrice;
   swap.isForward = event.params.isForward;
   swap.token1 = event.params.token1.toHex();
   swap.token2 = event.params.token2.toHex();
+  swap.timestamp = event.block.timestamp;
   swap.save();
 
   let pair = Pair.load(
@@ -34,6 +43,52 @@ export function handleSwap(event: NewSwapEvent): void {
     pair.volume = pair.volume.plus(
       event.params.quantity2.times(BigInt.fromString("2"))
     );
+
+    let swaps = pair.swaps;
+    swaps.push(swap.id);
+    pair.swaps = swaps;
+
+    // DAILY AND HOURLY STATS
+    let dailyStatsList = pair.dailyStats;
+    let hourlyStatList = pair.hourlyStats;
+
+    let day = event.block.timestamp.div(BigInt.fromI32(60 * 60 * 24));
+    let hour = event.block.timestamp.div(BigInt.fromI32(60 * 60));
+
+    let lastDailyStats = DailyStats.load(pair.lastDailyStats);
+    let lastHourlyStats = HourlyStats.load(pair.lastHourlyStats);
+
+    // for (let i = lastDailyStats.day.toI32() + 1; i < day.toI32(); i++) {
+    //   let dailyStats = new DailyStats(i.toString());
+    //   dailyStats.day = BigInt.fromI32(i);
+    //   dailyStats.price = lastDailyStats.price;
+    //   dailyStats.save();
+    //   dailyStatsList.push(dailyStats.id);
+    // }
+
+    // for (let i = lastHourlyStats.hour.toI32() + 1; i < hour.toI32(); i++) {
+    //   let hourlyStats = new HourlyStats(i.toString());
+    //   hourlyStats.hour = BigInt.fromI32(i);
+    //   hourlyStats.price = lastHourlyStats.price;
+    //   hourlyStats.save();
+    //   hourlyStatList.push(hourlyStats.id);
+    // }
+
+    let dailyStats = new DailyStats(day.toString());
+    dailyStats.day = day;
+    dailyStats.price = newPrice;
+    dailyStats.save();
+    dailyStatsList.push(dailyStats.id);
+
+    let hourlyStats = new HourlyStats(hour.toString());
+    hourlyStats.hour = hour;
+    hourlyStats.price = newPrice;
+    hourlyStats.save();
+    hourlyStatList.push(hourlyStats.id);
+
+    pair.dailyStats = dailyStatsList;
+    pair.hourlyStats = hourlyStatList;
+
     pair.save();
   }
 }

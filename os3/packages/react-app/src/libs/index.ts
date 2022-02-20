@@ -1,5 +1,9 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { useEffect, useState } from "react";
+
+export function weiToEther(wei: BigNumber) {
+  return parseFloat(ethers.utils.formatEther(wei)).toFixed(4);
+}
 
 export const isAddress = (addressCandidate: string) => {
   return (

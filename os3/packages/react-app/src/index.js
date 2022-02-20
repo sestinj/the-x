@@ -47,7 +47,7 @@ ReactDOM.render(
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="faucet" element={<Faucet />} />
-            <Route path="auctions" element={<Auctions />} />
+            <Route path="auctions" element={<Auctions />}></Route>
             <Route path="auctions/:auctionId" element={<AuctionPage />} />
             <Route path="portfolio" element={<Portfolio />} />
           </Routes>

@@ -21,6 +21,8 @@ dataSources:
       entities:
         - Pair
         - Token
+        - HourlyStats
+        - DailyStats
       eventHandlers:
         - event: NewPair(address,address,address)
           handler: handleNewPair
@@ -64,6 +66,9 @@ templates:
       entities:
         - Swap
         - User
+        - Pair
+        - DailyStats
+        - HourlyStats
       abis:
         - name: Erc20Dex
           file: ../contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json

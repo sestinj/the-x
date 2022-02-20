@@ -1,6 +1,7 @@
 {
   "network": "ropsten",
   "addresses": {
-    "centralDex": "0x431378b3ee88FB2338BF2A2Ca7d2c9C289487aa5"
+    "centralDex": "0x431378b3ee88FB2338BF2A2Ca7d2c9C289487aa5",
+    "auctionFactory": "0x7d10B76E20bEf2e0916b3e500B5652B044C3A1b6"
   }
 }

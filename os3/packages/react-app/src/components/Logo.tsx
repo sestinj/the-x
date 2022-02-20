@@ -13,7 +13,7 @@ const Logo = (props: { letter: string }) => {
           setLetter(props.letter);
         }}
         alt={"The X Logo"}
-        src={`${letter}.svg`}
+        src={`/${letter}.svg`}
         style={{
           width: "50px",
           height: "50px",

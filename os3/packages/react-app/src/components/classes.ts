@@ -54,4 +54,12 @@ export function generateGradient(
   return gradient;
 }
 
-export const highlightGradient = generateGradient("#ffffff", "#8800ff", 2);
+export const highlightGradient = generateGradient(
+  "#ffffff",
+  primaryHighlight,
+  2
+);
+
+export function generateHighlightGradient(n: number) {
+  return generateGradient("#ffffff", primaryHighlight, n);
+}

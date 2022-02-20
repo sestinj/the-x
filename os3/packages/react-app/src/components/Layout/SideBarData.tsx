@@ -7,6 +7,7 @@ import {
   HomeIcon,
   LightningBoltIcon,
   PlusCircleIcon,
+  TemplateIcon,
   TrendingUpIcon,
 } from "@heroicons/react/solid";
 
@@ -61,11 +62,11 @@ export default [
   //   route: "/notifications",
   //   icon: BellIcon,
   // },
-  // {
-  //   title: "Dashboard",
-  //   route: "/dashboard",
-  //   icon: TemplateIcon,
-  // },
+  {
+    title: "Dashboard",
+    route: "/dashboard",
+    icon: TemplateIcon,
+  },
   // {
   //   title: "Fundraising",
   //   route: "/fundraise",

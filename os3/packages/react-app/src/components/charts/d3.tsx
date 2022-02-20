@@ -12,7 +12,7 @@ import {
 } from "chart.js";
 import { Line, Pie } from "react-chartjs-2";
 import { primaryHighlight, secondaryDark } from "..";
-import { baseDiv, highlightGradient } from "../classes";
+import { baseDiv, generateHighlightGradient } from "../classes";
 
 ChartJS.register(
   ArcElement,
@@ -44,20 +44,59 @@ export function LineChart(props: {
   labels: string[];
   width: string;
   height: string;
+  x: number[];
+  y: number[];
+  title?: string;
+  xLabel?: string;
+  yLabel?: string;
 }) {
-  const [x, y] = geoBrownianMockData(10);
+  //   const [x, y] = geoBrownianMockData(10);
   return (
-    <div style={{ backgroundColor: secondaryDark, ...baseDiv }}>
+    <div
+      style={{
+        backgroundColor: secondaryDark,
+        ...baseDiv,
+        textAlign: "center",
+      }}
+    >
+      <h3 style={{ margin: "0" }}>{props.title}</h3>
       <Line
+        plugins={
+          {
+            title: {
+              text: props.title,
+            },
+            legend: {
+              display: false,
+            },
+          } as any
+        }
         width={props.width}
+        title={props.title}
         height={props.height}
-        options={{ elements: { point: { radius: 0, hitRadius: 20 } } }}
+        options={{
+          elements: { point: { radius: 0, hitRadius: 20 } },
+          scales: {
+            x: {
+              title: {
+                text: props.xLabel,
+                display: props.xLabel ? true : false,
+              },
+            },
+            y: {
+              title: {
+                text: props.yLabel,
+                display: props.yLabel ? true : false,
+              },
+            },
+          },
+        }}
         data={{
-          labels: x,
+          labels: props.x,
           datasets: [
             {
-              label: "Dataset 1",
-              data: y,
+              label: "Price",
+              data: props.y,
               fill: true,
               borderColor: primaryHighlight,
               backgroundColor: "#0004",
@@ -77,12 +116,17 @@ export function PieChart(props: { data: { label: string; value: number }[] }) {
       {
         label: "Portfolio Breakdown",
         data: props.data.map((datum) => datum.value),
-        backgroundColor: highlightGradient,
+        backgroundColor: generateHighlightGradient(props.data.length),
         hoverOffset: 4,
       },
     ],
   };
-  return <Pie data={dataConfig}></Pie>;
+  return (
+    <Pie
+      data={dataConfig}
+      options={{ responsive: true, maintainAspectRatio: true }}
+    ></Pie>
+  );
 }
 
 // function barChart(data, options: {width?: string, height?: string} = {}) {

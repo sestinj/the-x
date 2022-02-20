@@ -2,15 +2,12 @@ import { gql } from "@apollo/client";
 import { BigNumber } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { SignerContext } from "../App";
-import { PieChart } from "../components/charts/d3";
+import PortfolioPie from "../components/charts/PortfolioPie";
 import Layout from "../components/Layout";
 import Table from "../components/Table";
-import {
-  DEFAULT_TOKEN_LISTS,
-  getTokens,
-  Token,
-} from "../components/TokenSelect/compileTokenLists";
-import { getTokenBalance } from "../libs/etherscan";
+import { Token } from "../components/TokenSelect/compileTokenLists";
+import { weiToEther } from "../libs";
+import { getAllTokenBalances } from "../libs/etherscan";
 
 const GET_USER = gql`
   query getUser($id: ID!) {
@@ -34,18 +31,8 @@ const Portfolio = () => {
 
   useEffect(() => {
     async function getTokenBalances() {
-      const user = await signer?.getAddress();
-      if (!user) {
-        return;
-      }
-      const tokens = await getTokens(DEFAULT_TOKEN_LISTS);
-      const balances = await Promise.all(
-        tokens.map(async (token) => {
-          const balance = await getTokenBalance(token.address, user);
-          return { token, balance };
-        })
-      );
-      setTokenBalances(balances);
+      const balances = await getAllTokenBalances(signer);
+      setTokenBalances(balances as any);
     }
     getTokenBalances();
   }, [signer]);
@@ -65,21 +52,14 @@ const Portfolio = () => {
             rowCell={(data) => {
               return [
                 <div>{data.token.symbol}</div>,
-                <div>{data.balance.toString()}</div>,
+                <div>{weiToEther(data.balance)}</div>,
               ];
             }}
             rowHeaders={["Token", "Balance"]}
           ></Table>
         </div>
         <div style={{ gridColumn: "2" }}>
-          <PieChart
-            data={tokenBalances.map((tokenBalance) => {
-              return {
-                label: tokenBalance.token.symbol,
-                value: tokenBalance.balance.toNumber() || 2,
-              };
-            })}
-          ></PieChart>
+          <PortfolioPie></PortfolioPie>
         </div>
       </div>
     </Layout>

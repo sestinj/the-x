@@ -3,6 +3,7 @@ import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { SpecialButton } from ".";
 import { SignerContext } from "../App";
+import Info from "./Info";
 
 interface PayableButtonProps {
   onClick: () => void;
@@ -90,7 +91,17 @@ const PayableButton = (props: PayableButtonProps) => {
         color: approved ? "" : "white",
       }}
     >
-      {approved ? props.children : "Approve access to your tokens first"}
+      {approved ? (
+        props.children
+      ) : (
+        <div style={{ display: "flex" }}>
+          Approve access to your tokens first
+          <Info style={{ marginLeft: "10px" }}>
+            In order to transfer ERC20 tokens on behalf of you, we must be given
+            an allowance.
+          </Info>
+        </div>
+      )}
     </SpecialButton>
   );
 };

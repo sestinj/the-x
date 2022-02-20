@@ -1,6 +1,6 @@
 import { BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import { NewPair as NewPairEvent } from "../../generated/CentralDex/CentralDex";
-import { Pair, Token } from "../../generated/schema";
+import { DailyStats, HourlyStats, Pair, Token } from "../../generated/schema";
 import { Erc20Dex } from "../../generated/templates";
 import { ERC20 as ERC20Contract } from "../../generated/templates/ERC20/ERC20";
 
@@ -15,6 +15,25 @@ export function handleNewPair(event: NewPairEvent): void {
   pair.volume = BigInt.fromString("0");
   pair.tvl = BigInt.fromString("0");
   pair.swaps = [];
+
+  let lastHourStats = new HourlyStats(
+    event.block.timestamp.div(BigInt.fromI32(60 * 60 * 24)).toString()
+  );
+  lastHourStats.hour = event.block.timestamp.div(BigInt.fromI32(60 * 60 * 24));
+  lastHourStats.price = BigDecimal.fromString("1");
+  lastHourStats.save();
+
+  let lastDailyStats = new DailyStats(
+    event.block.timestamp.div(BigInt.fromI32(60 * 60)).toString()
+  );
+  lastDailyStats.day = event.block.timestamp.div(BigInt.fromI32(60 * 60));
+  lastDailyStats.price = BigDecimal.fromString("1");
+  lastDailyStats.save();
+
+  pair.dailyStats = [lastDailyStats.id];
+  pair.hourlyStats = [lastHourStats.id];
+  pair.lastHourlyStats = lastHourStats.id;
+  pair.lastDailyStats = lastDailyStats.id;
   pair.save();
 
   let token1 = new Token(address1.toHex());

@@ -1,7 +1,7 @@
 {
   "network": "mainnet",
   "addresses": {
-    "centralDex": "0x54B8d8E2455946f2A5B8982283f2359812e815ce",
-    "auctionFactory": "0xf090f16dEc8b6D24082Edd25B1C8D26f2bC86128"
+    "centralDex": "0x8CC6b8c770BDC57630902cb74B83920AEE1feA13",
+    "auctionFactory": "0x7d10B76E20bEf2e0916b3e500B5652B044C3A1b6"
   }
 }

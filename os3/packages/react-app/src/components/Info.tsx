@@ -1,9 +1,10 @@
-import React from "react";
 import { InformationCircleIcon } from "@heroicons/react/outline";
+import React from "react";
 import Popover from "./Popover";
 
 interface InfoProps {
   children: string | React.ReactNode | React.ReactNode[];
+  style?: React.CSSProperties;
 }
 
 const Info = (props: InfoProps) => {
@@ -14,7 +15,7 @@ const Info = (props: InfoProps) => {
           width="20px"
           height="20px"
           color="white"
-          style={{ cursor: "help" }}
+          style={{ cursor: "help", ...props.style }}
         ></InformationCircleIcon>
       }
     >

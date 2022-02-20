@@ -9,6 +9,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ProviderContext, SignerContext } from "../App";
 import { Button, TextInput } from "../components";
+import { LineChart } from "../components/charts/d3";
 import Hr from "../components/Hr";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
@@ -49,7 +50,16 @@ const GET_PRICE_HISTORY = gql`
   query priceHistory($id: ID!) {
     pair(id: $id) {
       id
-      priceHistory
+      dailyStats {
+        id
+        day
+        price
+      }
+      hourlyStats {
+        id
+        hour
+        price
+      }
     }
   }
 `;
@@ -101,6 +111,11 @@ const Exchange = () => {
   const [token1, setToken1] = useState<TokenListToken>(DEFAULT_TOKEN);
   const [token2, setToken2] = useState<TokenListToken>(DEFAULT_TOKEN);
   const [currentPair, setCurrentPair] = useState<Pair | undefined>(undefined); // TODO yuck
+
+  const { data: statsData, loading, error } = useQuery<any>(GET_PRICE_HISTORY, {
+    variables: { id: (token1.address + token2.address).toLowerCase() },
+  });
+
   function parsePrice(): number {
     return parseFloat(currentPair?.price.toString() || "0");
   } // TODO - This also should not exist
@@ -431,6 +446,33 @@ const Exchange = () => {
             </span>
           </p>
         </div>
+        {console.log(
+          "ss: ",
+          statsData?.pair?.dailyStats.map(
+            (dayStats: any, index: number) => index
+          ) || [1, 2],
+          statsData?.pair?.dailyStats.map((dayStats: any) =>
+            parseFloat(dayStats.price)
+          ) || [1, 2]
+        )}
+        <LineChart
+          title="Hourly Price"
+          labels={["Price History"]}
+          width="500px"
+          height="300px"
+          yLabel={`Price (${token1.symbol}/${token2.symbol})`}
+          x={
+            statsData?.pair?.hourlyStats.map((dayStats: any, index: number) =>
+              new Date(dayStats.hour * 60 * 60 * 1000).getUTCHours()
+            ) || [1, 2]
+          }
+          y={
+            statsData?.pair?.hourlyStats.map((dayStats: any) =>
+              parseFloat(dayStats.price)
+            ) || [1, 1]
+          }
+        ></LineChart>
+
         {/* <h5>Available Exchanges</h5> */}
         {/* <Table
           rowData={pairData?.pairs || []}

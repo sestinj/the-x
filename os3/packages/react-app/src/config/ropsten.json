@@ -11,7 +11,8 @@
     },
     "gsn": {
       "paymaster": "0x05319d82fa69EA8434A967CdF4A2699Db4Ff40e8"
-    }
+    },
+    "auctionFactory": "0x7d10B76E20bEf2e0916b3e500B5652B044C3A1b6"
   },
   "name": "ropsten",
   "alchemyKey": "https://eth-ropsten.alchemyapi.io/v2/iQg42SGtsJ11gAA9awS8gph4yQql9ogQ",

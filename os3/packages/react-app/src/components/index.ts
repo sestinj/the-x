@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 
 export const backgroundColor = "#161616";
 export const secondaryDark = "#323232";
-export const primaryHighlight = "#8000ff";
+export const primaryHighlight = "#80ff00";
 export const BORDER_RADIUS = "8px";
 
 export const Header = styled.header`

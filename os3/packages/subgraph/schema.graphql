@@ -7,7 +7,27 @@ type Pair @entity {
   swaps: [Swap!]!
   volume: BigInt!
   tvl: BigInt!
+  lastHourlyStats: HourlyStats!
+  lastDailyStats: DailyStats!
   # TVL (x, y, k are needed)
+  dailyStats: [DailyStats!]!
+  hourlyStats: [HourlyStats!]!
+}
+
+type DailyStats @entity {
+  id: ID!
+  day: BigInt!
+  price: BigDecimal!
+  # volume: BigInt!
+  # tvl: BigInt!
+}
+
+type HourlyStats @entity {
+  id: ID!
+  hour: BigInt!
+  price: BigDecimal!
+  # volume: BigInt!
+  # tvl: BigInt!
 }
 
 type Swap @entity {
@@ -20,6 +40,7 @@ type Swap @entity {
   isForward: Boolean
   token1: String!
   token2: String!
+  timestamp: BigInt!
   # TODO addresses are more efficiently encoded as Bytes
 }
 
