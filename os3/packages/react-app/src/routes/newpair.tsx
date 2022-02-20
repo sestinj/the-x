@@ -1,13 +1,13 @@
+import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
+import config from "@project/react-app/src/config/index.json";
+import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
-import { TextInput, primaryHighlight } from "../components";
-import Layout from "../components/Layout";
 import { useForm } from "react-hook-form";
 import { SignerContext } from "../App";
-import { BigNumber, ethers } from "ethers";
-import config from "@project/react-app/src/config/index.json";
-import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
-import PayableButton from "../components/PayableButton";
+import { A, primaryHighlight, TextInput } from "../components";
 import Hr from "../components/Hr";
+import Layout from "../components/Layout";
+import PayableButton from "../components/PayableButton";
 
 const NewPair = () => {
   const { signer } = useContext(SignerContext);
@@ -159,12 +159,12 @@ const NewPair = () => {
           You should take the time to ensure that the proportion of tokens that
           you add to the initial pool matches the current market price. You will
           be better rewarded by accuracy. Learn more about impermanent loss{" "}
-          <a
+          <A
             href="https://academy.binance.com/en/articles/impermanent-loss-explained"
             target={"_blank"}
           >
             here
-          </a>
+          </A>
           .
         </p>
       </div>

@@ -4,7 +4,7 @@ import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { SignerContext } from "../App";
-import { Button } from "../components";
+import { A, Button } from "../components";
 import Info from "../components/Info";
 import Layout from "../components/Layout";
 import TokenSelect from "../components/TokenSelect";
@@ -193,7 +193,7 @@ const Faucet = () => {
       ) : (
         <p>
           No faucet available for this token, but you can trade for it at{" "}
-          <a href="/exchange">the exchange</a>.
+          <A href="/exchange">the exchange</A>.
         </p>
       )}
 
@@ -207,9 +207,9 @@ const Faucet = () => {
       {isZeroAddress(token.address) && (
         <p>
           If you have exactly zero Ether, use{" "}
-          <a href="https://faucet.egorfine.com/" target={"_blank"}>
+          <A href="https://faucet.egorfine.com/" target={"_blank"}>
             this faucet
-          </a>{" "}
+          </A>{" "}
           to get some first for gas fees.<br></br>(Your address is {address})
         </p>
       )}

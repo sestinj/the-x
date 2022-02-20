@@ -11,6 +11,7 @@ import { ProviderContext, SignerContext } from "../App";
 import { Button, TextInput } from "../components";
 import { LineChart } from "../components/charts/d3";
 import Hr from "../components/Hr";
+import Info from "../components/Info";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import PayableButton from "../components/PayableButton";
@@ -405,7 +406,20 @@ const Exchange = () => {
                     }
               }
             >
-              {currentPair ? "Trade" : "Add Pair"}
+              {currentPair ? (
+                "Trade"
+              ) : (
+                <>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    Add Pair
+                    <Info style={{ marginLeft: "10px", filter: "invert(1)" }}>
+                      To trade two tokens, there must be an existing pool. If
+                      you'd like to help us support this combination, please
+                      consider adding a pair!
+                    </Info>
+                  </div>
+                </>
+              )}
             </Button>
           </div>
           <p>

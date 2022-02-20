@@ -71,7 +71,7 @@ const TokenSelect = (props: TokenSelectProps) => {
           setOpen(false);
         }}
       >
-        <h3>Select Token</h3>
+        <h3 style={{ marginLeft: "20px" }}>Select Token</h3>
         <div style={{ overflow: "scroll", height: "50vh" }}>
           <Table
             style={{ width: "100%" }}

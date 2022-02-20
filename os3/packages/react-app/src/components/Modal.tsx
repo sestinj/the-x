@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { Fragment, ReactNode } from "react";
-import { baseDiv } from "./classes";
+import { rounded } from "./classes";
 
 // TODO - instead of using props, you should use subcomponents. <Modal.Content>, <Modal.Title>, etc...
 export default function Modal(props: {
@@ -28,8 +28,8 @@ export default function Modal(props: {
           className="min-h-screen px-4 text-center"
           style={{
             minHeight: "100vh",
-            paddingLeft: "4px",
-            paddingRight: "4px",
+            // paddingLeft: "4px",
+            // paddingRight: "4px",
             textAlign: "center",
           }}
         >
@@ -64,7 +64,7 @@ export default function Modal(props: {
               display: "inline-block",
               width: "100%",
               maxWidth: "28rem",
-              padding: "12px",
+              // padding: "12px",
               marginTop: "8px",
               marginBottom: "8px",
               overflow: "hidden",
@@ -85,13 +85,16 @@ export default function Modal(props: {
                 props.closeModal();
               }}
               style={{
-                float: "right",
                 cursor: "pointer",
+                float: "right",
+                marginRight: "8px",
+                marginTop: "8px",
               }}
             ></XIcon>
+
             <div
               style={{
-                ...baseDiv,
+                ...rounded,
                 maxHeight: "75vh",
               }}
             >

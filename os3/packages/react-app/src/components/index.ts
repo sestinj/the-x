@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 
 export const backgroundColor = "#161616";
 export const secondaryDark = "#323232";
-export const primaryHighlight = "#80ff00";
+export const primaryHighlight = "#8800ff";
 export const BORDER_RADIUS = "8px";
 
 export const Header = styled.header`
@@ -15,6 +15,7 @@ export const Header = styled.header`
   justify-content: flex-end;
   color: white;
   padding-right: 20px;
+  border-bottom: 0.5px dashed gray;
 
   & ::selection {
     background: ${primaryHighlight}; /* WebKit/Blink Browsers */
@@ -48,12 +49,24 @@ export const Image = styled.img`
   pointer-events: none;
 `;
 
+export const A = styled.a`
+  color: ${primaryHighlight};
+
+  :visited {
+    color: ${primaryHighlight};
+  }
+`;
+
 export const Link = styled(ReactRouterDOM.Link).attrs({
   target: "_blank",
   rel: "noopener noreferrer",
 })`
   color: #61dafb;
   margin-top: 10px;
+
+  :visited {
+    color: ${primaryHighlight};
+  }
 `;
 
 export const Button = styled.button`
@@ -87,7 +100,6 @@ export const SpecialButton = styled.button`
   font-size: 16px;
   text-align: center;
   text-decoration: none;
-  margin: 0px 20px;
   padding: 12px 24px;
 
   :hover {
@@ -234,4 +246,25 @@ export const FillingBackground = styled.div`
   animation: ${increaseWidth} 15s linear infinite;
   height: 100%;
   background-color: #ffffff44;
+`;
+
+const dropShadowSize = 1;
+const pulse = keyframes`
+  0% {
+    filter: drop-shadow(${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight});
+  }
+
+  25% {
+    filter: none;
+  }
+  75% {
+    filter: none;
+  }
+  100% {
+    filter: drop-shadow(${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight});
+  }
+`;
+
+export const Pulse = styled.div`
+  animation: ${pulse} 5s ease-out infinite;
 `;

@@ -39,8 +39,9 @@ const AlertCard = (props: AlertCardProps) => {
       {/* <FillingBackground></FillingBackground> */}
 
       <XIcon
-        onClick={() => {
+        onClick={(ev) => {
           dispatch(archiveAlert(props.alert.id));
+          ev.stopPropagation();
         }}
         width="30px"
         height="30px"

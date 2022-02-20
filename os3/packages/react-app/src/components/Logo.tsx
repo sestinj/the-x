@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Logo = (props: { letter: string }) => {
+const Logo = (props: { letter: string; style?: React.CSSProperties }) => {
   const [letter, setLetter] = useState(props.letter);
   const letters = ["x", "n", "z"].filter((val) => val !== props.letter);
   return (
@@ -15,6 +15,7 @@ const Logo = (props: { letter: string }) => {
         alt={"The X Logo"}
         src={`/${letter}.svg`}
         style={{
+          ...props.style,
           width: "50px",
           height: "50px",
           position: "absolute",

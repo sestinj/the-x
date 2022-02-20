@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/solid";
 import { BigNumber } from "ethers";
 import React from "react";
-import { SpecialButton } from ".";
+import { A, SpecialButton } from ".";
 import config from "../config/index.json";
 import { getEtherscanUrlTx } from "../libs/etherscan/index";
 import useTx, { TxStatusTypes, UseTxOptions } from "../libs/hooks/useTx";
@@ -36,31 +36,12 @@ const TxModal = (props: TxModalProps) => {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          padding: "20px",
         }}
       >
         {(status === TxStatusTypes.unsent ||
           status === TxStatusTypes.signerNotFound) && (
-          <div>
-            {props.children}
-            <PayableButton
-              onClick={() => {
-                sendTx(...props.args);
-              }}
-              requirements={(props.spender && props.requirements) || []}
-              spender={props.spender || ""}
-              style={{ width: "100%", margin: "20px" }}
-            >
-              {props.confirmMessage || "Confirm"}
-            </PayableButton>
-            {/* <SpecialButton
-              onClick={() => {
-                sendTx(...props.args);
-              }}
-              style={{ width: "100%", margin: "20px" }}
-            >
-              {props.confirmMessage || "Confirm"}
-            </SpecialButton> */}
-          </div>
+          <div>{props.children}</div>
         )}
         {status === TxStatusTypes.sending ? (
           <>
@@ -105,23 +86,62 @@ const TxModal = (props: TxModalProps) => {
           <>
             <p>
               View on{" "}
-              <a
+              <A
                 href={getEtherscanUrlTx(tx?.hash, config.name)}
                 target={"_blank"}
               >
                 Etherscan
-              </a>
+              </A>
               .
             </p>
-            <SpecialButton
-              onClick={props.closeModal}
-              style={{ width: "100%", margin: "20px" }}
-            >
-              Close
-            </SpecialButton>
           </>
         )}
       </div>
+      {status === TxStatusTypes.unsent && (
+        <PayableButton
+          onClick={() => {
+            sendTx(...props.args);
+          }}
+          requirements={(props.spender && props.requirements) || []}
+          spender={props.spender || ""}
+          style={{
+            width: "100%",
+            borderRadius: "0px",
+            borderTop: "1px solid black",
+          }}
+        >
+          {props.confirmMessage || "Confirm"}
+        </PayableButton>
+      )}
+
+      {(status === TxStatusTypes.confirmed ||
+        status === TxStatusTypes.error ||
+        status === TxStatusTypes.rejected ||
+        status === TxStatusTypes.reverted ||
+        status === TxStatusTypes.pending) && (
+        <SpecialButton
+          onClick={props.closeModal}
+          style={{
+            width: "100%",
+            margin: "0px",
+            borderRadius: "0px",
+            backgroundColor: "white",
+            color: "black",
+            borderTop: "1px solid black",
+          }}
+        >
+          Close
+        </SpecialButton>
+      )}
+
+      {/* <SpecialButton
+              onClick={() => {
+                sendTx(...props.args);
+              }}
+              style={{ width: "100%", margin: "20px" }}
+            >
+              {props.confirmMessage || "Confirm"}
+            </SpecialButton> */}
     </Modal>
   );
 };

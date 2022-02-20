@@ -11,6 +11,7 @@ import { Button, secondaryDark, TextInput } from "../components";
 import { baseDiv } from "../components/classes";
 import Layout from "../components/Layout";
 import SafeImg from "../components/SafeImg/SafeImg";
+import Spinner from "../components/Spinner";
 import Table from "../components/Table";
 import TxModal from "../components/TxModal";
 import { validateTokenAmount } from "../libs";
@@ -343,8 +344,8 @@ const Pools = () => {
         </div>
       )}
 
-      <h3>My Liquidity</h3>
-      {userPositionsData ? (
+      {userPositionsData?.liquidityPositions?.length && <h3>My Liquidity</h3>}
+      {userPositionsData?.liquidityPositions?.length ? (
         <Table
           rowCell={(position: LiquidityPosition & { pair: Pair }) => {
             return [
@@ -393,56 +394,61 @@ const Pools = () => {
           rowData={userPositionsData?.liquidityPositions || []}
         ></Table>
       ) : (
+        !currentPair &&
         "Choose a pair below to invest in your first liquidity pool!"
       )}
       <h3>All Pools</h3>
-      <Table
-        rowCell={(pair: Pair) => {
-          return [
-            <div
-              style={{
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                ...baseDiv,
-                backgroundColor: secondaryDark,
-              }}
-              onClick={() => {
-                setCurrentPair(pair);
-              }}
-            >
-              <SafeImg
-                // address={currentToken.logoURI}
-                address="/logo192.png"
+      {pairData ? (
+        <Table
+          rowCell={(pair: Pair) => {
+            return [
+              <div
                 style={{
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  overflow: "clip",
-                  gridColumn: "1",
-                  filter: "invert(1)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  ...baseDiv,
+                  backgroundColor: secondaryDark,
                 }}
-              ></SafeImg>
-              {(pair.token1 as any)?.symbol}
-              {" / "}
-              {(pair.token2 as any)?.symbol}
-              <SafeImg
-                // address={currentToken.logoURI}
-                address="/logo192.png"
-                style={{
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  overflow: "clip",
-                  gridColumn: "1",
-                  filter: "invert(1)",
+                onClick={() => {
+                  setCurrentPair(pair);
                 }}
-              ></SafeImg>
-            </div>,
-          ];
-        }}
-        rowData={pairData?.pairs || []}
-      ></Table>
+              >
+                <SafeImg
+                  // address={currentToken.logoURI}
+                  address="/logo192.png"
+                  style={{
+                    borderRadius: "50%",
+                    width: "30px",
+                    height: "30px",
+                    overflow: "clip",
+                    gridColumn: "1",
+                    filter: "invert(1)",
+                  }}
+                ></SafeImg>
+                {(pair.token1 as any)?.symbol}
+                {" / "}
+                {(pair.token2 as any)?.symbol}
+                <SafeImg
+                  // address={currentToken.logoURI}
+                  address="/logo192.png"
+                  style={{
+                    borderRadius: "50%",
+                    width: "30px",
+                    height: "30px",
+                    overflow: "clip",
+                    gridColumn: "1",
+                    filter: "invert(1)",
+                  }}
+                ></SafeImg>
+              </div>,
+            ];
+          }}
+          rowData={pairData?.pairs || []}
+        ></Table>
+      ) : (
+        <Spinner></Spinner>
+      )}
     </Layout>
   );
 };
