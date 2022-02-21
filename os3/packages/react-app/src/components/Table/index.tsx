@@ -1,5 +1,7 @@
 import React from "react";
+import styled from "styled-components";
 import { BaseTable } from "..";
+import { rounded } from "../classes";
 
 interface TableProps<RowDataType> {
   rowCell: (data: RowDataType) => React.ReactNode[];
@@ -12,20 +14,30 @@ interface TableProps<RowDataType> {
   rowAction?: (data: RowDataType) => void;
 }
 
+const Hoverable = styled.tr`
+  :hover {
+    filter: brightness(0.85);
+  }
+`;
+
 function Table<RowDataType>(props: TableProps<RowDataType>) {
   return (
-    <BaseTable style={props.style}>
+    <BaseTable style={{ ...props.style, ...rounded }}>
       <tbody>
         {props.rowHeaders && (
           <tr style={props.headStyle}>
             {props.rowHeaders.map((rowHeader, index) => {
-              return <th key={index}>{rowHeader}</th>;
+              return (
+                <th style={{ padding: "8px" }} key={index}>
+                  {rowHeader}
+                </th>
+              );
             })}
           </tr>
         )}
         {props.rowData.map((data: RowDataType, index: number) => {
           return (
-            <tr
+            <Hoverable
               onClick={() => {
                 props.rowAction && props.rowAction(data);
               }}
@@ -37,10 +49,10 @@ function Table<RowDataType>(props: TableProps<RowDataType>) {
             >
               {props.rowCell(data).map((td, tdIndex) => (
                 <td style={props.cellStyle} key={tdIndex}>
-                  <div>{td}</div>
+                  <div style={{ textAlign: "center" }}>{td}</div>
                 </td>
               ))}
-            </tr>
+            </Hoverable>
           );
         })}
       </tbody>

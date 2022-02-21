@@ -41,6 +41,7 @@ const Popover = (props: PopoverProps) => {
               ...baseDiv,
               marginLeft: "24px",
               width: "auto",
+              maxWidth: "30vmax",
             }}
           >
             {props.children}

@@ -34,6 +34,7 @@ export const Body = styled.div`
   font-size: 14px;
   justify-content: center;
   min-height: calc(100vh - 70px);
+  padding-bottom: 20px;
 
   & ::selection {
     background: ${primaryHighlight}; /* WebKit/Blink Browsers */
@@ -147,7 +148,9 @@ export const TableCellDiv = styled.div`
   font-size: 18px;
 `;
 
-export const BaseTable = styled.table``;
+export const BaseTable = styled.table`
+  border: 1px solid white;
+`;
 
 export const Submit = styled.input.attrs((props) => ({
   type: "submit",

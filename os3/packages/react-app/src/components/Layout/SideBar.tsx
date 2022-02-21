@@ -37,7 +37,7 @@ const SideBar = () => {
           display: "grid",
           gridTemplateColumns: "auto auto",
           gridTemplateRows: "auto",
-          position: "fixed",
+          position: "absolute",
           left: `${5 - (open ? 0 : 90)}px`,
           transitionDelay: "100",
         }}

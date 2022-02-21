@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { ProviderContext, SignerContext } from "../../App";
 import { secondaryDark } from "../../components";
 import { baseDiv } from "../../components/classes";
+import Info from "../../components/Info";
 import Layout from "../../components/Layout";
 import Table from "../../components/Table";
 import useMobileMediaQuery from "../../libs/hooks/useMobileMediaQuery";
@@ -52,7 +53,13 @@ const Auctions = () => {
 
   return (
     <Layout>
-      <h1>Auctions</h1>
+      <div style={{ display: "flex" }}>
+        <h1>Auctions</h1>
+        <Info>
+          Auctions help new tokens find their fair price before going live on
+          the market, and give you an early access investment opportunity.
+        </Info>
+      </div>
       {console.log("Auction data: ", auctionData)}
       <Table
         style={{

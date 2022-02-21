@@ -3,18 +3,19 @@ import ADex from "@project/contracts/artifacts/src/dex/ADex.sol/ADex.json";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import config from "@project/react-app/src/config/index.json";
 import { LiquidityPosition, Pair } from "@project/subgraph/generated/schema";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { SignerContext } from "../App";
 import { Button, secondaryDark, TextInput } from "../components";
 import { baseDiv } from "../components/classes";
+import Info from "../components/Info";
 import Layout from "../components/Layout";
 import SafeImg from "../components/SafeImg/SafeImg";
 import Spinner from "../components/Spinner";
 import Table from "../components/Table";
 import TxModal from "../components/TxModal";
-import { validateTokenAmount } from "../libs";
+import { validateTokenAmount, weiToEther } from "../libs";
 
 // TODO - instead of writing the components twice for add and remove, just use the CSS order property, which works in a flex container
 
@@ -22,6 +23,8 @@ const GET_PAIRS = gql`
   query getPairs {
     pairs {
       id
+      volume
+      tvl
       token1 {
         id
         address
@@ -141,7 +144,13 @@ const Pools = () => {
 
   return (
     <Layout>
-      <h1>Pools</h1>
+      <div style={{ display: "flex" }}>
+        <h1>Pools</h1>
+        <Info>
+          Pools are the exchange's source of tokens. By investing your tokens in
+          a pool, you can earn fees on trades within that pair.
+        </Info>
+      </div>
 
       <TxModal
         open={addModalOpen}
@@ -400,20 +409,18 @@ const Pools = () => {
       <h3>All Pools</h3>
       {pairData ? (
         <Table
+          style={{ backgroundColor: secondaryDark }}
+          rowStyle={{
+            cursor: "pointer",
+            ...baseDiv,
+          }}
+          rowAction={(data) => {
+            setCurrentPair(data);
+          }}
+          cellStyle={{ padding: "20px" }}
           rowCell={(pair: Pair) => {
             return [
-              <div
-                style={{
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  ...baseDiv,
-                  backgroundColor: secondaryDark,
-                }}
-                onClick={() => {
-                  setCurrentPair(pair);
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center" }}>
                 <SafeImg
                   // address={currentToken.logoURI}
                   address="/logo192.png"
@@ -442,8 +449,13 @@ const Pools = () => {
                   }}
                 ></SafeImg>
               </div>,
+              weiToEther(BigNumber.from(pair.volume.toString())) +
+                ` ${(pair.token2 as any)?.symbol}`,
+              weiToEther(BigNumber.from(pair.tvl.toString())) +
+                ` ${(pair.token2 as any)?.symbol}`,
             ];
           }}
+          rowHeaders={["Pair", "Volume", "TVL"]}
           rowData={pairData?.pairs || []}
         ></Table>
       ) : (
