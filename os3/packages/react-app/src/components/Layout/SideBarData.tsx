@@ -1,6 +1,5 @@
 import {
   ChartPieIcon,
-  CogIcon,
   CollectionIcon,
   CurrencyDollarIcon,
   FilterIcon,
@@ -37,11 +36,11 @@ export default [
     route: "/createtoken",
     icon: CurrencyDollarIcon,
   },
-  {
-    title: "Manage Personal Token",
-    route: "/manageToken",
-    icon: CogIcon,
-  },
+  // {
+  //   title: "Manage Personal Token",
+  //   route: "/manageToken",
+  //   icon: CogIcon,
+  // },
   {
     title: "Faucet",
     route: "/faucet",

@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { ProviderContext, SignerContext } from "../../App";
 import { Button, secondaryDark, TextInput } from "../../components";
+import BarDiv, { BarArrowSpan, BarSubdiv } from "../../components/BarDiv";
 import { baseDiv } from "../../components/classes";
 import Layout from "../../components/Layout";
 import Table from "../../components/Table";
@@ -123,60 +124,47 @@ const AuctionPage = () => {
       <h1>Auction</h1>
       <p>{auctionData?.auction.type}</p>
 
-      <div
-        style={{
-          border: "2px solid white",
-          borderRadius: "8px",
-          overflow: "clip",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "stretch",
-          height: isMobile ? "" : "50px",
-          flexDirection: isMobile ? "column" : "row",
-        }}
-      >
-        <TextInput
-          placeholder="0.00 ETH"
-          style={{ borderRight: "1px solid white" }}
-          onChange={(ev) => {
-            setEth(parseFloat(ev.target.value));
-          }}
-        ></TextInput>
-        <div style={{ alignItems: "center", height: "100%" }}>
-          <span
-            style={{
-              width: "0px",
-              top: "6px",
-              display: "inline-block",
-              overflow: "visible",
-              position: "relative",
-              zIndex: "10",
-              left: "-12px",
-              fontSize: "24px",
+      <BarDiv>
+        <BarSubdiv>
+          <TextInput
+            placeholder="0.00 ETH"
+            style={{ borderRight: isMobile ? "" : "1px solid white" }}
+            onChange={(ev) => {
+              setEth(parseFloat(ev.target.value));
             }}
-          >
-            ➡️
-          </span>
-        </div>
+          ></TextInput>
+        </BarSubdiv>
 
-        <TextInput
-          disabled
-          style={{ borderLeft: "1px solid white", textAlign: "right" }}
-          value={`${
-            auctionData?.auction.price
-              ? eth * parseFloat(auctionData.auction.price.toString())
-              : "0.00"
-          } ${(auctionData?.auction as any)?.token.symbol}`}
-        ></TextInput>
+        <BarArrowSpan action={() => {}}></BarArrowSpan>
+
+        <BarSubdiv>
+          <TextInput
+            disabled
+            style={{
+              borderLeft: isMobile ? "" : "1px solid white",
+              textAlign: "right",
+              height: "100%",
+            }}
+            value={`${
+              auctionData?.auction.price
+                ? eth * parseFloat(auctionData.auction.price.toString())
+                : "0.00"
+            } ${(auctionData?.auction as any)?.token.symbol}`}
+          ></TextInput>
+        </BarSubdiv>
         <Button
-          style={{ margin: "0", borderRadius: "0" }}
+          style={{
+            margin: "0",
+            borderRadius: "0",
+            width: isMobile ? "100%" : "",
+          }}
           onClick={() => {
             setModalOpen(true);
           }}
         >
           Purchase
         </Button>
-      </div>
+      </BarDiv>
 
       {auctionData?.auction ? (
         <div>Price: {auctionData.auction.price.toString()}</div>

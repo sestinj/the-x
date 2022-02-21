@@ -34,7 +34,8 @@ export const Body = styled.div`
   font-size: 14px;
   justify-content: center;
   min-height: calc(100vh - 70px);
-  padding-bottom: 20px;
+  padding: 20px;
+  overflow: hidden;
 
   & ::selection {
     background: ${primaryHighlight}; /* WebKit/Blink Browsers */
@@ -81,6 +82,7 @@ export const Button = styled.button`
   text-decoration: none;
   margin: 0px 20px;
   padding: 12px 24px;
+  justify-content: center;
 
   :hover {
     box-shadow: 0px 0px 4px 4px ${primaryHighlight};

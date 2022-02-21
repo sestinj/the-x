@@ -11,6 +11,12 @@ import useMobileMediaQuery from "../../libs/hooks/useMobileMediaQuery";
 import SideBarData from "./SideBarData";
 import SideBarIcon from "./SideBarIcon";
 
+const Hoverable = styled.div`
+  :hover {
+    background-color: #fff1;
+  }
+`;
+
 const SideBar = () => {
   let currentlyOpen = -1;
   for (let i = 0; i < SideBarData.length; i++) {
@@ -23,12 +29,6 @@ const SideBar = () => {
   const isMobile = useMobileMediaQuery();
 
   const [open, setOpen] = useState(false);
-
-  const Hoverable = styled.div`
-    :hover {
-      background-color: #fff1;
-    }
-  `;
 
   return (
     <>

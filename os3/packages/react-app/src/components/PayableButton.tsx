@@ -11,6 +11,7 @@ interface PayableButtonProps {
   spender: string;
   children: React.ReactNode | string | React.ReactNode[];
   style?: React.CSSProperties;
+  symbol?: string;
 }
 
 const PayableButton = (props: PayableButtonProps) => {
@@ -95,7 +96,7 @@ const PayableButton = (props: PayableButtonProps) => {
         props.children
       ) : (
         <div style={{ display: "flex" }}>
-          Approve access to your tokens first
+          Approve access to your {props.symbol || "tokens"}
           <Info style={{ marginLeft: "10px" }}>
             In order to transfer ERC20 tokens on behalf of you, we must be given
             an allowance.

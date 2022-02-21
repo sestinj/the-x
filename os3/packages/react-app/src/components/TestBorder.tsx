@@ -1,8 +1,7 @@
-import { JsonRpcProvider } from "@ethersproject/providers";
-import React, { useState } from "react";
+import React from "react";
 import { primaryHighlight } from ".";
 interface TestBorderProps {
-  provider: JsonRpcProvider;
+  networkName: string | undefined;
   children: React.ReactNode;
 }
 
@@ -13,10 +12,7 @@ const TestBorder = (props: TestBorderProps) => {
     <>
       <div
         hidden={
-          !(
-            props.provider?.network?.name === "ropsten" ||
-            props.provider?.network?.name === "rinkeby"
-          )
+          !(props.networkName === "ropsten" || props.networkName === "rinkeby")
         }
         style={{
           border: `${BORDER_WIDTH}px solid ${primaryHighlight}`,

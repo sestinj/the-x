@@ -9,6 +9,14 @@ export const border: React.CSSProperties = {
   border: "2px solid white",
   ...rounded,
 };
+export const mobileFlex = (isMobile: boolean): React.CSSProperties => {
+  return {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: isMobile ? "column" : "row",
+  };
+};
 
 export const baseDiv: React.CSSProperties = { ...rounded, padding: "12px" };
 

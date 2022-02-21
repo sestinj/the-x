@@ -1,4 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
+import { ArrowRightIcon } from "@heroicons/react/outline";
 import ADex from "@project/contracts/artifacts/src/dex/ADex.sol/ADex.json";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import config from "@project/react-app/src/config/index.json";
@@ -6,8 +7,10 @@ import { LiquidityPosition, Pair } from "@project/subgraph/generated/schema";
 import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { SignerContext } from "../App";
 import { Button, secondaryDark, TextInput } from "../components";
+import BarDiv, { BarArrowSpan, BarSubdiv } from "../components/BarDiv";
 import { baseDiv } from "../components/classes";
 import Info from "../components/Info";
 import Layout from "../components/Layout";
@@ -16,6 +19,7 @@ import Spinner from "../components/Spinner";
 import Table from "../components/Table";
 import TxModal from "../components/TxModal";
 import { validateTokenAmount, weiToEther } from "../libs";
+import useMobileMediaQuery from "../libs/hooks/useMobileMediaQuery";
 
 // TODO - instead of writing the components twice for add and remove, just use the CSS order property, which works in a flex container
 
@@ -73,6 +77,8 @@ const GET_USER_PAIRS = gql`
 const Pools = () => {
   const { signer } = useContext(SignerContext);
   const [signerAddress, setSignerAddress] = useState("");
+
+  const isMobile = useMobileMediaQuery();
 
   const { data: pairData } = useQuery<{ pairs: Pair[] }>(GET_PAIRS);
   const { data: userPositionsData } = useQuery<{
@@ -207,148 +213,121 @@ const Pools = () => {
           {" / "}
           {(currentPair.token2 as any)?.symbol}
           {!adding ? (
-            <div
-              style={{
-                border: "2px solid white",
-                borderRadius: "8px",
-                overflow: "clip",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "50px",
-              }}
-            >
-              <TextInput
-                style={{
-                  borderRight: "1px solid white",
-                  borderLeft: "1px solid black",
-                  height: "100%",
-                }}
-                {...removeRegister("n", {
-                  validate: validateTokenAmount,
-                  onChange: (ev) => {
-                    // const [n, quantity1, quantity2] = addGetValues(["n", "quantity1", "quantity2"]);
-                    // addSetValue("quantity1", 69);
-                  },
-                })}
-                placeholder={"0.00 Liquidity Token"}
-              ></TextInput>
-              <span
-                style={{
-                  width: "0px",
-                  display: "inline-block",
-                  overflow: "visible",
-                  position: "relative",
-                  zIndex: "10",
-                  left: "-12px",
-                  fontSize: "24px",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
+            <BarDiv>
+              <BarSubdiv>
+                <TextInput
+                  style={{
+                    borderRight: isMobile ? "" : "1px solid white",
+                    borderLeft: isMobile ? "" : "1px solid black",
+                  }}
+                  {...removeRegister("n", {
+                    validate: validateTokenAmount,
+                    onChange: (ev) => {
+                      // const [n, quantity1, quantity2] = addGetValues(["n", "quantity1", "quantity2"]);
+                      // addSetValue("quantity1", 69);
+                    },
+                  })}
+                  placeholder={"0.00 Liquidity Token"}
+                ></TextInput>
+              </BarSubdiv>
+              <BarArrowSpan
+                action={() => {
                   setAdding(!adding);
                 }}
-              >
-                ➡️
-              </span>
-              <TextInput
-                style={{
-                  borderLeft: "1px solid white",
-                  borderRight: "1px solid black",
-                  textAlign: "right",
-                  height: "100%",
-                }}
-                placeholder={"0.00 " + (currentPair.token1 as any)?.symbol}
-                {...removeRegister("quantity1", {
-                  validate: validateTokenAmount,
-                })}
-              ></TextInput>
-              <TextInput
-                style={{
-                  textAlign: "right",
-                  height: "100%",
-                }}
-                placeholder={"0.00 " + (currentPair.token2 as any)?.symbol}
-                {...removeRegister("quantity2", {
-                  validate: validateTokenAmount,
-                })}
-              ></TextInput>
+              ></BarArrowSpan>
+
+              <BarSubdiv>
+                <TextInput
+                  style={{
+                    borderLeft: isMobile ? "" : "1px solid white",
+                    borderRight: isMobile ? "" : "1px solid black",
+                    textAlign: "right",
+                  }}
+                  placeholder={"0.00 " + (currentPair.token1 as any)?.symbol}
+                  {...removeRegister("quantity1", {
+                    validate: validateTokenAmount,
+                  })}
+                ></TextInput>
+              </BarSubdiv>
+              <BarSubdiv>
+                <TextInput
+                  style={{
+                    textAlign: "right",
+                  }}
+                  placeholder={"0.00 " + (currentPair.token2 as any)?.symbol}
+                  {...removeRegister("quantity2", {
+                    validate: validateTokenAmount,
+                  })}
+                ></TextInput>
+              </BarSubdiv>
               {/* Don't use UIntInput! Use just a validation callback with react-hook-forms. then you have a standard UI for textinput errors. */}
               <Button
-                style={{ borderRadius: "0", margin: "0", height: "100%" }}
+                style={{
+                  borderRadius: "0",
+                  margin: "0",
+                  height: "100%",
+                  width: isMobile ? "100%" : "",
+                }}
                 onClick={() => {
                   setRemoveModalOpen(true);
                 }}
               >
                 Remove Liquidity
               </Button>
-            </div>
+            </BarDiv>
           ) : (
-            <div
-              style={{
-                border: "2px solid white",
-                borderRadius: "8px",
-                overflow: "clip",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "50px",
-              }}
-            >
-              <TextInput
-                style={{
-                  borderRight: "1px solid black",
-                  height: "100%",
-                }}
-                placeholder={"0.00 " + (currentPair.token1 as any)?.symbol}
-                {...addRegister("quantity1", {
-                  validate: validateTokenAmount,
-                })}
-              ></TextInput>
-              <TextInput
-                style={{
-                  borderRight: "1px solid white",
-                  height: "100%",
-                }}
-                placeholder={"0.00 " + (currentPair.token2 as any)?.symbol}
-                {...addRegister("quantity2", {
-                  validate: validateTokenAmount,
-                })}
-              ></TextInput>
-              <span
-                style={{
-                  width: "0px",
-                  display: "inline-block",
-                  overflow: "visible",
-                  position: "relative",
-                  zIndex: "10",
-                  left: "-12px",
-                  fontSize: "24px",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
+            <BarDiv>
+              <BarSubdiv>
+                <TextInput
+                  style={{
+                    borderRight: isMobile ? "" : "1px solid black",
+                  }}
+                  placeholder={"0.00 " + (currentPair.token1 as any)?.symbol}
+                  {...addRegister("quantity1", {
+                    validate: validateTokenAmount,
+                  })}
+                ></TextInput>
+              </BarSubdiv>
+              <BarSubdiv>
+                <TextInput
+                  style={{
+                    borderRight: isMobile ? "" : "1px solid white",
+                  }}
+                  placeholder={"0.00 " + (currentPair.token2 as any)?.symbol}
+                  {...addRegister("quantity2", {
+                    validate: validateTokenAmount,
+                  })}
+                ></TextInput>
+              </BarSubdiv>
+              <BarArrowSpan
+                action={() => {
                   setAdding(!adding);
                 }}
-              >
-                ➡️
-              </span>
-              <TextInput
-                style={{
-                  borderLeft: "1px solid white",
-                  height: "100%",
-                  textAlign: "right",
-                }}
-                {...addRegister("n", { validate: validateTokenAmount })}
-                placeholder={"0.00 Liquidity Token"}
-              ></TextInput>
+              ></BarArrowSpan>
+              <BarSubdiv>
+                <TextInput
+                  style={{
+                    borderLeft: isMobile ? "" : "1px solid white",
+                    textAlign: "right",
+                  }}
+                  {...addRegister("n", { validate: validateTokenAmount })}
+                  placeholder={"0.00 Liquidity Token"}
+                ></TextInput>
+              </BarSubdiv>
               <Button
-                style={{ borderRadius: "0", margin: "0", height: "100%" }}
+                style={{
+                  borderRadius: "0",
+                  margin: "0",
+                  height: "100%",
+                  width: isMobile ? "100%" : "",
+                }}
                 onClick={() => {
                   setAddModalOpen(true);
                 }}
               >
                 Add Liquidity
               </Button>
-            </div>
+            </BarDiv>
           )}
         </div>
       )}
@@ -453,9 +432,16 @@ const Pools = () => {
                 ` ${(pair.token2 as any)?.symbol}`,
               weiToEther(BigNumber.from(pair.tvl.toString())) +
                 ` ${(pair.token2 as any)?.symbol}`,
+              <Link to="/exchange">
+                <ArrowRightIcon
+                  width="30px"
+                  height="30px"
+                  color="white"
+                ></ArrowRightIcon>
+              </Link>,
             ];
           }}
-          rowHeaders={["Pair", "Volume", "TVL"]}
+          rowHeaders={["Pair", "Volume", "TVL", "Exchange"]}
           rowData={pairData?.pairs || []}
         ></Table>
       ) : (

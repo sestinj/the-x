@@ -1,14 +1,14 @@
 import { gql, useApolloClient, useQuery } from "@apollo/client";
 import CentralDex from "@project/contracts/artifacts/src/dex/CentralDex.sol/CentralDex.json";
 import Erc20Dex from "@project/contracts/artifacts/src/dex/Erc20Dex.sol/Erc20Dex.json";
-import ERC20 from "@project/contracts/artifacts/src/Token/ERC20.sol/ERC20.json";
 import config from "@project/react-app/src/config/index.json";
 import { Pair, Token } from "@project/subgraph/generated/schema";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ProviderContext, SignerContext } from "../App";
 import { Button, TextInput } from "../components";
+import BarDiv, { BarArrowSpan, BarSubdiv } from "../components/BarDiv";
 import { LineChart } from "../components/charts/d3";
 import Hr from "../components/Hr";
 import Info from "../components/Info";
@@ -21,8 +21,10 @@ import {
   DEFAULT_TOKEN,
   Token as TokenListToken,
 } from "../components/TokenSelect/compileTokenLists";
-import { isAddress } from "../libs"; // TODO There should be a libs package so you aren't importing cross-package like this.
-import { getEtherscanUrlTx } from "../libs/etherscan/index";
+import {
+  ethersGetTokenBalance,
+  getEtherscanUrlTx,
+} from "../libs/etherscan/index";
 import useMobileMediaQuery from "../libs/hooks/useMobileMediaQuery";
 import { addAlert, Alert } from "../redux/slices/alertSlice";
 import { addTx } from "../redux/slices/txsSlice";
@@ -112,9 +114,15 @@ const Exchange = () => {
   const [token1, setToken1] = useState<TokenListToken>(DEFAULT_TOKEN);
   const [token2, setToken2] = useState<TokenListToken>(DEFAULT_TOKEN);
   const [currentPair, setCurrentPair] = useState<Pair | undefined>(undefined); // TODO yuck
+  const [pairForward, setPairForward] = useState(true);
 
   const { data: statsData, loading, error } = useQuery<any>(GET_PRICE_HISTORY, {
-    variables: { id: (token1.address + token2.address).toLowerCase() },
+    variables: {
+      id: (pairForward
+        ? token1.address + token2.address
+        : token2.address + token1.address
+      ).toLowerCase(),
+    },
   });
 
   function parsePrice(): number {
@@ -129,65 +137,41 @@ const Exchange = () => {
     });
     if (newPair) {
       setCurrentPair(newPair);
+      setPairForward(true);
+      return;
     }
 
-    if (!newPair) {
-      // There is no pair between these two, do something about it
-      console.log("NO EXCHANGE FOR THIS PAIR");
-    }
+    const idRev = "Pair:" + (token2.address + token1.address).toLowerCase();
+    newPair = apolloClient.readFragment({
+      id: idRev,
+      fragment: PAIR_FRAG,
+    });
 
-    console.log("EXCHANGE Changed: ", currentPair);
+    if (newPair) {
+      setCurrentPair(newPair);
+      setPairForward(false);
+      return;
+    }
+    setCurrentPair(undefined);
   }, [token1, token2]);
 
   // Getting balance directly from the contract for now
-  const [token1Balance, setToken1Balance] = useState(0);
-  const [token2Balance, setToken2Balance] = useState(0);
+  const [token1Balance, setToken1Balance] = useState(BigNumber.from(0));
+  const [token2Balance, setToken2Balance] = useState(BigNumber.from(0));
 
   useEffect(() => {
     (async () => {
-      try {
-        if (!isAddress(token1.address)) {
-          return;
-        }
-        if (!signer) {
-          return;
-        }
-        const tokenContract = new ethers.Contract(
-          token1.address,
-          ERC20.abi,
-          signer
-        );
-        const signerAddress = await signer.getAddress();
-        const tx = await tokenContract.balanceOf(signerAddress);
-        setToken1Balance(tx);
-      } catch (err) {
-        console.error("Unable to getBalance of token: ", err);
-      }
+      const balance = await ethersGetTokenBalance(token1.address, signer);
+      setToken1Balance(balance);
     })();
-  }, [token1]);
+  }, [token1, signer]);
 
   useEffect(() => {
     (async () => {
-      try {
-        if (!isAddress(token1.address)) {
-          return;
-        }
-        if (!signer) {
-          return;
-        }
-        const tokenContract = new ethers.Contract(
-          token2.address,
-          ERC20.abi,
-          signer
-        );
-        const signerAddress = await signer.getAddress();
-        const tx = await tokenContract.balanceOf(signerAddress);
-        setToken2Balance(tx);
-      } catch (err) {
-        console.log("Unable to getBalance of token: ", err);
-      }
+      const balance = await ethersGetTokenBalance(token2.address, signer);
+      setToken2Balance(balance);
     })();
-  }, [token2]);
+  }, [token2, signer]);
 
   // User input state
 
@@ -234,7 +218,7 @@ const Exchange = () => {
     // TODO - Everyone submits a bid at the price? They don't set their own? What do you do about this?
     // TODO - run some checks on the quantity
 
-    pairContract.swap(scaledQuantity, true).then((tx: any) => {
+    pairContract.swap(scaledQuantity, pairForward).then((tx: any) => {
       console.log("Submitted Bid: ", tx);
 
       setModalOpen(false);
@@ -293,6 +277,7 @@ const Exchange = () => {
           </div>
           <div style={{ textAlign: "center" }}>
             <PayableButton
+              symbol={token1.symbol}
               requirements={[
                 {
                   address: token1.address,
@@ -312,19 +297,8 @@ const Exchange = () => {
 
         <h1>Exchange</h1>
         <div>
-          <div
-            style={{
-              border: "2px solid white",
-              borderRadius: "8px",
-              overflow: "clip",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: isMobile ? "" : "50px",
-              flexDirection: isMobile ? "column" : "row",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "stretch" }}>
+          <BarDiv>
+            <BarSubdiv>
               <TokenSelect
                 onChange={(token: TokenListToken) => {
                   setToken1(token);
@@ -349,30 +323,16 @@ const Exchange = () => {
                 }
                 disabled={true}
               ></TextInput>
-            </div>
-            <span
-              style={{
-                width: "0px",
-                height: "0px",
-                top: "-16px",
-                display: "inline-block",
-                overflow: "visible",
-                position: "relative",
-                zIndex: "10",
-                left: "-12px",
-                fontSize: "24px",
-                cursor: "pointer",
-              }}
-              onClick={() => {
+            </BarSubdiv>
+            <BarArrowSpan
+              action={() => {
                 // Switch places of the two tokens
                 let temp = token1;
                 setToken1(token2);
                 setToken2(temp);
               }}
-            >
-              {isMobile ? "⬇️" : "➡️"}
-            </span>
-            <div style={{ display: "flex", alignItems: "stretch" }}>
+            ></BarArrowSpan>
+            <BarSubdiv>
               <TextInput
                 style={{
                   borderLeft: isMobile ? "" : "1px solid white",
@@ -390,7 +350,7 @@ const Exchange = () => {
                   console.log("New Token 2: ", token1);
                 }}
               ></TokenSelect>
-            </div>
+            </BarSubdiv>
             <Button
               style={{
                 borderRadius: "0",
@@ -421,7 +381,7 @@ const Exchange = () => {
                 </>
               )}
             </Button>
-          </div>
+          </BarDiv>
           <p>
             <span style={{ float: "left" }}>
               Balances: <br></br>
@@ -455,25 +415,18 @@ const Exchange = () => {
             <span style={{ float: "right" }}>
               Total:{" "}
               <b>
-                {(parsePrice() * quantity).toString()} {token1.symbol}
+                {(parsePrice() * quantity).toFixed(2).toString()}{" "}
+                {token1.symbol}
               </b>
             </span>
           </p>
         </div>
-        {console.log(
-          "ss: ",
-          statsData?.pair?.dailyStats.map(
-            (dayStats: any, index: number) => index
-          ) || [1, 2],
-          statsData?.pair?.dailyStats.map((dayStats: any) =>
-            parseFloat(dayStats.price)
-          ) || [1, 2]
-        )}
+
         <LineChart
           title="Hourly Price"
           labels={["Price History"]}
-          width="500px"
-          height="300px"
+          width="80vmin"
+          height="50vmin"
           yLabel={`Price (${token1.symbol}/${token2.symbol})`}
           x={
             statsData?.pair?.hourlyStats.map((dayStats: any, index: number) =>
@@ -482,7 +435,9 @@ const Exchange = () => {
           }
           y={
             statsData?.pair?.hourlyStats.map((dayStats: any) =>
-              parseFloat(dayStats.price)
+              pairForward
+                ? parseFloat(dayStats.price)
+                : 1 / parseFloat(dayStats.price)
             ) || [1, 1]
           }
         ></LineChart>

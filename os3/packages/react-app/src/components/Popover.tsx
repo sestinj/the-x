@@ -42,6 +42,7 @@ const Popover = (props: PopoverProps) => {
               marginLeft: "24px",
               width: "auto",
               maxWidth: "30vmax",
+              zIndex: 2,
             }}
           >
             {props.children}

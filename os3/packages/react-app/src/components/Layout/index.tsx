@@ -19,7 +19,7 @@ const Layout = ({ children }: LayoutProps) => {
   // const testBorderRef = useRef<any>(null);
 
   return (
-    <TestBorder provider={provider}>
+    <TestBorder networkName={provider?.network?.name}>
       {/* <LoginModal ref={modalRef}></LoginModal> */}
       <Header>
         <Logo letter="x"></Logo>

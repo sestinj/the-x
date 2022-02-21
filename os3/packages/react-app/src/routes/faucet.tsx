@@ -5,6 +5,7 @@ import { BigNumber, ethers } from "ethers";
 import React, { useContext, useEffect, useState } from "react";
 import { SignerContext } from "../App";
 import { A, Button } from "../components";
+import BarDiv from "../components/BarDiv";
 import Info from "../components/Info";
 import Layout from "../components/Layout";
 import TokenSelect from "../components/TokenSelect";
@@ -154,17 +155,7 @@ const Faucet = () => {
         <h1>Faucet</h1>
         <Info>Use the faucet to get tokens for free on the test network.</Info>
       </div>
-      <div
-        style={{
-          border: "2px solid white",
-          borderRadius: "8px",
-          overflow: "clip",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "50px",
-        }}
-      >
+      <BarDiv>
         <TokenSelect
           onChange={(token) => {
             setToken(token);
@@ -175,12 +166,17 @@ const Faucet = () => {
             onClick={() => {
               setModalOpen(true);
             }}
-            style={{ borderRadius: "0", margin: "0", height: "100%" }}
+            style={{
+              borderRadius: "0",
+              margin: "0",
+              height: "100%",
+              width: "100%",
+            }}
           >
             Get {token.symbol}
           </Button>
         )}
-      </div>
+      </BarDiv>
 
       {faucetContract ? (
         <p>

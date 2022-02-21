@@ -57,6 +57,8 @@ export function LineChart(props: {
         backgroundColor: secondaryDark,
         ...baseDiv,
         textAlign: "center",
+        width: props.width,
+        height: props.height,
       }}
     >
       <h3 style={{ margin: "0" }}>{props.title}</h3>

@@ -52,7 +52,7 @@ const CreateToken = () => {
           {/* Your Personal IPO */}
           Bet On Yourself
         </h1>
-        <h6>Cash Out on Your Potential, Kickstart Your Career</h6>
+        <h6>Cash out on your potential with a personal token</h6>
 
         <div style={{ paddingLeft: "10%", paddingRight: "10%" }}>
           <div
@@ -96,12 +96,15 @@ const CreateToken = () => {
             ></TextInput>
             <br></br>
             <br></br>
-            <label htmlFor="price">Auction Price</label>
-            <Info>
-              This is the static price of the token during the auction. Once the
-              auction ends, the price of the token will be determined by the
-              markets.
-            </Info>
+            <div style={{ display: "flow" }}>
+              <label htmlFor="price">Auction Price</label>
+              <Info style={{ marginLeft: "10px" }}>
+                This is the static price of the token during the auction. Once
+                the auction ends, the price of the token will be determined by
+                the markets.
+              </Info>
+            </div>
+
             <br></br>
             <TextInput
               id="price"

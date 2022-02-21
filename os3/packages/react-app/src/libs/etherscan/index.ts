@@ -7,7 +7,7 @@ import {
   getTokens,
 } from "../../components/TokenSelect/compileTokenLists";
 import config from "../../config/index.json";
-import { isZeroAddress } from "../index";
+import { isAddress, isZeroAddress } from "../index";
 
 export function getEtherscanUrlTx(txHash: string, network: string) {
   const prefix = network === "mainnet" ? "" : network + ".";
@@ -50,8 +50,11 @@ export async function getTokenBalance(
 
 export async function ethersGetTokenBalance(
   token: string,
-  signer: JsonRpcSigner
+  signer: JsonRpcSigner | undefined | null
 ): Promise<BigNumber> {
+  if (!signer || !isAddress(token)) {
+    return BigNumber.from(0);
+  }
   if (isZeroAddress(token)) {
     return await signer.getBalance();
   }
