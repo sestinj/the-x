@@ -254,9 +254,10 @@ export const FillingBackground = styled.div`
 `;
 
 const dropShadowSize = 1;
-const pulse = keyframes`
+const pulse = (color: string) => {
+  return keyframes`
   0% {
-    filter: drop-shadow(${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight});
+    filter: drop-shadow(${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${color}) drop-shadow(${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${color}) drop-shadow(-${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${color}) drop-shadow(-${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${color});
   }
 
   25% {
@@ -266,10 +267,15 @@ const pulse = keyframes`
     filter: none;
   }
   100% {
-    filter: drop-shadow(${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight}) drop-shadow(-${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${primaryHighlight});
+    filter: drop-shadow(${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${color}) drop-shadow(${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${color}) drop-shadow(-${dropShadowSize}px ${dropShadowSize}px ${dropShadowSize}px ${color}) drop-shadow(-${dropShadowSize}px -${dropShadowSize}px ${dropShadowSize}px ${color});
   }
 `;
+};
 
 export const Pulse = styled.div`
-  animation: ${pulse} 5s ease-out infinite;
+  animation: ${pulse(primaryHighlight)} 5s ease-out infinite;
+`;
+
+export const CustomPulse = styled.div`
+  animation: ${(props) => props.color} 5s ease-out infinite;
 `;

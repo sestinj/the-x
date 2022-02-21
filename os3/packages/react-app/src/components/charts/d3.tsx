@@ -77,18 +77,33 @@ export function LineChart(props: {
         title={props.title}
         height={props.height}
         options={{
+          color: "white",
           elements: { point: { radius: 0, hitRadius: 20 } },
           scales: {
             x: {
               title: {
                 text: props.xLabel,
                 display: props.xLabel ? true : false,
+                color: "white",
+              },
+              ticks: {
+                color: "white",
+              },
+              grid: {
+                display: false,
               },
             },
             y: {
               title: {
                 text: props.yLabel,
                 display: props.yLabel ? true : false,
+                color: "white",
+              },
+              ticks: {
+                color: "white",
+              },
+              grid: {
+                display: false,
               },
             },
           },

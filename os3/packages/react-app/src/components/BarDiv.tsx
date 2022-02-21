@@ -8,6 +8,7 @@ interface BarDivProps {
     | React.ReactChild
     | string
     | undefined;
+  style?: React.CSSProperties;
 }
 
 const BarDiv = (props: BarDivProps) => {
@@ -21,6 +22,7 @@ const BarDiv = (props: BarDivProps) => {
         overflow: "clip",
         height: isMobile ? "" : "50px",
         ...mobileFlex(isMobile),
+        ...props.style,
       }}
     >
       {props.children}
@@ -34,7 +36,12 @@ export const BarSubdiv = (props: {
   children: React.ReactChild[] | React.ReactChild | string;
 }) => {
   return (
-    <div style={{ display: "flex", alignItems: "stretch" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+      }}
+    >
       {props.children}
     </div>
   );
