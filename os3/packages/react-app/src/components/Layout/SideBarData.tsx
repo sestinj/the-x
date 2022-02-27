@@ -33,7 +33,7 @@ export default [
   },
   {
     title: "New Personal Token",
-    route: "/createtoken",
+    route: "/newtoken",
     icon: CurrencyDollarIcon,
   },
   // {

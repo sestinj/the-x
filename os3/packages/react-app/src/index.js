@@ -10,13 +10,13 @@ import Config from "./config/index.json";
 import "./index.css";
 import AuctionPage from "./routes/auctions/auction";
 import Auctions from "./routes/auctions/index";
-import CreateToken from "./routes/createToken";
 import Dashboard from "./routes/dashboard";
 import Exchange from "./routes/exchange";
 import Faucet from "./routes/faucet";
 import Home from "./routes/home";
 import ManageToken from "./routes/manageToken";
 import NewPair from "./routes/newpair";
+import NewToken from "./routes/newtoken";
 import Notifications from "./routes/notifications";
 import Offerings from "./routes/offerings";
 import Pools from "./routes/pools";
@@ -39,7 +39,7 @@ ReactDOM.render(
             <Route path="/" element={<Home />} />
             <Route path="home" element={<Home />} />
             <Route path="exchange" element={<Exchange />} />
-            <Route path="createToken" element={<CreateToken />} />
+            <Route path="newtoken" element={<NewToken />} />
             <Route path="manageToken" element={<ManageToken />} />
             <Route path="offerings" element={<Offerings />} />
             <Route path="newpair" element={<NewPair />} />
