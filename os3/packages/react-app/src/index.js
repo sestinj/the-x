@@ -10,6 +10,7 @@ import Config from "./config/index.json";
 import "./index.css";
 import AuctionPage from "./routes/auctions/auction";
 import Auctions from "./routes/auctions/index";
+import Ceramic from "./routes/ceramic";
 import CreateToken from "./routes/createToken";
 import Dashboard from "./routes/dashboard";
 import Exchange from "./routes/exchange";
@@ -50,6 +51,7 @@ ReactDOM.render(
             <Route path="auctions" element={<Auctions />}></Route>
             <Route path="auctions/:auctionId" element={<AuctionPage />} />
             <Route path="portfolio" element={<Portfolio />} />
+            <Route path="ceramic" element={<Ceramic />} />
           </Routes>
         </BrowserRouter>
       </App>

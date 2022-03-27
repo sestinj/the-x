@@ -24,6 +24,9 @@ yarn-error.log*
 packages/subgraph/build/
 packages/subgraph/generated/
 
+# react-app
+packages/react-app/src/libs/ceramic/keys.json
+
 # hardhat
 packages/contracts/artifacts/
 packages/contracts/cache
