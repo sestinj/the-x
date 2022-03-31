@@ -2,6 +2,30 @@
 
 This file is a home for the documentation of this repo's tech stack.
 
+---
+
+## Quickstart
+
+### Run a local ethereum network
+
+`npx hardhat node --hostname 0.0.0.0` from packages/contracts
+
+### Setup a local Graph Node
+
+```
+git clone https://github.com/graphprotocol/graph-node && cd graph-node && cargo build
+```
+
+Then `cd graph-node/docker && docker-compose up` to run the local node.
+
+### Build and run everything
+
+`npm run full:local` in packages/subgraph,
+`npm run deploy:local` in packages/contracts,
+`npm run full:local` in packages/react
+
+---
+
 ## React Router
 
 Currently used to routes URL paths. Eventual move to Next.js is an option.
@@ -41,6 +65,8 @@ https://github.com/graphprotocol/graph-node/blob/master/docs/getting-started.md
 3. Run a local Ethereum node (same you use to test with Hardhat, can use Ganache, geth, or parity)
 
 **To Start Local Node**
+
+(read step 8 first)
 
 1. `ipfs init`
 2. `ipfs daemon`
