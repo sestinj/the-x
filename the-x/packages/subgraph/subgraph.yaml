@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: CentralDex
-    network: ropsten
+    network: mainnet
     source:
       abi: CentralDex
-      address: "0x431378b3ee88FB2338BF2A2Ca7d2c9C289487aa5"
+      address: "0x8CC6b8c770BDC57630902cb74B83920AEE1feA13"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -30,7 +30,7 @@ dataSources:
       language: wasm/assemblyscript
   - kind: ethereum/contract
     name: AuctionFactory
-    network: ropsten
+    network: mainnet
     source:
       abi: AuctionFactory
       address: "0x7d10B76E20bEf2e0916b3e500B5652B044C3A1b6"
@@ -55,7 +55,7 @@ dataSources:
 templates:
   - name: Erc20Dex
     kind: ethereum/contract
-    network: ropsten
+    network: mainnet
     source:
       abi: Erc20Dex
     mapping:
@@ -81,7 +81,7 @@ templates:
           handler: handleLiquidityRemoval
   - name: ERC20
     kind: ethereum/contract
-    network: ropsten
+    network: mainnet
     source:
       abi: ERC20
     mapping:
@@ -96,7 +96,7 @@ templates:
       language: wasm/assemblyscript
   - name: FixedPriceAuction
     kind: ethereum/contract
-    network: ropsten
+    network: mainnet
     source:
       abi: FixedPriceAuction
     mapping:

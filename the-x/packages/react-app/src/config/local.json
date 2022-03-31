@@ -1,0 +1,22 @@
+{
+  "subgraphUrl": "http://localhost:8000/subgraphs/name/x",
+  "name": "mainnet",
+  "addresses": {
+    "centralDex": "0x8CC6b8c770BDC57630902cb74B83920AEE1feA13",
+    "auctionFactory": "0x7d10B76E20bEf2e0916b3e500B5652B044C3A1b6",
+    "testToken1": "0x967AB65ef14c58bD4DcfFeaAA1ADb40a022140E5",
+    "testToken2": "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E",
+    "faucets": {
+      "0x0000000000000000000000000000000000000000": "",
+      "0x967AB65ef14c58bD4DcfFeaAA1ADb40a022140E5": "",
+      "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E": ""
+    },
+    "gsn": {
+      "paymaster": ""
+    }
+  },
+  "alchemyKey": "",
+  "isTest": true,
+  "fortmaticKey": "pk_test_5FBD281126D5508F",
+  "etherscanKey": "797SV3DZ817FFFPVMTB922NJS8MNXNXEZ3"
+}

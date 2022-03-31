@@ -4,12 +4,12 @@
   "addresses": {
     "centralDex": "0x8CC6b8c770BDC57630902cb74B83920AEE1feA13",
     "auctionFactory": "0x7d10B76E20bEf2e0916b3e500B5652B044C3A1b6",
-    "testToken1": "0x51C65cd0Cdb1A8A8b79dfc2eE965B1bA0bb8fc89",
-    "testToken2": "0x8fC8CFB7f7362E44E472c690A6e025B80E406458",
+    "testToken1": "0x967AB65ef14c58bD4DcfFeaAA1ADb40a022140E5",
+    "testToken2": "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E",
     "faucets": {
       "0x0000000000000000000000000000000000000000": "",
-      "0x51C65cd0Cdb1A8A8b79dfc2eE965B1bA0bb8fc89": "",
-      "0x8fC8CFB7f7362E44E472c690A6e025B80E406458": ""
+      "0x967AB65ef14c58bD4DcfFeaAA1ADb40a022140E5": "",
+      "0xe1708FA6bb2844D5384613ef0846F9Bc1e8eC55E": ""
     },
     "gsn": {
       "paymaster": ""
