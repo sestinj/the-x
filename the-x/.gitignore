@@ -29,3 +29,5 @@ packages/contracts/artifacts/
 packages/contracts/cache
 
 .DS_Store
+scratch.txt
+.vscode/**
