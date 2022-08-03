@@ -1,6 +1,8 @@
 # **The X**
 
-![The X](./x.gif)
+<p align="center">
+  <img src="x.gif" alt="The X" />
+</p>
 
 ![Lines of code](https://img.shields.io/tokei/lines/github/sestinj/the-x)
 ![GitHub issues](https://img.shields.io/github/issues-raw/sestinj/the-x)
