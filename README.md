@@ -1,7 +1,7 @@
 # **The X**
 ![Lines of code](https://img.shields.io/tokei/lines/github/sestinj/the-x)
 ![GitHub issues](https://img.shields.io/github/issues-raw/sestinj/the-x)
-![GitHub](https://img.shields.io/github/license/sestinj/the-x)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![GitHub Repo stars](https://img.shields.io/github/stars/sestinj/the-x?style=social)
 ![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fsestinj%2Fthe-x)
 
