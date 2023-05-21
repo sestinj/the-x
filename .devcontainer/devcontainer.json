@@ -2,6 +2,5 @@
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
   },
-  "postStartCommand": "code --install-extension pkief.material-icon-theme",
   "postAttachCommand": "code --install-extension pkief.material-icon-theme"
 }
