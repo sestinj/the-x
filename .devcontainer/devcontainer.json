@@ -2,5 +2,5 @@
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
   },
-  "postAttachCommand": "code --install-extension Continue.continue"
+  "updateContentCommand": "code --install-extension Continue.continue"
 }
