@@ -2,6 +2,6 @@
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
   },
-  "updateContentCommand": "wget -O continue.vsix https://raw.githubusercontent.com/sestinj/the-x/main/continue-0.0.5.vsix",
-  "postAttachCommand": "code --install-extension continue.vsix"
+  "updateContentCommand": "wget -O continue.vsix https://raw.githubusercontent.com/sestinj/the-x/main/continue-0.0.8.vsix",
+  "postAttachCommand": "code --install-extension ./continue.vsix"
 }
